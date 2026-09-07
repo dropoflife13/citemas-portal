@@ -1,0 +1,105 @@
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+
+const userSchema = new mongoose.Schema({
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+
+  studentId: { type: String },
+  yearLevel: { type: String, enum: ['1st', '2nd', '3rd', '4th', 'Graduate'] },
+  department: { type: String },
+
+  role: {
+    type: String,
+    enum: ['super_admin', 'teacher', 'officer', 'alumni', 'member', 'applicant', 'user'],
+    default: 'user'
+  },
+  
+  // Officer Position - Only applicable for users with role 'officer'
+  officerPosition: {
+    type: String,
+    enum: [
+      'president',
+      'vice_president',
+      'secretary',
+      'treasurer',
+      'pro',
+      'events_director',
+      'creative_director',
+      'year_level_representative'
+    ],
+    default: null,
+  },
+
+  specialization: {
+    type: String,
+    enum: ['traditional_arts', 'digital_arts', 'voice_acting', 'video_editing', 'photography']
+  },
+  
+  isAlumni: { type: Boolean, default: false },
+  graduationYear: { type: Number }, // ← Added graduation year field
+
+  phone: { type: String },
+  bio: { type: String },
+
+  // Application related fields
+  applicationStatus: {
+    type: String,
+    enum: ['pending', 'approved', 'rejected', 'not_applied'],
+    default: 'not_applied'
+  },
+  applicationDate: { type: Date },
+
+  // Portfolio related fields
+  portfolioCount: { type: Number, default: 0 },
+
+}, { timestamps: true });
+
+// Hash password before saving
+userSchema.pre('save', async function () {
+  if (!this.isModified('password')) return;
+  const salt = await bcrypt.genSalt(10);
+  this.password = await bcrypt.hash(this.password, salt);
+});
+
+// Compare password method
+userSchema.methods.comparePassword = function (candidatePassword) {
+  return bcrypt.compare(candidatePassword, this.password);
+};
+
+// Remove password when converting to JSON
+userSchema.set('toJSON', {
+  transform: function (doc, ret) {
+    delete ret.password;
+    return ret;
+  }
+});
+
+// Virtual field to get full name
+userSchema.virtual('fullName').get(function() {
+  return `${this.firstName} ${this.lastName}`;
+});
+
+// Virtual field to check if user is an officer
+userSchema.virtual('isOfficer').get(function() {
+  return this.role === 'officer' && this.officerPosition !== null;
+});
+
+// Virtual field to get formatted officer position
+userSchema.virtual('formattedOfficerPosition').get(function() {
+  if (!this.officerPosition) return null;
+  return this.officerPosition
+    .split('_')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+});
+
+// Virtual field to get graduation year display
+userSchema.virtual('graduationYearDisplay').get(function() {
+  if (!this.graduationYear) return null;
+  return `Class of ${this.graduationYear}`;
+});
+
+export default mongoose.models.User || mongoose.model('User', userSchema);
