@@ -1,190 +1,192 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/lib/AuthContext';
-
-const POSITIONS = [
-  { value: '', label: '-- No position --' },
-  { value: 'president', label: 'President' },
-  { value: 'vice_president', label: 'Vice President' },
-  { value: 'secretary', label: 'Secretary' },
-  { value: 'treasurer', label: 'Treasurer' },
-  { value: 'pro', label: 'P.R.O.' },
-  { value: 'events_director', label: 'Events Director' },
-  { value: 'creative_director', label: 'Creative Director' },
-  { value: 'year_level_representative', label: 'Year Level Representative' },
-];
+import { useRouter } from 'next/navigation';
 
 export default function UsersPage() {
-  const { user, token, loading } = useAuth();
+  const { user, token, loading: authLoading } = useAuth();
+  const router = useRouter();
+
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [actionMsg, setActionMsg] = useState('');
-  const [activeTab, setActiveTab] = useState('members');
+  const [activeTab, setActiveTab] = useState('all');
 
-  const canView = user && ['super_admin', 'teacher', 'officer', 'alumni', 'member'].includes(user.role);
-  const isTeacher = user?.role === 'teacher';
-  const isPresident = user?.role === 'officer' && user?.officerPosition === 'president';
-  const canPromoteOfficer = isTeacher || isPresident;
-  const canApproveAlumni = ['teacher', 'officer', 'super_admin'].includes(user?.role);
+  const fetchUsers = useCallback(async () => {
+    if (!token) return;
 
-  async function loadUsers() {
     try {
-      const res = await fetch('/api/users', {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      if (res.ok) setUsers(data);
-      else setError(data.error);
-    } catch {
-      setError('Could not connect to the server');
-    }
-  }
+      setLoading(true);
+      setError('');
 
-  useEffect(() => {
-    if (token && canView) loadUsers();
+      const res = await fetch('/api/users', {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+      if (res.ok && Array.isArray(data.users)) {
+        setUsers(data.users);
+      } else {
+        setUsers([]);
+        setError(data.message || 'Failed to load directory.');
+      }
+    } catch {
+      setUsers([]);
+      setError('An error occurred while loading directory.');
+    } finally {
+      setLoading(false);
+    }
   }, [token]);
 
-  async function handleUpdate(id, role, extra = {}) {
-    setActionMsg('');
-    try {
-      const res = await fetch(`/api/users/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ role, ...extra }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        setActionMsg(data.error);
-        return;
-      }
-      setActionMsg(`Updated ${data.firstName} ${data.lastName}`);
-      loadUsers();
-    } catch {
-      setActionMsg('Could not connect to the server');
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+      return;
     }
+
+    if (user && token) {
+      fetchUsers();
+    }
+  }, [user, authLoading, token, router, fetchUsers]);
+
+  const safeUsers = Array.isArray(users) ? users : [];
+  const officers = safeUsers.filter((u) => u.role === 'officer');
+  const members = safeUsers.filter((u) => u.role === 'member');
+  const alumni = safeUsers.filter((u) => u.role === 'alumni');
+  const teachers = safeUsers.filter((u) => u.role === 'teacher');
+
+  const tabs = [
+    { id: 'all', label: 'All', count: safeUsers.length },
+    { id: 'officer', label: 'Officers', count: officers.length },
+    { id: 'member', label: 'Members', count: members.length },
+    { id: 'alumni', label: 'Alumni', count: alumni.length },
+    { id: 'teacher', label: 'Faculty', count: teachers.length },
+  ];
+
+  const displayedUsers = safeUsers.filter((u) => {
+    if (activeTab === 'all') return true;
+    return u.role === activeTab;
+  });
+
+  if (authLoading || loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#110808] text-[#FDFBF7]">
+        <p className="text-[#FDFBF7]/70">Loading directory...</p>
+      </div>
+    );
   }
 
-  const members = users.filter((u) => u.role === 'member');
-  const officers = users.filter((u) => u.role === 'officer');
-  const alumni = users.filter((u) => u.role === 'alumni');
-
-  if (loading) return <p className="p-6">Loading...</p>;
-  if (!user) return <p className="p-6">Please log in.</p>;
-  if (!canView) return <p className="p-6 text-gray-500">You don't have access to this page.</p>;
+  if (error) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-[#110808] px-6 text-[#FDFBF7]">
+        <p className="text-red-300">{error}</p>
+        <button
+          onClick={fetchUsers}
+          className="mt-4 rounded-xl bg-gradient-to-r from-red-600 to-red-800 px-4 py-2 text-sm font-black uppercase tracking-[0.18em] text-[#FDFBF7]"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Directory</h1>
+    <div className="min-h-screen bg-[#110808] px-4 py-8 text-[#FDFBF7] sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl space-y-6">
+        <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-[0_25px_60px_rgba(0,0,0,0.45)] backdrop-blur-2xl">
+          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-red-300">Community</p>
+          <h1 className="mt-3 text-3xl font-black tracking-tight text-[#FDFBF7]">CITEMAS Directory</h1>
+          <p className="mt-2 text-sm text-[#FDFBF7]/70">Browse and connect with members, officers, alumni, and faculty.</p>
+        </div>
 
-      <div className="flex gap-4 border-b mb-6">
-        {['members', 'officers', 'alumni'].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`pb-2 px-1 capitalize ${activeTab === tab ? 'border-b-2 border-black font-semibold' : 'text-gray-500'}`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div>
-
-      {actionMsg && <p className="text-sm mb-4 text-blue-700">{actionMsg}</p>}
-      {error && <p className="text-red-600 mb-4">{error}</p>}
-
-      <div className="space-y-3">
-        {activeTab === 'members' && (
-          <>
-            {members.length === 0 && <p className="text-gray-500">No members yet.</p>}
-            {members.map((u) => (
-              <div key={u._id} className="border rounded-lg p-4 flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="font-bold">{u.firstName} {u.lastName}</p>
-                  <p className="text-sm text-gray-600">{u.email}</p>
-                  {u.specialization && <p className="text-sm text-gray-500">{u.specialization}</p>}
-                </div>
-                <div className="flex flex-wrap gap-2 items-center">
-                  {canPromoteOfficer && <PromoteControl userId={u._id} onUpdate={handleUpdate} />}
-                  {canApproveAlumni && <AlumniControl userId={u._id} onUpdate={handleUpdate} />}
-                </div>
-              </div>
+        <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-4 shadow-[0_25px_60px_rgba(0,0,0,0.45)] backdrop-blur-2xl">
+          <div className="flex flex-wrap gap-3">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-black uppercase tracking-[0.2em] transition-all ${
+                  activeTab === tab.id
+                    ? 'bg-gradient-to-r from-red-600 to-red-800 text-[#FDFBF7]'
+                    : 'border border-white/10 bg-[#1a0d0d] text-[#FDFBF7]/70 hover:border-red-500/30'
+                }`}
+              >
+                {tab.label}
+                <span className={`rounded-full px-2 py-0.5 text-[9px] ${activeTab === tab.id ? 'bg-black/20 text-[#FDFBF7]' : 'bg-white/[0.06] text-[#FDFBF7]/60'}`}>
+                  {tab.count}
+                </span>
+              </button>
             ))}
-          </>
-        )}
+          </div>
+        </div>
 
-        {activeTab === 'officers' && (
-          <>
-            {officers.length === 0 && <p className="text-gray-500">No officers yet.</p>}
-            {officers.map((u) => (
-              <div key={u._id} className="border rounded-lg p-4">
-                <p className="font-bold">{u.firstName} {u.lastName}</p>
-                <p className="text-sm text-gray-600">{u.email}</p>
-                <p className="text-sm">
-                  {POSITIONS.find((p) => p.value === u.officerPosition)?.label || 'No position assigned'}
-                </p>
-              </div>
+        {displayedUsers.length > 0 ? (
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {displayedUsers.map((person) => (
+              <UserCard key={person._id || person.id} person={person} />
             ))}
-          </>
-        )}
-
-        {activeTab === 'alumni' && (
-          <>
-            {alumni.length === 0 && <p className="text-gray-500">No alumni yet.</p>}
-            {alumni.map((u) => (
-              <div key={u._id} className="border rounded-lg p-4">
-                <p className="font-bold">{u.firstName} {u.lastName}</p>
-                <p className="text-sm text-gray-600">{u.email}</p>
-                {u.graduationYear && <p className="text-sm text-gray-500">Class of {u.graduationYear}</p>}
-              </div>
-            ))}
-          </>
+          </div>
+        ) : (
+          <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-8 text-center text-sm text-[#FDFBF7]/70">
+            No records found for this category.
+          </div>
         )}
       </div>
     </div>
   );
 }
 
-function PromoteControl({ userId, onUpdate }) {
-  const [position, setPosition] = useState('');
+function UserCard({ person }) {
+  const getRoleBadge = (role) => {
+    switch (role) {
+      case 'officer':
+        return 'border-amber-500/30 bg-amber-500/10 text-amber-200';
+      case 'alumni':
+        return 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200';
+      case 'teacher':
+        return 'border-sky-500/30 bg-sky-500/10 text-sky-200';
+      default:
+        return 'border-white/10 bg-white/[0.04] text-[#FDFBF7]/80';
+    }
+  };
 
   return (
-    <div className="flex items-center gap-2">
-      <select
-        value={position}
-        onChange={(e) => setPosition(e.target.value)}
-        className="border rounded p-1 text-sm"
-      >
-        {POSITIONS.map((p) => (
-          <option key={p.value} value={p.value}>{p.label}</option>
-        ))}
-      </select>
-      <button
-        onClick={() => onUpdate(userId, 'officer', { officerPosition: position })}
-        className="bg-black text-white text-sm px-3 py-1 rounded"
-      >
-        Promote to Officer
-      </button>
-    </div>
-  );
-}
+    <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-5 shadow-[0_25px_60px_rgba(0,0,0,0.45)] backdrop-blur-2xl">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="text-lg font-black text-[#FDFBF7]">
+            {person.firstName} {person.lastName}
+          </h3>
+          <p className="mt-1 text-xs text-[#FDFBF7]/60">{person.email}</p>
+        </div>
+        <span className={`rounded-full px-2.5 py-1 text-[9px] font-black uppercase tracking-[0.18em] ${getRoleBadge(person.role)} ${person.officerPosition ? 'capitalize' : ''}`}>
+          {person.officerPosition ? person.officerPosition.replace(/_/g, ' ') : person.role}
+        </span>
+      </div>
 
-function AlumniControl({ userId, onUpdate }) {
-  const [year, setYear] = useState(new Date().getFullYear());
-
-  return (
-    <div className="flex items-center gap-2">
-      <input
-        type="number"
-        value={year}
-        onChange={(e) => setYear(e.target.value)}
-        className="border rounded p-1 text-sm w-20"
-      />
-      <button
-        onClick={() => onUpdate(userId, 'alumni', { graduationYear: Number(year) })}
-        className="bg-gray-700 text-white text-sm px-3 py-1 rounded"
-      >
-        Mark as Alumni
-      </button>
+      {(person.department || person.yearLevel || person.specialization) && (
+        <div className="mt-4 space-y-2 border-t border-white/10 pt-4 text-sm text-[#FDFBF7]/70">
+          {person.department && (
+            <p>
+              <span className="text-[#FDFBF7]/40">Department:</span> {person.department}
+            </p>
+          )}
+          {person.yearLevel && (
+            <p>
+              <span className="text-[#FDFBF7]/40">Year:</span> {person.yearLevel}
+            </p>
+          )}
+          {person.specialization && (
+            <p>
+              <span className="text-[#FDFBF7]/40">Specialization:</span> {person.specialization}
+            </p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -9,7 +9,21 @@ const userSchema = new mongoose.Schema({
 
   studentId: { type: String },
   yearLevel: { type: String, enum: ['1st', '2nd', '3rd', '4th', 'Graduate'] },
-  department: { type: String },
+  
+  department: {
+    type: String,
+    enum: [
+      'College of Arts & Sciences (CAS)',
+      'College of Accountancy',
+      'College of Allied Health Sciences (CAHS)',
+      'College of Criminal Justice Education (CCJE)',
+      'College of Education (CoEd)',
+      'College of Engineering',
+      'College of Information Technology Education (CITE)',
+      'College of Management (COM)',
+      'College of Maritime Education (COME)',
+    ],
+  },
 
   role: {
     type: String,
@@ -17,7 +31,6 @@ const userSchema = new mongoose.Schema({
     default: 'user'
   },
   
-  // Officer Position - Only applicable for users with role 'officer'
   officerPosition: {
     type: String,
     enum: [
@@ -39,12 +52,11 @@ const userSchema = new mongoose.Schema({
   },
   
   isAlumni: { type: Boolean, default: false },
-  graduationYear: { type: Number }, // ← Added graduation year field
+  graduationYear: { type: Number },
 
   phone: { type: String },
   bio: { type: String },
 
-  // Application related fields
   applicationStatus: {
     type: String,
     enum: ['pending', 'approved', 'rejected', 'not_applied'],
@@ -52,7 +64,6 @@ const userSchema = new mongoose.Schema({
   },
   applicationDate: { type: Date },
 
-  // Portfolio related fields
   portfolioCount: { type: Number, default: 0 },
 
 }, { timestamps: true });

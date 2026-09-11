@@ -1,26 +1,122 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --paper: #110808;
+  --paper-deep: #1f1010;
+  --ink: #FDFBF7;
+  --ink-muted: #f8d9d9;
+  --ink-faint: #d7a0a0;
+  --line: rgba(255, 255, 255, 0.1);
+  --accent: #DC2626;
+  --accent-soft: #ef4444;
+  --accent-dim: rgba(220, 38, 38, 0.18);
+  --background: var(--paper);
+  --foreground: var(--ink);
 }
 
 @theme inline {
+  --color-paper: var(--paper);
+  --color-paper-deep: var(--paper-deep);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-dim: var(--accent-dim);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-serif: "Fraunces", Georgia, serif;
+  --font-mono: "JetBrains Mono", monospace;
+  --max-width-page: 80rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--paper);
+  color: var(--ink);
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(220, 38, 38, 0.18), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(127, 29, 29, 0.24), transparent 26%),
+    var(--paper);
+  color: var(--ink);
+  font-family: "Inter", system-ui, sans-serif;
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.15) 40%, transparent 100%);
+  pointer-events: none;
+  opacity: 0.45;
+  z-index: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: var(--accent);
+  color: var(--paper);
+}
+
+main,
+header,
+footer,
+section,
+article,
+nav {
+  position: relative;
+  z-index: 1;
+}
+
+/* ==========================================
+   CITEMAS Unified Component Styles (Tailwind v4)
+   ========================================== */
+
+.citemas-card {
+  background-color: rgba(31, 16, 16, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.45);
+}
+
+.citemas-card-interactive {
+  background-color: rgba(31, 16, 16, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--line);
+  border-radius: 1rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.45);
+  transition: all 0.2s ease;
+}
+
+.citemas-card-interactive:hover {
+  background-color: rgba(255, 255, 255, 0.04);
+  border-color: rgba(220, 38, 38, 0.45);
+  transform: translateY(-2px);
+}
+
+.citemas-modal {
+  background-color: rgba(17, 8, 8, 0.9);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 1.5rem;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
 }

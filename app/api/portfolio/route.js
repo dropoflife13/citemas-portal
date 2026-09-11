@@ -1,4 +1,3 @@
-// app/api/portfolio/route.js
 import connectDB from '@/lib/mongodb';
 import Portfolio from '@/models/Portfolio';
 import User from '@/models/User';
@@ -9,9 +8,6 @@ const STAFF_ROLES = ['super_admin', 'teacher', 'officer'];
 const CAN_CREATE = ['super_admin', 'teacher', 'officer', 'member'];
 const MAX_ENTRIES_PER_MEMBER = 5;
 
-// GET portfolio entries
-// - Staff (officer/teacher/super_admin): see everyone's
-// - Member: see only their own
 export async function GET(req) {
   const currentUser = getUserFromRequest(req);
   if (!currentUser) {
@@ -20,7 +16,6 @@ export async function GET(req) {
 
   await connectDB();
 
-  // Staff: see all portfolios with applicant details
   if (STAFF_ROLES.includes(currentUser.role)) {
     const entries = await Portfolio.find()
       .populate('owner', 'firstName lastName email role studentId department yearLevel')
@@ -28,7 +23,6 @@ export async function GET(req) {
     return NextResponse.json(entries);
   }
 
-  // Members: see only their own portfolios
   if (currentUser.role === 'member') {
     const entries = await Portfolio.find({ owner: currentUser.id })
       .populate('owner', 'firstName lastName email')
@@ -36,32 +30,21 @@ export async function GET(req) {
     return NextResponse.json(entries);
   }
 
-  return NextResponse.json(
-    { error: 'You do not have permission to view portfolios' },
-    { status: 403 }
-  );
+  return NextResponse.json({ error: 'You do not have permission to view portfolios' }, { status: 403 });
 }
 
-// POST create a portfolio entry
-// - Staff: can submit on behalf of applicants
-// - Members: can submit their own work (max 5)
 export async function POST(req) {
   const currentUser = getUserFromRequest(req);
   if (!currentUser) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
-
   if (!CAN_CREATE.includes(currentUser.role)) {
-    return NextResponse.json(
-      { error: 'You do not have permission to submit a portfolio' },
-      { status: 403 }
-    );
+    return NextResponse.json({ error: 'You do not have permission to submit a portfolio' }, { status: 403 });
   }
 
   try {
     await connectDB();
 
-    // Check member limit
     if (currentUser.role === 'member') {
       const count = await Portfolio.countDocuments({ owner: currentUser.id });
       if (count >= MAX_ENTRIES_PER_MEMBER) {
@@ -74,6 +57,14 @@ export async function POST(req) {
 
     const { title, description, specialization, mediaUrl, level, applicantName, applicantEmail } = await req.json();
 
+    // JWT only has id/email/role — fetch full record if we need name for the fallback
+    let ownerName = applicantName;
+    let ownerEmail = applicantEmail || currentUser.email;
+    if (!ownerName) {
+      const fullUser = await User.findById(currentUser.id).select('firstName lastName');
+      ownerName = fullUser ? `${fullUser.firstName} ${fullUser.lastName}` : '';
+    }
+
     const newEntry = new Portfolio({
       owner: currentUser.id,
       title,
@@ -81,11 +72,7 @@ export async function POST(req) {
       specialization,
       mediaUrl,
       level,
-      // Store applicant details
-      applicant: {
-        name: applicantName || `${currentUser.firstName} ${currentUser.lastName}`,
-        email: applicantEmail || currentUser.email,
-      }
+      applicant: { name: ownerName, email: ownerEmail },
     });
     await newEntry.save();
 
@@ -95,31 +82,24 @@ export async function POST(req) {
   }
 }
 
-// DELETE portfolio entry - Staff only
 export async function DELETE(req) {
   const currentUser = getUserFromRequest(req);
   if (!currentUser) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
-
   if (!STAFF_ROLES.includes(currentUser.role)) {
-    return NextResponse.json(
-      { error: 'Only staff can delete portfolio entries' },
-      { status: 403 }
-    );
+    return NextResponse.json({ error: 'Only staff can delete portfolio entries' }, { status: 403 });
   }
 
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
-
     if (!id) {
       return NextResponse.json({ error: 'Portfolio ID required' }, { status: 400 });
     }
 
     await connectDB();
     const deleted = await Portfolio.findByIdAndDelete(id);
-
     if (!deleted) {
       return NextResponse.json({ error: 'Portfolio not found' }, { status: 404 });
     }
