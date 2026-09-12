@@ -76,6 +76,8 @@ const userSchema = new mongoose.Schema({
 
   phone: { type: String },
   bio: { type: String },
+  avatar: { type: String, default: '' },
+  coverPhoto: { type: String, default: '' },
 
   applicationStatus: {
     type: String,

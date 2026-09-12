@@ -15,6 +15,10 @@ export default function UsersDirectoryPage() {
   const [departmentFilter, setDepartmentFilter] = useState('');
   const [roleFilter, setRoleFilter] = useState('all'); // 'all', 'officer', 'member', 'admin'
   const [error, setError] = useState('');
+  const [roleDrafts, setRoleDrafts] = useState({});
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const canManageMembers = authUser && ['super_admin', 'teacher', 'adviser', 'officer'].includes(authUser.role);
 
   useEffect(() => {
     if (!authLoading && !authUser) {
@@ -22,14 +26,16 @@ export default function UsersDirectoryPage() {
       return;
     }
 
-    if (authUser && token) {
-      fetchUsers();
+    if (!authLoading && authUser && token) {
+      fetchUsers(false);
     }
-  }, [authUser, authLoading, token, router]);
+  }, [authLoading, authUser?.id, authUser?.role, token, router]);
 
-  const fetchUsers = async () => {
+  const fetchUsers = async (showLoader = true) => {
     try {
-      setLoading(true);
+      setLoading(showLoader);
+      setIsRefreshing(!showLoader);
+
       const res = await fetch('/api/users', {
         headers: {
           Authorization: 'Bearer ' + token,
@@ -47,6 +53,50 @@ export default function UsersDirectoryPage() {
       setError('An unexpected error occurred while loading members.');
     } finally {
       setLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  const handleRoleDraftChange = (memberId, field, value) => {
+    setRoleDrafts((prev) => ({
+      ...prev,
+      [memberId]: {
+        ...(prev[memberId] || {}),
+        [field]: value,
+      },
+    }));
+  };
+
+  const handleRoleUpdate = async (member) => {
+    if (!canManageMembers || !member?._id) return;
+
+    const draft = roleDrafts[member._id] || {};
+    const nextRole = draft.role || member.role || 'member';
+    const nextPosition = draft.officerPosition || member.officerPosition || null;
+
+    try {
+      const res = await fetch(`/api/users/${member._id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          role: nextRole,
+          officerPosition: nextRole === 'officer' ? nextPosition : null,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || data.message || 'Role update failed.');
+      }
+
+      setError('');
+      await fetchUsers(false);
+    } catch (err) {
+      console.error('Role update error:', err);
+      setError(err.message || 'Unable to update the member role right now.');
     }
   };
 
@@ -74,7 +124,7 @@ export default function UsersDirectoryPage() {
 
   const uniqueDepartments = Array.from(new Set(users.map((u) => u.department).filter(Boolean)));
 
-  if (authLoading || loading) {
+  if (authLoading || (loading && !isRefreshing)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-transparent text-[#FDFBF7]">
         <div className="flex flex-col items-center gap-3">
@@ -114,7 +164,7 @@ export default function UsersDirectoryPage() {
             { id: 'all', label: 'All Members' },
             { id: 'officer', label: 'Officers' },
             { id: 'member', label: 'Regular Members' },
-            { id: 'admin', label: 'Admins' },
+    
           ].map((tab) => (
             <button
               key={tab.id}
@@ -225,6 +275,54 @@ export default function UsersDirectoryPage() {
                     </div>
                   </div>
                 </div>
+
+                {canManageMembers && (
+                  <div className="mt-5 border-t border-white/10 pt-4">
+                    <div className="space-y-2">
+                      <label className="block text-[9px] font-black uppercase tracking-[0.2em] text-[#FDFBF7]/60">
+                        Update role
+                      </label>
+
+                      <select
+                        value={roleDrafts[member._id]?.role || member.role || 'member'}
+                        onChange={(e) => handleRoleDraftChange(member._id, 'role', e.target.value)}
+                        className="w-full rounded-xl border border-white/10 bg-[#1a0d0d] px-3 py-2 text-xs text-white focus:border-red-500 focus:outline-none"
+                      >
+                        <option value="member">Member</option>
+                        <option value="alumni">Alumni</option>
+                        <option value="officer">Officer</option>
+                        <option value="teacher">Teacher</option>
+                        <option value="adviser">Adviser</option>
+                        <option value="super_admin">Admin</option>
+                      </select>
+
+                      {(roleDrafts[member._id]?.role || member.role) === 'officer' && (
+                        <select
+                          value={roleDrafts[member._id]?.officerPosition || member.officerPosition || 'president'}
+                          onChange={(e) => handleRoleDraftChange(member._id, 'officerPosition', e.target.value)}
+                          className="w-full rounded-xl border border-white/10 bg-[#1a0d0d] px-3 py-2 text-xs text-white focus:border-red-500 focus:outline-none"
+                        >
+                          <option value="president">President</option>
+                          <option value="vice_president">Vice President</option>
+                          <option value="secretary">Secretary</option>
+                          <option value="treasurer">Treasurer</option>
+                          <option value="pro">PRO</option>
+                          <option value="events_director">Events Director</option>
+                          <option value="creative_director">Creative Director</option>
+                          <option value="year_level_representative">Year Level Representative</option>
+                        </select>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => handleRoleUpdate(member)}
+                        className="w-full rounded-xl bg-gradient-to-r from-red-600 to-red-800 px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-white transition hover:opacity-90"
+                      >
+                        Save Role
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {member.bio && (
                   <p className="mt-4 text-xs font-light leading-relaxed text-white/60 line-clamp-2 border-t border-white/5 pt-3">

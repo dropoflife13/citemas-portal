@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Camera, Edit3, User, CheckCircle2 } from 'lucide-react';
 
 export default function ProfilePage() {
-  const { user: authUser, token, loading: authLoading } = useAuth();
+  const { user: authUser, token, loading: authLoading, refreshSession } = useAuth();
   const router = useRouter();
 
   const [profile, setProfile] = useState(null);
@@ -17,6 +17,65 @@ export default function ProfilePage() {
 
   const avatarInputRef = useRef(null);
   const coverInputRef = useRef(null);
+
+  const handleImageUpload = async (type, event) => {
+    const file = event?.target?.files?.[0];
+    if (!file || !token) return;
+
+    if (!file.type.startsWith('image/')) {
+      setMessage({ type: 'error', text: 'Please choose a valid image file.' });
+      return;
+    }
+
+    setSaving(true);
+    setMessage({ type: '', text: '' });
+
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const uploadRes = await fetch('/api/portfolio/upload', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const uploadData = await uploadRes.json();
+      if (!uploadRes.ok) {
+        throw new Error(uploadData.error || 'Image upload failed.');
+      }
+
+      const field = type === 'avatar' ? 'avatar' : 'coverPhoto';
+      const patchRes = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ [field]: uploadData.url }),
+      });
+
+      const patchData = await patchRes.json();
+      if (!patchRes.ok) {
+        throw new Error(patchData.message || patchData.error || 'Profile image update failed.');
+      }
+
+      setProfile((prev) => ({ ...prev, [field]: uploadData.url }));
+      await refreshSession(token);
+      setMessage({
+        type: 'success',
+        text: type === 'avatar' ? 'Profile photo updated successfully.' : 'Cover photo updated successfully.',
+      });
+    } catch (error) {
+      console.error('Image upload error:', error);
+      setMessage({ type: 'error', text: error.message || 'Image upload failed.' });
+    } finally {
+      setSaving(false);
+      event.target.value = '';
+    }
+  };
 
   useEffect(() => {
     if (!authLoading && !authUser) {
@@ -98,7 +157,7 @@ export default function ProfilePage() {
             onClick={() => handleImageUploadTrigger('cover')}
           >
             <img
-              src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80"
+              src={profile.coverPhoto || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=1200&q=80'}
               alt="Profile cover"
               className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
             />
@@ -117,7 +176,7 @@ export default function ProfilePage() {
               ref={coverInputRef}
               className="hidden"
               accept="image/*"
-              onChange={() => alert('Cover photo upload handler can be wired here!')}
+              onChange={(event) => handleImageUpload('cover', event)}
             />
           </div>
 
@@ -149,7 +208,7 @@ export default function ProfilePage() {
                     ref={avatarInputRef}
                     className="hidden"
                     accept="image/*"
-                    onChange={() => alert('Avatar upload handler can be wired here!')}
+                    onChange={(event) => handleImageUpload('avatar', event)}
                   />
                 </div>
 

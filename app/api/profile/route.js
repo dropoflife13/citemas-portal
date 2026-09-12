@@ -84,6 +84,8 @@ export async function PATCH(req) {
       lastName,
       phone,
       bio,
+      avatar,
+      coverPhoto,
       yearLevel,
       department,
       specialization,
@@ -94,6 +96,8 @@ export async function PATCH(req) {
     if (lastName !== undefined) updates.lastName = lastName.trim();
     if (phone !== undefined) updates.phone = phone.trim();
     if (bio !== undefined) updates.bio = bio.trim();
+    if (avatar !== undefined) updates.avatar = avatar.trim();
+    if (coverPhoto !== undefined) updates.coverPhoto = coverPhoto.trim();
     if (yearLevel !== undefined) updates.yearLevel = yearLevel.trim();
     if (department !== undefined) updates.department = department.trim();
     if (specialization !== undefined) updates.specialization = specialization.trim();
