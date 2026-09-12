@@ -235,53 +235,57 @@ function InteractiveSpatialShowcase() {
 
 export default function LandingPage() {
   const [activeIdx, setActiveIdx] = useState(0);
+  const [officerRows, setOfficerRows] = useState([]);
 
-  const featuredOfficers = [
-    {
-      name: 'Vea de los Santos',
-      role: 'President',
-      image: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80',
-    },
-    {
-      name: 'Evonie Sabug',
-      role: 'Vice President',
-      image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80',
-    },
-    {
-      name: 'Miki Matsui',
-      role: 'Secretary',
-      image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80',
-    },
-    {
-      name: 'Achilles Fernandez',
-      role: 'Treasurer',
-      image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80',
-    },
-  ];
-
-  const supportOfficers = [
-    { name: 'Nasser Al-Hunaini', role: 'Auditor' },
-    { name: 'Kaiza Mardoquio', role: 'Business Manager' },
-    { name: 'Rogelio Lardera', role: 'P.I.O.' },
-    { name: 'Aries Averia', role: 'P.I.O.' },
-    { name: 'Recca Almonte', role: 'P.R.O.' },
-    { name: 'Gian Somes', role: 'P.R.O.' },
-  ];
-
-  const yearReps = [
-    { name: '2nd Year Representative', role: 'Vacant' },
-    { name: 'Kriza Bless Mallon', role: '3rd Year Representative' },
-    { name: 'Vea de los Santos', role: '4th Year Representative' },
-  ];
+  const formatPosition = (position) => {
+    if (!position) return 'Officer';
+    return position
+      .split('_')
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+  };
 
   useEffect(() => {
+    fetch('/api/officers')
+      .then((res) => (res.ok ? res.json() : { officers: [] }))
+      .then((data) => setOfficerRows(Array.isArray(data.officers) ? data.officers : []))
+      .catch(() => setOfficerRows([]));
+  }, []);
+
+  const featuredOfficers = officerRows
+    .filter((person) => person && person.officerPosition)
+    .map((person) => ({
+      name: `${person.firstName || ''} ${person.lastName || ''}`.trim() || 'CITEMAS Officer',
+      role: formatPosition(person.officerPosition),
+      image:
+        person.avatar ||
+        `https://ui-avatars.com/api/?name=${encodeURIComponent(`${person.firstName || ''} ${person.lastName || ''}`.trim() || 'CITEMAS Officer')}&background=7f1d1d&color=f8f2ec&size=512`,
+    }));
+
+  const supportOfficers = officerRows
+    .filter((person) => person && person.officerPosition && person.officerPosition !== 'president')
+    .slice(0, 6)
+    .map((person) => ({
+      name: `${person.firstName || ''} ${person.lastName || ''}`.trim() || 'CITEMAS Officer',
+      role: formatPosition(person.officerPosition),
+    }));
+
+  const yearReps = officerRows
+    .filter((person) => person && person.officerPosition === 'year_level_representative')
+    .map((person) => ({
+      name: `${person.firstName || ''} ${person.lastName || ''}`.trim() || 'Year Representative',
+      role: 'Year Representative',
+    }));
+
+  useEffect(() => {
+    if (!featuredOfficers.length) return;
     const timer = setInterval(() => {
       setActiveIdx((prev) => (prev + 1) % featuredOfficers.length);
     }, 4000);
     return () => clearInterval(timer);
   }, [featuredOfficers.length]);
 
-  const current = featuredOfficers[activeIdx];
+  const current = featuredOfficers[activeIdx] || null;
 
   const pillars = [
     {
@@ -576,120 +580,134 @@ export default function LandingPage() {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          {/* Enhanced Red Carousel with 2x Enlarged Avatar */}
-          <div
-            className="relative w-full h-[460px] rounded-[36px] p-7 transition-all duration-1000 ease-out transform-gpu overflow-hidden flex flex-col justify-between shrink-0 border border-white/20"
-            style={{
-              background: 'radial-gradient(circle at 50% 20%, rgba(220, 38, 38, 0.45) 0%, rgba(127, 29, 29, 0.25) 50%, rgba(10, 4, 4, 0.98) 90%)',
-              backdropFilter: 'blur(36px) saturate(200%)',
-              WebkitBackdropFilter: 'blur(36px) saturate(200%)',
-              boxShadow: `
-                0 30px 70px -10px rgba(0, 0, 0, 0.8),
-                0 0 50px rgba(220, 38, 38, 0.2),
-                inset 0 1px 2px 0 rgba(255, 255, 255, 0.4)
-              `,
-            }}
-          >
-            <div className="relative z-20 flex items-center justify-between shrink-0 h-9">
+          {current ? (
+            <>
               <div
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider text-amber-300 border border-white/25 backdrop-blur-2xl"
-                style={{ background: 'rgba(0, 0, 0, 0.5)', boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.2)' }}
-              >
-                <span>👑</span>
-                <span>{current.role}</span>
-              </div>
-
-              <div className="flex items-center gap-1.5">
-                {featuredOfficers.map((_, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => setActiveIdx(idx)}
-                    className={`h-1.5 rounded-full transition-all duration-500 ${
-                      activeIdx === idx
-                        ? 'w-6 bg-red-500 shadow-[0_0_12px_#DC2626]'
-                        : 'w-2 bg-white/30 hover:bg-white/60'
-                    }`}
-                    aria-label={`Go to officer ${idx + 1}`}
-                  />
-                ))}
-              </div>
-            </div>
-
-            <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center my-auto">
-              <div
-                className="relative flex h-36 w-36 shrink-0 items-center justify-center rounded-full overflow-hidden transition-transform duration-700 ease-out hover:scale-105"
+                className="relative w-full h-[460px] rounded-[36px] p-7 transition-all duration-1000 ease-out transform-gpu overflow-hidden flex flex-col justify-between shrink-0 border border-white/20"
                 style={{
-                  border: '3px solid rgba(255,255,255,0.5)',
-                  boxShadow: '0 20px 40px rgba(0,0,0,0.7), inset 0 2px 4px rgba(255,255,255,0.6)',
+                  background: 'radial-gradient(circle at 50% 20%, rgba(220, 38, 38, 0.45) 0%, rgba(127, 29, 29, 0.25) 50%, rgba(10, 4, 4, 0.98) 90%)',
+                  backdropFilter: 'blur(36px) saturate(200%)',
+                  WebkitBackdropFilter: 'blur(36px) saturate(200%)',
+                  boxShadow: `
+                    0 30px 70px -10px rgba(0, 0, 0, 0.8),
+                    0 0 50px rgba(220, 38, 38, 0.2),
+                    inset 0 1px 2px 0 rgba(255, 255, 255, 0.4)
+                  `,
                 }}
               >
-                <img src={current.image} alt={current.name} className="h-full w-full object-cover" />
-              </div>
-
-              <div className="mt-4 max-w-xs flex flex-col justify-center transition-all duration-500">
-                <p className="text-[10px] font-black tracking-[0.25em] text-red-400 uppercase">● CURRENTLY ACTIVE</p>
-                <h3 className="text-2xl font-black text-[#FDFBF7] tracking-tight drop-shadow-md mt-1">
-                  {current.name}
-                </h3>
-                <p className="mt-1 text-xs text-[#FDFBF7]/75 font-medium tracking-wide">
-                  PHINMA University of Iloilo
-                </p>
-              </div>
-            </div>
-
-            <div className="relative z-20 flex items-center justify-between pt-3 border-t border-white/10 shrink-0 h-11">
-              <div
-                className="px-3.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider text-[#FDFBF7]/90 border border-white/15"
-                style={{ background: 'rgba(255,255,255,0.08)' }}
-              >
-                ✨ CITEMAS Board Member
-              </div>
-              <span className="text-[10px] font-black text-amber-300 tracking-widest uppercase">
-                0{activeIdx + 1} / 0{featuredOfficers.length}
-              </span>
-            </div>
-          </div>
-
-          {/* Dynamic Board & Year Details */}
-          <div className="space-y-5">
-            <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.35)]">
-              <p className="text-[10px] font-black uppercase tracking-[0.24em] text-red-300">Board details</p>
-              <div className="mt-4 space-y-3">
-                {supportOfficers.map((officer) => (
-                  <div 
-                    key={`${officer.role}-${officer.name}`} 
-                    className={`flex items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 transition-all duration-300 ${
-                      current.role.toLowerCase() === officer.role.toLowerCase() 
-                        ? 'border-red-500/50 bg-red-500/15 shadow-[0_0_15px_rgba(220,38,38,0.2)]' 
-                        : 'border-white/10 bg-black/10 hover:border-white/20'
-                    }`}
+                <div className="relative z-20 flex items-center justify-between shrink-0 h-9">
+                  <div
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider text-amber-300 border border-white/25 backdrop-blur-2xl"
+                    style={{ background: 'rgba(0, 0, 0, 0.5)', boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.2)' }}
                   >
-                    <span className="text-[9px] font-black uppercase tracking-[0.18em] text-amber-300">{officer.role}</span>
-                    <span className="text-right text-sm font-black text-[#F8F2EC]">{officer.name}</span>
+                    <span>👑</span>
+                    <span>{current.role}</span>
                   </div>
-                ))}
-              </div>
-            </div>
 
-            <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.35)]">
-              <p className="text-[10px] font-black uppercase tracking-[0.24em] text-red-300">Year representatives</p>
-              <div className="mt-4 space-y-3">
-                {yearReps.map((rep) => (
-                  <div 
-                    key={`${rep.role}-${rep.name}`} 
-                    className={`flex items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 transition-all duration-300 ${
-                      rep.name.includes(current.name) 
-                        ? 'border-red-500/50 bg-red-500/15 shadow-[0_0_15px_rgba(220,38,38,0.2)]' 
-                        : 'border-white/10 bg-black/10 hover:border-white/20'
-                    }`}
-                  >
-                    <span className="text-[9px] font-black uppercase tracking-[0.18em] text-amber-300">{rep.role}</span>
-                    <span className="text-right text-sm font-black text-[#F8F2EC]">{rep.name}</span>
+                  <div className="flex items-center gap-1.5">
+                    {featuredOfficers.map((_, idx) => (
+                      <button
+                        key={idx}
+                        onClick={() => setActiveIdx(idx)}
+                        className={`h-1.5 rounded-full transition-all duration-500 ${
+                          activeIdx === idx
+                            ? 'w-6 bg-red-500 shadow-[0_0_12px_#DC2626]'
+                            : 'w-2 bg-white/30 hover:bg-white/60'
+                        }`}
+                        aria-label={`Go to officer ${idx + 1}`}
+                      />
+                    ))}
                   </div>
-                ))}
+                </div>
+
+                <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center my-auto">
+                  <div
+                    className="relative flex h-36 w-36 shrink-0 items-center justify-center rounded-full overflow-hidden transition-transform duration-700 ease-out hover:scale-105"
+                    style={{
+                      border: '3px solid rgba(255,255,255,0.5)',
+                      boxShadow: '0 20px 40px rgba(0,0,0,0.7), inset 0 2px 4px rgba(255,255,255,0.6)',
+                    }}
+                  >
+                    <img src={current.image} alt={current.name} className="h-full w-full object-cover" />
+                  </div>
+
+                  <div className="mt-4 max-w-xs flex flex-col justify-center transition-all duration-500">
+                    <p className="text-[10px] font-black tracking-[0.25em] text-red-400 uppercase">● CURRENTLY ACTIVE</p>
+                    <h3 className="text-2xl font-black text-[#FDFBF7] tracking-tight drop-shadow-md mt-1">
+                      {current.name}
+                    </h3>
+                    <p className="mt-1 text-xs text-[#FDFBF7]/75 font-medium tracking-wide">
+                      PHINMA University of Iloilo
+                    </p>
+                  </div>
+                </div>
+
+                <div className="relative z-20 flex items-center justify-between pt-3 border-t border-white/10 shrink-0 h-11">
+                  <div
+                    className="px-3.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider text-[#FDFBF7]/90 border border-white/15"
+                    style={{ background: 'rgba(255,255,255,0.08)' }}
+                  >
+                    ✨ CITEMAS Board Member
+                  </div>
+                  <span className="text-[10px] font-black text-amber-300 tracking-widest uppercase">
+                    0{activeIdx + 1} / 0{featuredOfficers.length}
+                  </span>
+                </div>
               </div>
+
+              <div className="space-y-5">
+                <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.35)]">
+                  <p className="text-[10px] font-black uppercase tracking-[0.24em] text-red-300">Board details</p>
+                  <div className="mt-4 space-y-3">
+                    {supportOfficers.length ? supportOfficers.map((officer) => (
+                      <div 
+                        key={`${officer.role}-${officer.name}`} 
+                        className={`flex items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 transition-all duration-300 ${
+                          current.role.toLowerCase() === officer.role.toLowerCase() 
+                            ? 'border-red-500/50 bg-red-500/15 shadow-[0_0_15px_rgba(220,38,38,0.2)]' 
+                            : 'border-white/10 bg-black/10 hover:border-white/20'
+                        }`}
+                      >
+                        <span className="text-[9px] font-black uppercase tracking-[0.18em] text-amber-300">{officer.role}</span>
+                        <span className="text-right text-sm font-black text-[#F8F2EC]">{officer.name}</span>
+                      </div>
+                    )) : (
+                      <div className="rounded-2xl border border-dashed border-white/10 p-4 text-sm text-[rgba(248,242,236,0.7)]">
+                        Officer assignments are still being updated.
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="rounded-[28px] border border-white/10 bg-[linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] p-5 shadow-[0_20px_50px_rgba(0,0,0,0.35)]">
+                  <p className="text-[10px] font-black uppercase tracking-[0.24em] text-red-300">Year representatives</p>
+                  <div className="mt-4 space-y-3">
+                    {yearReps.length ? yearReps.map((rep) => (
+                      <div 
+                        key={`${rep.role}-${rep.name}`} 
+                        className={`flex items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 transition-all duration-300 ${
+                          current && rep.name.includes(current.name) 
+                            ? 'border-red-500/50 bg-red-500/15 shadow-[0_0_15px_rgba(220,38,38,0.2)]' 
+                            : 'border-white/10 bg-black/10 hover:border-white/20'
+                        }`}
+                      >
+                        <span className="text-[9px] font-black uppercase tracking-[0.18em] text-amber-300">{rep.role}</span>
+                        <span className="text-right text-sm font-black text-[#F8F2EC]">{rep.name}</span>
+                      </div>
+                    )) : (
+                      <div className="rounded-2xl border border-dashed border-white/10 p-4 text-sm text-[rgba(248,242,236,0.7)]">
+                        No year representatives assigned yet.
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="col-span-full rounded-[28px] border border-dashed border-white/10 bg-white/[0.02] p-12 text-center text-slate-300">
+              The officer lineup has not been assigned yet. Update the current officers in the system to populate this section.
             </div>
-          </div>
+          )}
         </div>
       </section>
 

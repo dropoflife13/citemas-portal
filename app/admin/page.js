@@ -6,6 +6,12 @@ import { useAuth } from '@/lib/AuthContext';
 
 const ADMIN_ROLES = new Set(['super_admin', 'teacher', 'adviser', 'officer']);
 
+const canAccessAdmin = (user) => {
+  if (!user) return false;
+  if (ADMIN_ROLES.has(user.role)) return true;
+  return user.role === 'officer' && user.officerPosition === 'president';
+};
+
 export default function AdminPage() {
   const { user, token, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -21,7 +27,7 @@ export default function AdminPage() {
       return;
     }
 
-    if (!authLoading && user && !ADMIN_ROLES.has(user.role)) {
+    if (!authLoading && user && !canAccessAdmin(user)) {
       router.push('/dashboard');
       return;
     }

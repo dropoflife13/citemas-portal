@@ -42,10 +42,11 @@ export async function PATCH(req, { params }) {
 
     if (role === 'officer') {
       const isTeacher = ['teacher', 'adviser'].includes(promoter.role);
+      const isAdmin = ['super_admin'].includes(promoter.role);
       const isPresident = promoter.role === 'officer' && promoter.officerPosition === 'president';
-      if (!isTeacher && !isPresident) {
+      if (!isTeacher && !isAdmin && !isPresident) {
         return NextResponse.json(
-          { error: 'Only a teacher, adviser, or the president can assign officer roles' },
+          { error: 'Only a teacher, president, or admin can assign officer roles' },
           { status: 403 }
         );
       }
