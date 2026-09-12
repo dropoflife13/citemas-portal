@@ -7,7 +7,7 @@ import { useRouter } from 'next/navigation';
 import { Camera, Edit3, User, CheckCircle2 } from 'lucide-react';
 
 export default function ProfilePage() {
-  const { user: authUser, token, loading: authLoading, refreshSession } = useAuth();
+  const { user: authUser, token, loading: authLoading, updateUser } = useAuth();
   const router = useRouter();
 
   const [profile, setProfile] = useState(null);
@@ -63,7 +63,7 @@ export default function ProfilePage() {
       }
 
       setProfile((prev) => ({ ...prev, [field]: uploadData.url }));
-      await refreshSession(token);
+      updateUser({ [field]: uploadData.url });
       setMessage({
         type: 'success',
         text: type === 'avatar' ? 'Profile photo updated successfully.' : 'Cover photo updated successfully.',
@@ -86,7 +86,8 @@ export default function ProfilePage() {
     if (authUser && token) {
       fetchProfile();
     }
-  }, [authUser, authLoading, token, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading, token]);
 
   const fetchProfile = async () => {
     try {
