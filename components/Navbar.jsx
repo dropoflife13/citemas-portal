@@ -10,7 +10,10 @@ const CITEMAS_CREAM = '#FDFBF7';
 const MUTED = 'rgba(253,251,247,0.85)';
 
 export default function Navbar() {
-  const { user, logout, loading } = useAuth();
+  const auth = useAuth();
+  const user = auth?.user ?? null;
+  const logout = auth?.logout ?? (() => {});
+  const loading = auth?.loading ?? false;
   const router = useRouter();
 
   function handleLogout() {
@@ -23,30 +26,23 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#110808]/80 backdrop-blur-md text-sm font-extrabold uppercase tracking-wider">
       <div className="w-full flex items-center justify-between pl-8 pr-12 md:pl-12 md:pr-16 py-5">
-        
         {/* Logo Brand */}
         <Link 
           href="/" 
           className="flex items-center gap-3.5 group transition-transform duration-150 active:scale-95"
         >
           <div
-            className="flex h-10 w-10 items-center justify-center rounded-xl font-extrabold text-lg shadow-md transition-all duration-200 group-hover:scale-105 group-hover:brightness-110"
-            style={{ background: CITEMAS_RED, color: CITEMAS_CREAM }}
+            className="flex h-10 w-10 items-center justify-center rounded-xl font-black text-lg shadow-[0_8px_24px_rgba(217,41,41,0.45)] transition-all duration-200 group-hover:scale-105 group-hover:brightness-110"
+            style={{ background: 'linear-gradient(135deg, #d92929 0%, #7a1111 100%)', color: CITEMAS_CREAM }}
           >
             C
           </div>
           <div>
             <span
-              className="font-extrabold tracking-tight text-xl block leading-none transition-colors duration-200 group-hover:text-red-500"
-              style={{ color: CITEMAS_CREAM }}
+              className="font-black tracking-[-0.06em] text-xl block leading-none transition-colors duration-200 group-hover:text-red-400"
+              style={{ color: CITEMAS_CREAM, fontFamily: 'Fraunces, Georgia, serif' }}
             >
               CITEMAS
-            </span>
-            <span
-              className="text-[10px] font-semibold tracking-wider uppercase block mt-1"
-              style={{ color: MUTED }}
-            >
-              Multimedia Arts Studio
             </span>
           </div>
         </Link>
@@ -85,7 +81,6 @@ export default function Navbar() {
               >
                 Portfolio
               </Link>
-
               {/* User Profile Badge */}
               <Link
                 href="/profile"

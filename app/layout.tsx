@@ -27,24 +27,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-paper text-ink relative overflow-x-hidden`}
+        suppressHydrationWarning
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-transparent text-ink relative overflow-x-hidden`}
       >
-        {/* 2. Wrap your layout elements with AuthProvider */}
         <AuthProvider>
-          {/* Global Colorful Background */}
           <Background />
 
-          {/* Global Navigation */}
           <div className="relative z-10">
             <Navbar />
           </div>
 
-          {/* Main Page Content */}
           <main className="relative z-10 flex-grow">{children}</main>
 
-          {/* Global Footer */}
           <div className="relative z-10">
             <Footer />
           </div>

@@ -3,7 +3,7 @@ import Event from '@/models/Event';
 import { getUserFromRequest } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 import User from '@/models/User';
-const CAN_MANAGE = ['officer', 'teacher', 'super_admin'];
+const CAN_MANAGE = ['officer', 'teacher', 'adviser', 'super_admin'];
 
 // GET — get all events
 // Any authenticated user can view events

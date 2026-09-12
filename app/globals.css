@@ -2,15 +2,17 @@
 @import "tailwindcss";
 
 :root {
-  --paper: #110808;
-  --paper-deep: #1f1010;
-  --ink: #FDFBF7;
-  --ink-muted: #f8d9d9;
-  --ink-faint: #d7a0a0;
-  --line: rgba(255, 255, 255, 0.1);
-  --accent: #DC2626;
+  --paper: #0b0505;
+  --paper-deep: #160909;
+  --paper-glass: rgba(20, 12, 12, 0.72);
+  --ink: #f8f2ec;
+  --ink-muted: rgba(248, 242, 236, 0.72);
+  --ink-faint: rgba(248, 242, 236, 0.46);
+  --line: rgba(255, 255, 255, 0.08);
+  --accent: #d92929;
   --accent-soft: #ef4444;
-  --accent-dim: rgba(220, 38, 38, 0.18);
+  --accent-dim: rgba(217, 41, 41, 0.18);
+  --gold: #f5b24a;
   --background: var(--paper);
   --foreground: var(--ink);
 }
@@ -41,8 +43,9 @@ html {
 
 body {
   background:
-    radial-gradient(circle at top left, rgba(220, 38, 38, 0.18), transparent 28%),
-    radial-gradient(circle at bottom right, rgba(127, 29, 29, 0.24), transparent 26%),
+    radial-gradient(circle at top left, rgba(217, 41, 41, 0.26), transparent 24%),
+    radial-gradient(circle at top right, rgba(245, 178, 74, 0.08), transparent 22%),
+    radial-gradient(circle at bottom left, rgba(127, 29, 29, 0.24), transparent 28%),
     var(--paper);
   color: var(--ink);
   font-family: "Inter", system-ui, sans-serif;
@@ -55,12 +58,12 @@ body::before {
   position: fixed;
   inset: 0;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: 64px 64px;
-  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.15) 40%, transparent 100%);
+    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+  background-size: 72px 72px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.82), rgba(0, 0, 0, 0.15) 48%, transparent 100%);
   pointer-events: none;
-  opacity: 0.45;
+  opacity: 0.5;
   z-index: 0;
 }
 

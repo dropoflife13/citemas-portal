@@ -4,8 +4,8 @@ import User from '@/models/User';
 import { getUserFromRequest } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 
-const STAFF_ROLES = ['super_admin', 'teacher', 'officer'];
-const CAN_CREATE = ['super_admin', 'teacher', 'officer', 'member'];
+const STAFF_ROLES = ['super_admin', 'teacher', 'adviser', 'officer'];
+const CAN_CREATE = ['super_admin', 'teacher', 'adviser', 'officer', 'member'];
 const MAX_ENTRIES_PER_MEMBER = 5;
 
 export async function GET(req) {

@@ -18,7 +18,7 @@ async function run() {
   const role = process.argv[3];
   const position = process.argv[4] || null;
 
-  const validRoles = ['super_admin', 'teacher', 'officer', 'alumni', 'member', 'applicant', 'user'];
+  const validRoles = ['super_admin', 'teacher', 'adviser', 'officer', 'alumni', 'member', 'applicant', 'user'];
   const validPositions = [
     'president', 'vice_president', 'secretary', 'treasurer',
     'pro', 'events_director', 'creative_director', 'year_level_representative'
@@ -40,6 +40,7 @@ async function run() {
   await mongoose.connect(MONGODB_URI);
 
   const update = { role, officerPosition: role === 'officer' ? position : null };
+  if (role === 'teacher' || role === 'adviser') update.staffApprovalStatus = 'approved';
   const result = await User.findOneAndUpdate({ email }, update, { new: true });
 
   if (!result) {

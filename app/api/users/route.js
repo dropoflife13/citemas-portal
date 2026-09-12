@@ -9,7 +9,7 @@ export async function GET(req) {
     return NextResponse.json({ message: 'Not authenticated' }, { status: 401 });
   }
 
-  const canView = ['super_admin', 'teacher', 'officer', 'alumni', 'member'].includes(currentUser.role);
+  const canView = ['super_admin', 'teacher', 'adviser', 'officer', 'alumni', 'member'].includes(currentUser.role);
   if (!canView) {
     return NextResponse.json({ message: 'You do not have permission to view the member directory' }, { status: 403 });
   }

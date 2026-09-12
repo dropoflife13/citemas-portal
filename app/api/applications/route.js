@@ -10,7 +10,7 @@ export async function GET(req) {
   if (!currentUser) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
-  if (!['officer', 'teacher', 'super_admin'].includes(currentUser.role)) {
+  if (!['officer', 'teacher', 'adviser', 'super_admin'].includes(currentUser.role)) {
     return NextResponse.json({ error: 'You do not have permission to view applications' }, { status: 403 });
   }
 

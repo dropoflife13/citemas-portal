@@ -7,7 +7,18 @@ const userSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
 
-  studentId: { type: String },
+  studentId: { type: String, unique: true, sparse: true },
+  staffId: { type: String, unique: true, sparse: true },
+  accountType: {
+    type: String,
+    enum: ['student', 'adviser'],
+    default: 'student',
+  },
+  staffApprovalStatus: {
+    type: String,
+    enum: ['not_applicable', 'pending', 'approved'],
+    default: 'not_applicable',
+  },
   yearLevel: { type: String, enum: ['1st', '2nd', '3rd', '4th', 'Graduate'] },
   
   department: {
@@ -22,12 +33,21 @@ const userSchema = new mongoose.Schema({
       'College of Information Technology Education (CITE)',
       'College of Management (COM)',
       'College of Maritime Education (COME)',
+      'BS Information Technology',
+      'BS Computer Science',
+      'BS Business Administration',
+      'BS Accountancy',
+      'BS Hospitality Management',
+      'BS Tourism Management',
+      'Bachelor of Elementary Education',
+      'Bachelor of Secondary Education',
+      'Bachelor of Science in Nursing',
     ],
   },
 
   role: {
     type: String,
-    enum: ['super_admin', 'teacher', 'officer', 'alumni', 'member', 'applicant', 'user'],
+    enum: ['super_admin', 'teacher', 'adviser', 'officer', 'alumni', 'member', 'applicant', 'user'],
     default: 'user'
   },
   
@@ -65,6 +85,11 @@ const userSchema = new mongoose.Schema({
   applicationDate: { type: Date },
 
   portfolioCount: { type: Number, default: 0 },
+
+  passwordResetCodeHash: { type: String, select: false },
+  passwordResetExpiresAt: { type: Date, select: false },
+  passwordResetAttempts: { type: Number, default: 0, select: false },
+  passwordResetLastRequestedAt: { type: Date, select: false },
 
 }, { timestamps: true });
 

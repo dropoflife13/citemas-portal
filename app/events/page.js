@@ -98,7 +98,7 @@ export default function EventsPage() {
   const [editError, setEditError] = useState('');
   const [uploadingEdit, setUploadingEdit] = useState(false);
 
-  const canManageRoles = ['officer', 'teacher', 'super_admin'];
+  const canManageRoles = ['officer', 'teacher', 'adviser', 'super_admin'];
   const canCreate = user && canManageRoles.includes(user.role);
 
   async function loadEvents() {

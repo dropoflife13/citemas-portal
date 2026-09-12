@@ -20,27 +20,42 @@ export async function PATCH(req, { params }) {
     const { id } = await params;
     const { role, officerPosition, graduationYear } = await req.json();
 
-    const validRoles = ['super_admin', 'teacher', 'officer', 'alumni', 'member', 'applicant', 'user'];
+    const validRoles = ['super_admin', 'teacher', 'adviser', 'officer', 'alumni', 'member', 'applicant', 'user'];
     if (role && !validRoles.includes(role)) {
       return NextResponse.json({ error: 'Invalid role' }, { status: 400 });
     }
 
+    const targetUser = await User.findById(id);
+    if (!targetUser) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    if (['super_admin', 'teacher', 'adviser'].includes(role)) {
+      if (promoter.role !== 'super_admin') {
+        return NextResponse.json({ error: 'Only a system admin can grant staff or admin access.' }, { status: 403 });
+      }
+
+      if (role !== 'super_admin' && targetUser.accountType !== role) {
+        return NextResponse.json({ error: 'The requested staff role does not match this account type.' }, { status: 400 });
+      }
+    }
+
     if (role === 'officer') {
-      const isTeacher = promoter.role === 'teacher';
+      const isTeacher = ['teacher', 'adviser'].includes(promoter.role);
       const isPresident = promoter.role === 'officer' && promoter.officerPosition === 'president';
       if (!isTeacher && !isPresident) {
         return NextResponse.json(
-          { error: 'Only a teacher or the president can assign officer roles' },
+          { error: 'Only a teacher, adviser, or the president can assign officer roles' },
           { status: 403 }
         );
       }
     }
 
     if (role === 'alumni') {
-      const canApproveAlumni = ['teacher', 'officer', 'super_admin'].includes(promoter.role);
+      const canApproveAlumni = ['teacher', 'adviser', 'officer', 'super_admin'].includes(promoter.role);
       if (!canApproveAlumni) {
         return NextResponse.json(
-          { error: 'Only officers, teachers, or admins can approve alumni status' },
+          { error: 'Only officers, teachers, advisers, or admins can approve alumni status' },
           { status: 403 }
         );
       }
@@ -48,6 +63,7 @@ export async function PATCH(req, { params }) {
 
     const updateData = {};
     if (role) updateData.role = role;
+    if (['teacher', 'adviser'].includes(role)) updateData.staffApprovalStatus = 'approved';
     updateData.officerPosition = role === 'officer' ? (officerPosition || null) : null;
     if (role === 'alumni' && graduationYear) updateData.graduationYear = graduationYear;
 
