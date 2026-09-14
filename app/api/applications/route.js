@@ -46,8 +46,11 @@ export async function POST(req) {
     });
     await newApplication.save();
 
-    // Move the user's role from "user" to "applicant"
-    await User.findByIdAndUpdate(currentUser.id, { role: 'applicant' });
+    // Only legacy "user" accounts are moved to "applicant".
+    // Members (the base student role) keep their status.
+    if (currentUser.role === 'user') {
+      await User.findByIdAndUpdate(currentUser.id, { role: 'applicant' });
+    }
 
     return NextResponse.json(newApplication, { status: 201 });
   } catch (err) {

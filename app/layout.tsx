@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Background from "@/components/background"; 
 import { AuthProvider } from "@/lib/AuthContext"; // <-- 1. Import your AuthProvider
+import { ToastProvider } from "@/components/Toast";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,17 +34,19 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-transparent text-ink relative overflow-x-hidden`}
       >
         <AuthProvider>
-          <Background />
+          <ToastProvider>
+            <Background />
 
-          <div className="relative z-10">
-            <Navbar />
-          </div>
+            <div className="relative z-10">
+              <Navbar />
+            </div>
 
-          <main className="relative z-10 flex-grow">{children}</main>
+            <main className="relative z-10 flex-grow">{children}</main>
 
-          <div className="relative z-10">
-            <Footer />
-          </div>
+            <div className="relative z-10">
+              <Footer />
+            </div>
+          </ToastProvider>
         </AuthProvider>
       </body>
     </html>

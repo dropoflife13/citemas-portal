@@ -3,32 +3,12 @@ import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
 import { verifyAuth } from '@/lib/auth';
 import { profilePatchSchema } from '@/lib/validators';
-
-const VALID_DEPARTMENTS = [
-  'College of Arts & Sciences (CAS)',
-  'College of Accountancy',
-  'College of Allied Health Sciences (CAHS)',
-  'College of Criminal Justice Education (CCJE)',
-  'College of Education (CoEd)',
-  'College of Engineering',
-  'College of Information Technology Education (CITE)',
-  'College of Management (COM)',
-  'College of Maritime Education (COME)',
-  'BS Information Technology',
-  'BS Computer Science',
-  'BS Business Administration',
-  'BS Accountancy',
-  'BS Hospitality Management',
-  'BS Tourism Management',
-  'Bachelor of Elementary Education',
-  'Bachelor of Secondary Education',
-  'Bachelor of Science in Nursing',
-];
+import { logActivity } from '@/lib/logActivity';
 
 export async function GET(req) {
   try {
     const authResult = await verifyAuth(req);
-    
+
     if (!authResult || !authResult.success) {
       return NextResponse.json(
         { message: authResult?.message || 'Authentication failed' },
@@ -49,10 +29,10 @@ export async function GET(req) {
   } catch (error) {
     console.error('CRITICAL /api/profile GET Error:', error);
     return NextResponse.json(
-      { 
-        message: 'Internal Server Error', 
+      {
+        message: 'Internal Server Error',
         error: error.message,
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined 
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
       },
       { status: 500 }
     );
@@ -117,6 +97,53 @@ export async function PATCH(req) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
+    // ─── Log the activity ───
+    const actor = {
+      id: updatedUser._id,
+      firstName: updatedUser.firstName,
+      lastName: updatedUser.lastName,
+      role: updatedUser.role,
+    };
+    const actorName = `${updatedUser.firstName} ${updatedUser.lastName}`;
+
+    if (avatar !== undefined) {
+      await logActivity({
+        req,
+        actor,
+        action: 'profile.avatar_changed',
+        targetType: 'User',
+        targetId: updatedUser._id,
+        targetName: actorName,
+      });
+    }
+
+    if (coverPhoto !== undefined) {
+      await logActivity({
+        req,
+        actor,
+        action: 'profile.cover_changed',
+        targetType: 'User',
+        targetId: updatedUser._id,
+        targetName: actorName,
+      });
+    }
+
+    // Log the general "profile updated" for non-image changes
+    const nonImageUpdates = Object.keys(updates).filter(
+      (k) => k !== 'avatar' && k !== 'coverPhoto'
+    );
+    if (nonImageUpdates.length > 0) {
+      await logActivity({
+        req,
+        actor,
+        action: 'profile.updated',
+        targetType: 'User',
+        targetId: updatedUser._id,
+        targetName: actorName,
+        metadata: { fields: nonImageUpdates },
+      });
+    }
+
     return NextResponse.json(
       { message: 'Profile updated successfully', user: updatedUser },
       { status: 200 }
@@ -124,9 +151,9 @@ export async function PATCH(req) {
   } catch (error) {
     console.error('CRITICAL /api/profile PATCH Error:', error);
     return NextResponse.json(
-      { 
-        message: 'Failed to update profile', 
-        error: error.message 
+      {
+        message: 'Failed to update profile',
+        error: error.message
       },
       { status: 500 }
     );

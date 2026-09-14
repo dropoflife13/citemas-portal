@@ -3,10 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
-import { Search, Users, Shield, Award, Mail, Phone, BookOpen, Filter } from 'lucide-react';
+import { useToast } from '@/components/Toast';
+import { Search, Users, Mail, BookOpen, Trash2 } from 'lucide-react';
 
 export default function UsersDirectoryPage() {
   const { user: authUser, token, loading: authLoading } = useAuth();
+  const { showToast } = useToast();
   const router = useRouter();
 
   const [users, setUsers] = useState([]);
@@ -19,17 +21,7 @@ export default function UsersDirectoryPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const canManageMembers = authUser && ['super_admin', 'teacher', 'adviser', 'officer'].includes(authUser.role);
-
-  useEffect(() => {
-    if (!authLoading && !authUser) {
-      router.push('/login');
-      return;
-    }
-
-    if (!authLoading && authUser && token) {
-      fetchUsers(false);
-    }
-  }, [authLoading, authUser?.id, authUser?.role, token, router]);
+  const canDeleteMembers = authUser?.role === 'super_admin';
 
   const fetchUsers = async (showLoader = true) => {
     try {
@@ -57,6 +49,17 @@ export default function UsersDirectoryPage() {
     }
   };
 
+  useEffect(() => {
+    if (!authLoading && !authUser) {
+      router.push('/login');
+      return;
+    }
+
+    if (!authLoading && authUser && token) {
+      fetchUsers(false);
+    }
+  }, [authLoading, authUser?.id, authUser?.role, token, router]);
+
   const handleRoleDraftChange = (memberId, field, value) => {
     setRoleDrafts((prev) => ({
       ...prev,
@@ -65,6 +68,30 @@ export default function UsersDirectoryPage() {
         [field]: value,
       },
     }));
+  };
+
+  const handleDeleteMember = async (member) => {
+    if (!canDeleteMembers || !member?._id) return;
+
+    try {
+      const res = await fetch(`/api/users/${member._id}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || data.error || 'Delete failed.');
+      }
+
+      setError('');
+      await fetchUsers(false);
+      showToast(`${member.firstName} ${member.lastName} was deleted`, 'success');
+    } catch (err) {
+      console.error('Delete member error:', err);
+      setError(err.message || 'Unable to delete this member.');
+      showToast(err.message || 'Unable to delete this member.', 'error');
+    }
   };
 
   const handleRoleUpdate = async (member) => {
@@ -94,9 +121,11 @@ export default function UsersDirectoryPage() {
 
       setError('');
       await fetchUsers(false);
+      showToast(`${member.firstName} ${member.lastName} is now ${nextRole.replace(/_/g, ' ')}`, 'success');
     } catch (err) {
       console.error('Role update error:', err);
       setError(err.message || 'Unable to update the member role right now.');
+      showToast(err.message || 'Unable to update the member role right now.', 'error');
     }
   };
 
@@ -276,6 +305,19 @@ export default function UsersDirectoryPage() {
                   </div>
                 </div>
 
+                {canDeleteMembers && (
+                  <div className="mt-4">
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteMember(member)}
+                      className="w-full rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-red-300 transition hover:bg-red-500/20 hover:text-red-200"
+                    >
+                      <Trash2 size={12} className="mr-1.5 inline" />
+                      Delete Member
+                    </button>
+                  </div>
+                )}
+
                 {canManageMembers && (
                   <div className="mt-5 border-t border-white/10 pt-4">
                     <div className="space-y-2">
@@ -292,7 +334,6 @@ export default function UsersDirectoryPage() {
                         <option value="alumni">Alumni</option>
                         <option value="officer">Officer</option>
                         <option value="teacher">Teacher</option>
-                        <option value="adviser">Adviser</option>
                         <option value="super_admin">Admin</option>
                       </select>
 
@@ -326,7 +367,7 @@ export default function UsersDirectoryPage() {
 
                 {member.bio && (
                   <p className="mt-4 text-xs font-light leading-relaxed text-white/60 line-clamp-2 border-t border-white/5 pt-3">
-                    "{member.bio}"
+                    &ldquo;{member.bio}&rdquo;
                   </p>
                 )}
               </div>

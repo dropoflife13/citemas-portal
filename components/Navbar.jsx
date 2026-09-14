@@ -27,8 +27,8 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#110808]/80 backdrop-blur-md text-sm font-extrabold uppercase tracking-wider">
       <div className="w-full flex items-center justify-between pl-8 pr-12 md:pl-12 md:pr-16 py-5">
         {/* Logo Brand */}
-        <Link 
-          href="/" 
+        <Link
+          href="/"
           className="flex items-center gap-3.5 group transition-transform duration-150 active:scale-95"
         >
           <div
@@ -51,36 +51,47 @@ export default function Navbar() {
         <div className="flex items-center gap-6 md:gap-8 font-bold ml-auto" style={{ color: MUTED }}>
           {user ? (
             <>
-              <Link 
-                href="/dashboard" 
+              <Link
+                href="/dashboard"
                 className="transition-all duration-150 hover:text-white hover:-translate-y-0.5 active:scale-95 active:translate-y-0"
               >
                 Dashboard
               </Link>
-              <Link 
-                href="/events" 
+              <Link
+                href="/events"
                 className="transition-all duration-150 hover:text-white hover:-translate-y-0.5 active:scale-95 active:translate-y-0"
               >
                 Events
               </Link>
-              <Link 
-                href="/users" 
+              <Link
+                href="/users"
                 className="transition-all duration-150 hover:text-white hover:-translate-y-0.5 active:scale-95 active:translate-y-0"
               >
                 Members
               </Link>
-              <Link 
-                href="/applications" 
+              <Link
+                href="/applications"
                 className="transition-all duration-150 hover:text-white hover:-translate-y-0.5 active:scale-95 active:translate-y-0"
               >
                 Applications
               </Link>
-              <Link 
-                href="/portfolio" 
+              <Link
+                href="/portfolio"
                 className="transition-all duration-150 hover:text-white hover:-translate-y-0.5 active:scale-95 active:translate-y-0"
               >
                 Portfolio
               </Link>
+
+              {/* Admin link — only visible to super_admin */}
+              {user.role === 'super_admin' && (
+                <Link
+                  href="/admin"
+                  className="px-3 py-1.5 text-[11px] font-black rounded-lg border border-red-500/40 bg-red-500/10 text-red-200 transition-all duration-150 hover:border-red-400 hover:bg-red-500/20 hover:-translate-y-0.5 active:scale-95 active:translate-y-0"
+                >
+                  Admin
+                </Link>
+              )}
+
               {/* User Profile Badge */}
               <Link
                 href="/profile"
@@ -105,20 +116,20 @@ export default function Navbar() {
             </>
           ) : (
             <>
-              <Link 
-                href="/events" 
+              <Link
+                href="/events"
                 className="transition-all duration-150 hover:text-white hover:-translate-y-0.5 active:scale-95 active:translate-y-0"
               >
                 Events
               </Link>
-              <Link 
-                href="/users" 
+              <Link
+                href="/users"
                 className="transition-all duration-150 hover:text-white hover:-translate-y-0.5 active:scale-95 active:translate-y-0"
               >
                 Members
               </Link>
-              <Link 
-                href="/portfolio" 
+              <Link
+                href="/portfolio"
                 className="transition-all duration-150 hover:text-white hover:-translate-y-0.5 active:scale-95 active:translate-y-0"
               >
                 Portfolio

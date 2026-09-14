@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Fragment } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   CheckCircle2,
@@ -8,8 +8,10 @@ import {
   FileText,
   XCircle,
   Clock3,
+  Trash2,
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
+import { useToast } from '@/components/Toast';
 
 const STATUS_STYLES = {
   pending: 'bg-amber-500/10 text-amber-200 border border-amber-500/30',
@@ -27,6 +29,7 @@ const SPECIALIZATION_LABELS = {
 
 export default function ApplicationsPage() {
   const { user, token, loading: authLoading } = useAuth();
+  const { showToast } = useToast();
   const router = useRouter();
 
   const [applications, setApplications] = useState([]);
@@ -47,22 +50,8 @@ export default function ApplicationsPage() {
   const isApplicant = user?.role === 'applicant';
   const canApply = user && !isStaff && !isApplicant;
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
-      return;
-    }
-
-    if (user && token && isStaff) {
-      loadApplications();
-    } else if (user && token) {
-      setLoading(false);
-    }
-  }, [authLoading, user, token, isStaff, router]);
-
   async function loadApplications() {
     try {
-      setLoading(true);
       const res = await fetch('/api/applications', {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -83,6 +72,19 @@ export default function ApplicationsPage() {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    if (!authLoading && !user) {
+      router.push('/login');
+      return;
+    }
+
+    if (user && token && isStaff) {
+      loadApplications();
+    } else if (user && token) {
+      setLoading(false);
+    }
+  }, [authLoading, user, token, isStaff, router]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -115,6 +117,35 @@ export default function ApplicationsPage() {
     }
   }
 
+  async function handleDeleteApplication(appId) {
+    if (!appId) return;
+
+    try {
+      setActioningId(appId);
+      const res = await fetch(`/api/applications/${appId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error || 'Unable to delete application');
+        showToast(data.error || 'Unable to delete application', 'error');
+        return;
+      }
+
+      setApplications((prev) => prev.filter((app) => app._id !== appId));
+      setExpandedId(null);
+      setError('');
+      showToast('Application deleted', 'success');
+    } catch {
+      setError('Could not delete application');
+      showToast('Could not delete application', 'error');
+    } finally {
+      setActioningId(null);
+    }
+  }
+
   async function handleApplicationDecision(appId, decision) {
     if (!appId || !decision) return;
 
@@ -142,8 +173,10 @@ export default function ApplicationsPage() {
       );
       setExpandedId(null);
       setError('');
+      showToast(`Application ${decision}`, decision === 'approved' ? 'success' : 'info');
     } catch {
       setError('Could not update application status');
+      showToast('Could not update application status', 'error');
     } finally {
       setActioningId(null);
     }
@@ -292,8 +325,9 @@ export default function ApplicationsPage() {
                       const isExpanded = expandedId === app._id;
 
                       return (
-                        <>
-                          <tr key={app._id} className="hover:bg-white/[0.02] transition-colors align-middle">
+                         <Fragment key={app._id}>
+                          <tr className="hover:bg-white/[0.02] transition-colors align-middle">
+
                             <td className="px-6 py-4">
                               <div className="font-bold text-white">
                                 {applicant.firstName || 'Unknown'} {applicant.lastName || ''}
@@ -345,6 +379,15 @@ export default function ApplicationsPage() {
                                   <XCircle size={13} />
                                   {actioningId === app._id ? '...' : 'Deny'}
                                 </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDeleteApplication(app._id)}
+                                  disabled={actioningId === app._id}
+                                  className="inline-flex items-center gap-1.5 rounded-xl border border-red-500/40 bg-red-500/10 px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-red-300 hover:bg-red-500/20 hover:text-red-200 transition-all disabled:cursor-not-allowed disabled:opacity-50"
+                                >
+                                  <Trash2 size={13} />
+                                  {actioningId === app._id ? '...' : 'Delete'}
+                                </button>
                               </div>
                             </td>
                           </tr>
@@ -379,7 +422,7 @@ export default function ApplicationsPage() {
                               </td>
                             </tr>
                           )}
-                        </>
+                        </Fragment>
                       );
                     })
                   )}

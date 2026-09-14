@@ -3,6 +3,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
+import {
+  Activity,
+  User,
+  Image,
+  LogIn,
+  LogOut,
+  FileText,
+  Shield,
+} from 'lucide-react';
 
 const ADMIN_ROLES = new Set(['super_admin', 'teacher', 'adviser', 'officer']);
 
@@ -12,12 +21,40 @@ const canAccessAdmin = (user) => {
   return user.role === 'officer' && user.officerPosition === 'president';
 };
 
+const ACTION_META = {
+  'auth.login': { label: 'logged in', color: 'text-emerald-300', icon: LogIn },
+  'auth.logout': { label: 'logged out', color: 'text-rose-300', icon: LogOut },
+  'auth.signup': { label: 'signed up', color: 'text-emerald-300', icon: User },
+  'profile.avatar_changed': { label: 'changed avatar', color: 'text-amber-300', icon: Image },
+  'profile.cover_changed': { label: 'changed cover photo', color: 'text-amber-300', icon: Image },
+  'profile.updated': { label: 'updated profile', color: 'text-amber-300', icon: User },
+  'user.role_updated': { label: 'changed a role', color: 'text-red-300', icon: Shield },
+  'project.created': { label: 'created a project', color: 'text-sky-300', icon: FileText },
+  'project.updated': { label: 'updated a project', color: 'text-sky-300', icon: FileText },
+  'project.deleted': { label: 'deleted a project', color: 'text-rose-300', icon: FileText },
+};
+
+function timeAgo(date) {
+  const now = new Date();
+  const then = new Date(date);
+  const seconds = Math.floor((now - then) / 1000);
+  if (seconds < 60) return 'just now';
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return then.toLocaleDateString();
+}
+
 export default function AdminPage() {
   const { user, token, loading: authLoading } = useAuth();
   const router = useRouter();
 
   const [users, setUsers] = useState([]);
   const [applications, setApplications] = useState([]);
+  const [activityLogs, setActivityLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -42,17 +79,21 @@ export default function AdminPage() {
       setLoading(true);
       setError('');
 
-      const [usersRes, applicationsRes] = await Promise.all([
+      const [usersRes, applicationsRes, activityRes] = await Promise.all([
         fetch('/api/users', {
           headers: { Authorization: `Bearer ${token}` },
         }),
         fetch('/api/applications', {
           headers: { Authorization: `Bearer ${token}` },
         }),
+        fetch('/api/activity?limit=20', {
+          headers: { Authorization: `Bearer ${token}` },
+        }),
       ]);
 
       const usersData = await usersRes.json();
       const applicationsData = await applicationsRes.json();
+      const activityData = await activityRes.json();
 
       if (!usersRes.ok || !applicationsRes.ok) {
         throw new Error(
@@ -62,6 +103,7 @@ export default function AdminPage() {
 
       setUsers(Array.isArray(usersData.users) ? usersData.users : []);
       setApplications(Array.isArray(applicationsData) ? applicationsData : []);
+      setActivityLogs(Array.isArray(activityData.logs) ? activityData.logs : []);
     } catch (err) {
       console.error('Admin load error:', err);
       setError(err.message || 'An unexpected error occurred while loading the admin dashboard.');
@@ -210,6 +252,89 @@ export default function AdminPage() {
             </div>
           </div>
         </div>
+
+        {/* ───── ACTIVITY LOG ───── */}
+        {user?.role === 'super_admin' && (
+          <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-6 shadow-[0_25px_60px_rgba(0,0,0,0.45)] backdrop-blur-2xl">
+            <div className="mb-5 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-red-500/30 bg-red-500/10 text-red-300">
+                  <Activity size={18} />
+                </div>
+                <div>
+                  <p className="text-[10px] font-black uppercase tracking-[0.28em] text-red-300">
+                    Admin only
+                  </p>
+                  <h2 className="text-lg font-black uppercase tracking-[0.18em] text-[#FDFBF7]">
+                    Recent Activity
+                  </h2>
+                </div>
+              </div>
+
+              <button
+                onClick={loadAdminData}
+                className="rounded-full border border-white/10 bg-[#1a0d0d] px-3 py-1.5 text-[9px] font-black uppercase tracking-[0.18em] text-[#FDFBF7]/60 transition-colors hover:border-red-400/40 hover:text-red-200"
+              >
+                Refresh
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {activityLogs.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-white/10 bg-[#1a0d0d] p-5 text-sm text-[#FDFBF7]/60">
+                  No activity recorded yet.
+                </div>
+              ) : (
+                activityLogs.map((log) => {
+                  const meta = ACTION_META[log.action] || {
+                    label: log.action,
+                    color: 'text-[#FDFBF7]/80',
+                    icon: Activity,
+                  };
+                  const Icon = meta.icon;
+                  const when = timeAgo(log.createdAt);
+
+                  return (
+                    <div
+                      key={log._id}
+                      className="flex items-start gap-4 rounded-2xl border border-white/10 bg-[#1a0d0d] px-5 py-4 transition-colors hover:border-white/20"
+                    >
+                      <div
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] ${meta.color}`}
+                      >
+                        <Icon size={15} />
+                      </div>
+
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm">
+                          <span className="font-bold text-[#FDFBF7]">
+                            {log.actorName}
+                          </span>{' '}
+                          <span className={`${meta.color} font-medium`}>
+                            {meta.label}
+                          </span>
+                          {log.targetName && log.targetName !== log.actorName && (
+                            <>
+                              {' '}
+                              <span className="text-[#FDFBF7]/60">·</span>{' '}
+                              <span className="text-[#FDFBF7]/80">
+                                {log.targetName}
+                              </span>
+                            </>
+                          )}
+                        </p>
+
+                        <p className="mt-0.5 font-mono text-[10px] uppercase tracking-widest text-[#FDFBF7]/40">
+                          {log.actorRole} · {when}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,4 @@
-// models/Portfolio.js
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const portfolioSchema = new mongoose.Schema({
   owner: {
@@ -43,4 +42,4 @@ const portfolioSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-module.exports = mongoose.models.Portfolio || mongoose.model('Portfolio', portfolioSchema);
+export default mongoose.models.Portfolio || mongoose.model('Portfolio', portfolioSchema);

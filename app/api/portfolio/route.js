@@ -5,7 +5,7 @@ import { getUserFromRequest } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 
 const STAFF_ROLES = ['super_admin', 'teacher', 'adviser', 'officer'];
-const CAN_CREATE = ['super_admin', 'teacher', 'adviser', 'officer', 'member'];
+const CAN_CREATE = ['super_admin', 'teacher', 'adviser', 'officer', 'member', 'alumni'];
 const MAX_ENTRIES_PER_MEMBER = 5;
 
 export async function GET(req) {
@@ -23,7 +23,7 @@ export async function GET(req) {
     return NextResponse.json(entries);
   }
 
-  if (currentUser.role === 'member') {
+  if (currentUser.role === 'member' || currentUser.role === 'alumni') {
     const entries = await Portfolio.find({ owner: currentUser.id })
       .populate('owner', 'firstName lastName email')
       .sort({ createdAt: -1 });

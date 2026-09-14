@@ -3,6 +3,7 @@ import User from '@/models/User';
 import { generateToken } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 import { loginSchema } from '@/lib/validators';
+import { logActivity } from '@/lib/logActivity';
 
 export async function POST(req) {
   try {
@@ -27,6 +28,22 @@ export async function POST(req) {
     }
 
     const token = generateToken(user);
+
+    // ─── Log the login ───
+    await logActivity({
+      req,
+      actor: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+      },
+      action: 'auth.login',
+      targetType: 'User',
+      targetId: user._id,
+      targetName: `${user.firstName} ${user.lastName}`,
+    });
+
     return NextResponse.json({
       token,
       user: {
@@ -38,9 +55,15 @@ export async function POST(req) {
         accountType: user.accountType,
         staffApprovalStatus: user.staffApprovalStatus,
         officerPosition: user.officerPosition,
+        studentId: user.studentId,
+        staffId: user.staffId,
+        yearLevel: user.yearLevel,
+        department: user.department,
+        specialization: user.specialization,
       }
     });
   } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error('Login error:', err);
+    return NextResponse.json({ error: 'Unable to sign in. Please try again.' }, { status: 500 });
   }
 }

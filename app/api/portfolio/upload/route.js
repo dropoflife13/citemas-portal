@@ -1,16 +1,19 @@
 import { NextResponse } from 'next/server';
 import { v2 as cloudinary } from 'cloudinary';
-import { verifyAuth } from '@/lib/auth';
+import { getUserFromRequest } from '@/lib/auth';
 import { Readable } from 'stream';
+
+const CAN_UPLOAD = ['super_admin', 'teacher', 'adviser', 'officer', 'member'];
 
 export async function POST(req) {
   try {
-    console.log('=== UPLOAD ROUTE STARTED ===');
-
     // Verify user credentials
-    const authResult = await verifyAuth(req);
-    if (!authResult || !authResult.success) {
-      return NextResponse.json({ error: authResult?.message || 'Not authenticated' }, { status: 401 });
+    const currentUser = getUserFromRequest(req);
+    if (!currentUser) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+    if (!CAN_UPLOAD.includes(currentUser.role)) {
+      return NextResponse.json({ error: 'You do not have permission to upload portfolio media' }, { status: 403 });
     }
 
     // Configure Cloudinary
@@ -35,7 +38,7 @@ export async function POST(req) {
       );
     }
 
-    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm', 'image/jpg'];
+    const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm'];
     if (!validTypes.includes(file.type)) {
       return NextResponse.json(
         { error: 'Invalid file type. Please upload an image or video.' },

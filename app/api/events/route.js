@@ -2,7 +2,6 @@ import connectDB from '@/lib/mongodb';
 import Event from '@/models/Event';
 import { getUserFromRequest } from '@/lib/auth';
 import { NextResponse } from 'next/server';
-import User from '@/models/User';
 const CAN_MANAGE = ['officer', 'teacher', 'adviser', 'super_admin'];
 
 // GET — get all events

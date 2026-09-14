@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 import connectDB from '@/lib/mongodb';
 import Event from '@/models/Event';
-import User from '@/models/User';
 import { getUserFromRequest } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 

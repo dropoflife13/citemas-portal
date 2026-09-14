@@ -8,7 +8,6 @@ import Link from 'next/link';
 const CITEMAS_RED = '#DC2626';
 const CITEMAS_DARK_RED = '#7F1D1D';
 const CITEMAS_CREAM = '#FDFBF7';
-const CITEMAS_GOLD = '#F59E0B';
 
 // Floating Spatial Glass Panel
 function SpatialGlassPanel({ children, className = '', depth = 'mid' }) {
@@ -246,10 +245,19 @@ export default function LandingPage() {
   };
 
   useEffect(() => {
-    fetch('/api/officers')
-      .then((res) => (res.ok ? res.json() : { officers: [] }))
-      .then((data) => setOfficerRows(Array.isArray(data.officers) ? data.officers : []))
-      .catch(() => setOfficerRows([]));
+    const loadOfficers = () => {
+      fetch('/api/officers')
+        .then((res) => (res.ok ? res.json() : { officers: [] }))
+        .then((data) => setOfficerRows(Array.isArray(data.officers) ? data.officers : []))
+        .catch(() => setOfficerRows([]));
+    };
+
+    loadOfficers();
+
+    // Re-fetch when the page regains focus (e.g. after updating roles in /users)
+    const onFocus = () => loadOfficers();
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
   }, []);
 
   const featuredOfficers = officerRows
