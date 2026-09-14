@@ -89,7 +89,7 @@ export default function Home() {
         <section className="relative max-w-5xl mx-auto px-6 pt-24 pb-16 text-center">
           <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-medium mb-8 backdrop-blur-md shadow-inner animate-pulse">
             <span className="w-2 h-2 rounded-full bg-red-500 shadow-sm shadow-red-500"></span>
-            <span>Welcome, CITE & Multimedia Arts </span>
+            <span>Welcome, CITE & Multimedia Arts Studio </span>
           </div>
 
           <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-6 leading-tight text-white">
