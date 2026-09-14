@@ -49,8 +49,9 @@ export async function POST(req) {
       yearLevel: accountType === 'student' ? yearLevel : undefined,
       department,
       specialization: accountType === 'student' ? specialization : undefined,
+      // Students start as "user" and must apply + be approved to become "member".
       // Staff accounts are verified before they receive teacher/adviser permissions.
-      role: accountType === 'student' ? 'member' : 'applicant',
+      role: accountType === 'student' ? 'user' : 'applicant',
       staffApprovalStatus: accountType === 'student' ? 'not_applicable' : 'pending',
     });
     await newUser.save();
