@@ -21,7 +21,7 @@ async function run() {
   const validRoles = ['super_admin', 'teacher', 'adviser', 'officer', 'alumni', 'member', 'applicant', 'user'];
   const validPositions = [
     'president', 'vice_president', 'secretary', 'treasurer',
-    'pro', 'events_director', 'creative_director', 'year_level_representative'
+    'pro', 'pio', 'events_director', 'creative_director', 'year_level_representative'
   ];
 
   if (!email || !role) {

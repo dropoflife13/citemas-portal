@@ -1,25 +1,8 @@
+// app/api/officers/route.js
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
-
-const positionOrder = {
-  president: 1,
-  vice_president: 2,
-  secretary: 3,
-  treasurer: 4,
-  pro: 5,
-  events_director: 6,
-  creative_director: 7,
-  year_level_representative: 8,
-};
-
-const formatPosition = (role) => {
-  if (!role) return 'Officer';
-  return role
-    .split('_')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
-};
+import { POSITION_ORDER as positionOrder, formatPosition } from '@/lib/permissions';
 
 export async function GET() {
   try {
@@ -29,7 +12,7 @@ export async function GET() {
       role: 'officer',
       officerPosition: { $ne: null },
     })
-      .select('firstName lastName email officerPosition avatar department yearLevel bio')
+      .select('firstName lastName officerPosition avatar department yearLevel bio')
       .sort({ createdAt: 1 });
 
     const mapped = officers
@@ -37,7 +20,6 @@ export async function GET() {
         _id: member._id,
         firstName: member.firstName,
         lastName: member.lastName,
-        email: member.email,
         officerPosition: member.officerPosition,
         displayPosition: formatPosition(member.officerPosition),
         avatar: member.avatar || null,

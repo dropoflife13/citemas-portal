@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/Toast';
-import { Search, Users, Mail, BookOpen, Trash2 } from 'lucide-react';
+import AccessDenied from '@/components/AccessDenied';
+import { Search, Users, Mail, BookOpen, Trash2, AlertTriangle, X } from 'lucide-react';
 
 export default function UsersDirectoryPage() {
   const { user: authUser, token, loading: authLoading } = useAuth();
@@ -19,9 +20,12 @@ export default function UsersDirectoryPage() {
   const [error, setError] = useState('');
   const [roleDrafts, setRoleDrafts] = useState({});
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [memberToDelete, setMemberToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const canManageMembers = authUser && ['super_admin', 'teacher', 'adviser', 'officer'].includes(authUser.role);
   const canDeleteMembers = authUser?.role === 'super_admin';
+  const canView = authUser && ['super_admin', 'teacher', 'adviser', 'officer', 'alumni', 'member'].includes(authUser.role);
 
   const fetchUsers = async (showLoader = true) => {
     try {
@@ -50,15 +54,10 @@ export default function UsersDirectoryPage() {
   };
 
   useEffect(() => {
-    if (!authLoading && !authUser) {
-      router.push('/login');
-      return;
-    }
-
-    if (!authLoading && authUser && token) {
+    if (!authLoading && authUser && token && canView) {
       fetchUsers(false);
     }
-  }, [authLoading, authUser?.id, authUser?.role, token, router]);
+  }, [authLoading, authUser?.id, authUser?.role, token, canView]);
 
   const handleRoleDraftChange = (memberId, field, value) => {
     setRoleDrafts((prev) => ({
@@ -70,11 +69,17 @@ export default function UsersDirectoryPage() {
     }));
   };
 
-  const handleDeleteMember = async (member) => {
+  const handleDeleteMember = (member) => {
     if (!canDeleteMembers || !member?._id) return;
+    setMemberToDelete(member);
+  };
+
+  const confirmDeleteMember = async () => {
+    if (!canDeleteMembers || !memberToDelete?._id) return;
 
     try {
-      const res = await fetch(`/api/users/${member._id}`, {
+      setIsDeleting(true);
+      const res = await fetch(`/api/users/${memberToDelete._id}`, {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -85,12 +90,15 @@ export default function UsersDirectoryPage() {
       }
 
       setError('');
+      showToast(`${memberToDelete.firstName} ${memberToDelete.lastName} was deleted`, 'success');
+      setMemberToDelete(null);
       await fetchUsers(false);
-      showToast(`${member.firstName} ${member.lastName} was deleted`, 'success');
     } catch (err) {
       console.error('Delete member error:', err);
       setError(err.message || 'Unable to delete this member.');
       showToast(err.message || 'Unable to delete this member.', 'error');
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -116,7 +124,7 @@ export default function UsersDirectoryPage() {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.error || data.message || 'Role update failed.');
+        throw new Error(data.message || data.error || 'Role update failed.');
       }
 
       setError('');
@@ -153,13 +161,25 @@ export default function UsersDirectoryPage() {
 
   const uniqueDepartments = Array.from(new Set(users.map((u) => u.department).filter(Boolean)));
 
-  if (authLoading || (loading && !isRefreshing)) {
+  if (authLoading || (canView && loading && !isRefreshing)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-transparent text-[#FDFBF7]">
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-red-600 border-t-transparent" />
           <p className="text-sm font-medium tracking-wider text-[#FDFBF7]/70">Loading member directory...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (!canView) {
+    return (
+      <div className="min-h-screen bg-transparent px-4 py-12">
+        <AccessDenied
+          title="Member Directory Restricted"
+          resourceName="the member directory"
+          message="This section is available to approved CITEMAS members."
+        />
       </div>
     );
   }
@@ -348,6 +368,7 @@ export default function UsersDirectoryPage() {
                           <option value="secretary">Secretary</option>
                           <option value="treasurer">Treasurer</option>
                           <option value="pro">PRO</option>
+                          <option value="pio">PIO</option>
                           <option value="events_director">Events Director</option>
                           <option value="creative_director">Creative Director</option>
                           <option value="year_level_representative">Year Level Representative</option>
@@ -372,6 +393,48 @@ export default function UsersDirectoryPage() {
                 )}
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Delete Member Confirmation Modal */}
+        {memberToDelete && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md">
+            <div className="relative w-full max-w-md rounded-[28px] border border-red-500/30 bg-[#140808] p-6 shadow-2xl space-y-5">
+              <div className="flex items-start gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-red-500/40 bg-red-500/20 text-red-400">
+                  <AlertTriangle size={24} />
+                </div>
+                <div className="space-y-1">
+                  <h3 className="text-lg font-black text-[#FDFBF7]">Confirm Deletion</h3>
+                  <p className="text-xs text-white/70 leading-relaxed">
+                    Are you sure you want to delete this member? This action cannot be undone.
+                  </p>
+                  <p className="text-xs font-bold text-red-300 mt-2">
+                    {memberToDelete.firstName} {memberToDelete.lastName} ({memberToDelete.email})
+                    {memberToDelete.officerPosition && ` — ${memberToDelete.officerPosition.replace(/_/g, ' ').toUpperCase()}`}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+                <button
+                  type="button"
+                  disabled={isDeleting}
+                  onClick={() => setMemberToDelete(null)}
+                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white hover:bg-white/10 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  disabled={isDeleting}
+                  onClick={confirmDeleteMember}
+                  className="rounded-xl bg-gradient-to-r from-red-600 to-red-800 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-red-900/40 hover:brightness-110 transition disabled:opacity-50"
+                >
+                  {isDeleting ? 'Deleting...' : 'Delete Member'}
+                </button>
+              </div>
+            </div>
           </div>
         )}
 

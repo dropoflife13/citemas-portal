@@ -83,6 +83,10 @@ export async function POST(req) {
       date,
       location,
       capacity,
+      image,
+      images,
+      highlights,
+      isPast,
     } = body;
 
 
@@ -227,6 +231,10 @@ export async function POST(req) {
       capacity: parsedCapacity,
       createdBy: currentUser.id,
       attendees: [],
+      image: typeof image === 'string' ? image.trim() : undefined,
+      images: Array.isArray(images) ? images.filter((u) => typeof u === 'string' && u.trim()) : [],
+      highlights: typeof highlights === 'string' ? highlights.slice(0, 3000) : undefined,
+      isPast: isPast === true,
     });
 
     await newEvent.save();

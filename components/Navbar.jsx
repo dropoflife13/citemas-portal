@@ -21,8 +21,6 @@ export default function Navbar() {
     router.push('/login');
   }
 
-  if (loading) return null;
-
   return (
     <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#110808]/80 backdrop-blur-md text-sm font-extrabold uppercase tracking-wider">
       <div className="w-full flex items-center justify-between pl-8 pr-12 md:pl-12 md:pr-16 py-5">
@@ -47,9 +45,16 @@ export default function Navbar() {
           </div>
         </Link>
 
-        {/* Navigation Links (More spacious layout) */}
+        {/* Navigation Links */}
         <div className="flex items-center gap-6 md:gap-8 font-bold ml-auto" style={{ color: MUTED }}>
-          {user ? (
+          {loading ? (
+            <div className="flex items-center gap-5 animate-pulse">
+              <div className="h-4 w-16 rounded-md bg-white/10" />
+              <div className="h-4 w-16 rounded-md bg-white/10" />
+              <div className="h-4 w-16 rounded-md bg-white/10" />
+              <div className="h-8 w-24 rounded-xl bg-white/10" />
+            </div>
+          ) : user ? (
             <>
               <Link
                 href="/dashboard"

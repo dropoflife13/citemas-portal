@@ -3,6 +3,9 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useAuth } from '@/lib/AuthContext';
+import AchievementCard from '@/components/AchievementCard';
+import { Award } from 'lucide-react';
 
 // CITEMAS Aesthetic Colors
 const CITEMAS_RED = '#DC2626';
@@ -233,16 +236,36 @@ function InteractiveSpatialShowcase() {
 }
 
 export default function LandingPage() {
+  const { user, token, loading: authLoading } = useAuth();
   const [activeIdx, setActiveIdx] = useState(0);
   const [officerRows, setOfficerRows] = useState([]);
+  const [achievements, setAchievements] = useState([]);
+  const [achievementsLoading, setAchievementsLoading] = useState(true);
 
   const formatPosition = (position) => {
     if (!position) return 'Officer';
+    if (position.toLowerCase() === 'pro') return 'PRO';
+    if (position.toLowerCase() === 'pio') return 'PIO';
     return position
       .split('_')
       .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
       .join(' ');
   };
+
+  useEffect(() => {
+    const loadAchievements = () => {
+      setAchievementsLoading(true);
+      fetch('/api/achievements?recent=true&limit=6', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      })
+        .then((res) => (res.ok ? res.json() : { achievements: [] }))
+        .then((data) => setAchievements(Array.isArray(data.achievements) ? data.achievements : []))
+        .catch(() => setAchievements([]))
+        .finally(() => setAchievementsLoading(false));
+    };
+
+    loadAchievements();
+  }, [token]);
 
   useEffect(() => {
     const loadOfficers = () => {
@@ -474,6 +497,66 @@ export default function LandingPage() {
             </SpatialGlassPanel>
           ))}
         </div>
+      </section>
+
+      {/* RECENT ACHIEVEMENTS SECTION */}
+      <section id="achievements" className="mx-auto max-w-7xl border-t border-white/10 px-6 py-20 sm:px-8">
+        <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.24em] text-amber-300">
+              <Award size={12} />
+              Community Accolades
+            </span>
+            <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] text-[#F8F2EC] sm:text-4xl">
+              Recent Achievements
+            </h2>
+            <p className="mt-2 text-sm text-[rgba(248,242,236,0.7)] max-w-xl">
+              Celebrating awards, competition wins, and recognized creative milestones achieved by CITEMAS members.
+            </p>
+          </div>
+          <SpatialButton href="/portfolio" variant="secondary">
+            View All Achievements
+          </SpatialButton>
+        </div>
+
+        {achievementsLoading ? (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-64 rounded-[28px] border border-white/10 bg-white/[0.03] p-6 animate-pulse" />
+            ))}
+          </div>
+        ) : achievements.length > 0 ? (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {achievements.map((achievement) => (
+              <AchievementCard
+                key={achievement._id}
+                achievement={achievement}
+                currentUserId={user?.id || user?._id}
+                isStaff={['super_admin', 'teacher', 'adviser', 'officer'].includes(user?.role)}
+                onDelete={() => {
+                  setAchievements((prev) => prev.filter((a) => a._id !== achievement._id));
+                }}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-[28px] border border-dashed border-white/15 bg-white/[0.02] p-12 text-center space-y-4">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-300">
+              <Award size={28} />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-lg font-black text-white">You have not posted any achievements yet.</h3>
+              <p className="text-xs text-white/60 max-w-md mx-auto">
+                Showcase your accomplishments by adding your first achievement in the portfolio section.
+              </p>
+            </div>
+            <div>
+              <SpatialButton href="/portfolio" variant="primary">
+                Post First Achievement
+              </SpatialButton>
+            </div>
+          </div>
+        )}
       </section>
       {/* SPECIALIZATIONS SECTION */}
       <section id="specializations" className="mx-auto max-w-7xl border-t border-white/10 px-6 py-20 sm:px-8">

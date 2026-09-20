@@ -61,6 +61,28 @@ const eventSchema = new mongoose.Schema(
         },
       },
     ],
+
+    image: {
+      type: String,
+      default: '',
+    },
+
+    images: {
+      type: [String],
+      default: [],
+    },
+
+    highlights: {
+      type: String,
+      trim: true,
+      maxlength: [3000, 'Highlights cannot exceed 3000 characters'],
+      default: '',
+    },
+
+    isPast: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

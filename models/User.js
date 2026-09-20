@@ -59,6 +59,7 @@ const userSchema = new mongoose.Schema({
       'secretary',
       'treasurer',
       'pro',
+      'pio',
       'events_director',
       'creative_director',
       'year_level_representative'
@@ -95,6 +96,21 @@ const userSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
+// Enforce database-level uniqueness for single-holder executive officer positions.
+// Allows multiple members with null, and allows multi-seat positions (e.g. PRO, PIO, reps).
+userSchema.index(
+  { officerPosition: 1 },
+  {
+    unique: true,
+    partialFilterExpression: {
+      role: 'officer',
+      officerPosition: {
+        $in: ['president', 'vice_president', 'secretary', 'treasurer'],
+      },
+    },
+  }
+);
+
 // Hash password before saving
 userSchema.pre('save', async function () {
   if (!this.isModified('password')) return;
@@ -128,6 +144,8 @@ userSchema.virtual('isOfficer').get(function() {
 // Virtual field to get formatted officer position
 userSchema.virtual('formattedOfficerPosition').get(function() {
   if (!this.officerPosition) return null;
+  if (this.officerPosition === 'pro') return 'PRO';
+  if (this.officerPosition === 'pio') return 'PIO';
   return this.officerPosition
     .split('_')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))

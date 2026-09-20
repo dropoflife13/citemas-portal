@@ -3,16 +3,16 @@ import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 import { getUserFromRequest } from '@/lib/auth';
 import { logActivity } from '@/lib/logActivity';
-
-// Only these roles can delete users
-const ALLOWED_ROLES = ['super_admin'];
-const MANAGE_ROLES = ['super_admin', 'teacher', 'adviser', 'officer'];
-
-const VALID_ROLES = ['super_admin', 'teacher', 'adviser', 'officer', 'alumni', 'member', 'applicant', 'user'];
-const VALID_POSITIONS = [
-  'president', 'vice_president', 'secretary', 'treasurer',
-  'pro', 'events_director', 'creative_director', 'year_level_representative',
-];
+import {
+  VALID_ROLES,
+  ALL_OFFICER_POSITIONS,
+  UNIQUE_OFFICER_POSITIONS,
+  formatPosition,
+  isUniqueOfficerPosition,
+  canManageMembers,
+  canDeleteMembers,
+  getFreshUser,
+} from '@/lib/permissions';
 
 export async function PATCH(req, { params }) {
   const currentUser = getUserFromRequest(req);
@@ -21,7 +21,9 @@ export async function PATCH(req, { params }) {
     return NextResponse.json({ message: 'Not authenticated' }, { status: 401 });
   }
 
-  if (!MANAGE_ROLES.includes(currentUser.role)) {
+  // Verify fresh permissions from DB to prevent demoted officers from performing updates
+  const dbUser = await getFreshUser(currentUser.id);
+  if (!dbUser || !canManageMembers(dbUser)) {
     return NextResponse.json(
       { message: 'You do not have permission to update user roles' },
       { status: 403 }
@@ -44,17 +46,18 @@ export async function PATCH(req, { params }) {
       );
     }
 
-    if (role === 'officer' && officerPosition && !VALID_POSITIONS.includes(officerPosition)) {
+    if (role === 'officer' && officerPosition && !ALL_OFFICER_POSITIONS.includes(officerPosition)) {
       return NextResponse.json(
-        { message: `Officer position must be one of: ${VALID_POSITIONS.join(', ')}` },
+        { message: `Officer position must be one of: ${ALL_OFFICER_POSITIONS.join(', ')}` },
         { status: 400 }
       );
     }
 
     await connectDB();
 
-    // Prevent duplicate officer positions (e.g. two presidents)
-    if (role === 'officer' && officerPosition) {
+    // Prevent duplicate officer positions for single-holder executive roles (e.g. president, treasurer, secretary, vice_president)
+    // Multi-holder positions such as PRO, PIO, and Year Level Representative allow multiple members.
+    if (role === 'officer' && officerPosition && isUniqueOfficerPosition(officerPosition)) {
       const existing = await User.findOne({
         _id: { $ne: id },
         role: 'officer',
@@ -63,7 +66,9 @@ export async function PATCH(req, { params }) {
 
       if (existing) {
         return NextResponse.json(
-          { message: `${officerPosition.replace(/_/g, ' ')} is already assigned to ${existing.firstName} ${existing.lastName}. Remove that assignment first.` },
+          {
+            message: `${formatPosition(officerPosition)} is already assigned to ${existing.firstName} ${existing.lastName}. Remove that assignment first.`,
+          },
           { status: 409 }
         );
       }
@@ -100,6 +105,12 @@ export async function PATCH(req, { params }) {
     return NextResponse.json({ message: 'User role updated', user: updated });
   } catch (err) {
     console.error('Update user role error:', err);
+    if (err?.code === 11000) {
+      return NextResponse.json(
+        { message: 'This officer position is already assigned to another member. Remove that assignment first.' },
+        { status: 409 }
+      );
+    }
     return NextResponse.json(
       { message: 'Failed to update user role: ' + err.message },
       { status: 500 }
@@ -114,7 +125,8 @@ export async function DELETE(req, { params }) {
     return NextResponse.json({ message: 'Not authenticated' }, { status: 401 });
   }
 
-  if (!ALLOWED_ROLES.includes(currentUser.role)) {
+  const dbUser = await getFreshUser(currentUser.id);
+  if (!dbUser || !canDeleteMembers(dbUser)) {
     return NextResponse.json(
       { message: 'Only super admins can delete users' },
       { status: 403 }
@@ -140,18 +152,15 @@ export async function DELETE(req, { params }) {
     await connectDB();
 
     const target = await User.findById(id)
-      .select('firstName lastName email role')
+      .select('firstName lastName email role officerPosition')
       .lean();
 
     if (!target) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
-    // Delete the user
+    // Delete the user and release any held officer position
     await User.findByIdAndDelete(id);
-
-    // Also clean up their activity logs (optional — remove if you want to keep history)
-    // await ActivityLog.deleteMany({ actor: id });
 
     // Log the deletion
     await logActivity({
@@ -164,6 +173,7 @@ export async function DELETE(req, { params }) {
       metadata: {
         deletedEmail: target.email,
         deletedRole: target.role,
+        releasedOfficerPosition: target.officerPosition || null,
       },
     });
 
