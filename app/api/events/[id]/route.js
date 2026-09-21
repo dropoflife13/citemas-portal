@@ -6,7 +6,6 @@ import mongoose from 'mongoose';
 
 const CAN_MANAGE = ['officer', 'teacher', 'adviser', 'super_admin'];
 
-
 // =====================================================
 // GET — Get a single event
 // Any authenticated user can view
@@ -143,6 +142,10 @@ export async function PATCH(req, { params }) {
       date,
       location,
       capacity,
+      image,
+      images,
+      highlights,
+      isPast,
     } = body;
 
 
@@ -285,8 +288,6 @@ export async function PATCH(req, { params }) {
           );
         }
 
-        // Do not allow capacity to be lower
-        // than the current number of attendees.
         const currentAttendees =
           event.attendees?.length || 0;
 
@@ -302,6 +303,29 @@ export async function PATCH(req, { params }) {
 
         event.capacity = numericCapacity;
       }
+    }
+
+
+    // -------------------------------------------------
+    // NEW FIELDS (image, images, highlights, isPast)
+    // -------------------------------------------------
+
+    if (image !== undefined) {
+      event.image = typeof image === 'string' ? image.trim() : null;
+    }
+
+    if (images !== undefined) {
+      event.images = Array.isArray(images)
+        ? images.filter((u) => typeof u === 'string' && u.trim())
+        : [];
+    }
+
+    if (highlights !== undefined) {
+      event.highlights = typeof highlights === 'string' ? highlights.slice(0, 3000) : '';
+    }
+
+    if (isPast !== undefined) {
+      event.isPast = Boolean(isPast);
     }
 
 

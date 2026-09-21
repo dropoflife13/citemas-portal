@@ -3,8 +3,12 @@
 import { useState } from 'react';
 import { X, Award, Upload, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
+import { useBodyScrollLock } from '@/lib/useBodyScrollLock';
+import ModalPortal from '@/components/ModalPortal';
 
 export default function AchievementModal({ isOpen, onClose, onSuccess }) {
+  useBodyScrollLock(isOpen);
+
   const { token } = useAuth();
 
   const [form, setForm] = useState({
@@ -96,7 +100,7 @@ export default function AchievementModal({ isOpen, onClose, onSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 p-4 backdrop-blur-md overflow-y-auto">
+    <ModalPortal isOpen={isOpen} onClose={onClose}>
       <div className="relative w-full max-w-xl rounded-[32px] border border-white/10 bg-[#120707] p-6 md:p-8 shadow-2xl space-y-6 my-8">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/10 pb-4">
@@ -264,6 +268,6 @@ export default function AchievementModal({ isOpen, onClose, onSuccess }) {
           </div>
         </form>
       </div>
-    </div>
+    </ModalPortal>
   );
 }

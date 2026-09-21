@@ -8,21 +8,24 @@ export async function GET() {
   try {
     await connectDB();
 
+    // Query active officers with non-null position
     const officers = await User.find({
       role: 'officer',
       officerPosition: { $ne: null },
     })
       .select('firstName lastName officerPosition avatar department yearLevel bio')
-      .sort({ createdAt: 1 });
+      .sort({ createdAt: 1 })
+      .lean();
 
+    // Transform into clean public DTO
     const mapped = officers
       .map((member) => ({
-        _id: member._id,
-        firstName: member.firstName,
-        lastName: member.lastName,
+        _id: String(member._id),
+        firstName: member.firstName || '',
+        lastName: member.lastName || '',
         officerPosition: member.officerPosition,
         displayPosition: formatPosition(member.officerPosition),
-        avatar: member.avatar || null,
+        avatar: typeof member.avatar === 'string' && member.avatar.startsWith('http') ? member.avatar : null,
         department: member.department || 'PHINMA University of Iloilo',
         yearLevel: member.yearLevel || null,
         bio: member.bio || '',
@@ -33,10 +36,18 @@ export async function GET() {
         return orderA - orderB;
       });
 
-    return NextResponse.json({ officers: mapped });
+    return NextResponse.json(
+      { officers: mapped },
+      {
+        status: 200,
+        headers: {
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+        },
+      }
+    );
   } catch (error) {
     return NextResponse.json(
-      { message: 'Failed to fetch officers: ' + error.message },
+      { error: 'Failed to fetch officers roster', message: error.message },
       { status: 500 }
     );
   }

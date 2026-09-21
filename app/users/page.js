@@ -6,6 +6,8 @@ import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/Toast';
 import AccessDenied from '@/components/AccessDenied';
 import { Search, Users, Mail, BookOpen, Trash2, AlertTriangle, X } from 'lucide-react';
+import { useBodyScrollLock } from '@/lib/useBodyScrollLock';
+import ModalPortal from '@/components/ModalPortal';
 
 export default function UsersDirectoryPage() {
   const { user: authUser, token, loading: authLoading } = useAuth();
@@ -22,6 +24,8 @@ export default function UsersDirectoryPage() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  useBodyScrollLock(Boolean(memberToDelete));
 
   const canManageMembers = authUser && ['super_admin', 'teacher', 'adviser', 'officer'].includes(authUser.role);
   const canDeleteMembers = authUser?.role === 'super_admin';
@@ -397,46 +401,44 @@ export default function UsersDirectoryPage() {
         )}
 
         {/* Delete Member Confirmation Modal */}
-        {memberToDelete && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md">
-            <div className="relative w-full max-w-md rounded-[28px] border border-red-500/30 bg-[#140808] p-6 shadow-2xl space-y-5">
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-red-500/40 bg-red-500/20 text-red-400">
-                  <AlertTriangle size={24} />
-                </div>
-                <div className="space-y-1">
-                  <h3 className="text-lg font-black text-[#FDFBF7]">Confirm Deletion</h3>
-                  <p className="text-xs text-white/70 leading-relaxed">
-                    Are you sure you want to delete this member? This action cannot be undone.
-                  </p>
-                  <p className="text-xs font-bold text-red-300 mt-2">
-                    {memberToDelete.firstName} {memberToDelete.lastName} ({memberToDelete.email})
-                    {memberToDelete.officerPosition && ` — ${memberToDelete.officerPosition.replace(/_/g, ' ').toUpperCase()}`}
-                  </p>
-                </div>
+        <ModalPortal isOpen={Boolean(memberToDelete)} onClose={() => setMemberToDelete(null)}>
+          <div className="relative w-full max-w-md rounded-[28px] border border-red-500/30 bg-[#140808] p-6 shadow-2xl space-y-5">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-red-500/40 bg-red-500/20 text-red-400">
+                <AlertTriangle size={24} />
               </div>
-
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
-                <button
-                  type="button"
-                  disabled={isDeleting}
-                  onClick={() => setMemberToDelete(null)}
-                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white hover:bg-white/10 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  disabled={isDeleting}
-                  onClick={confirmDeleteMember}
-                  className="rounded-xl bg-gradient-to-r from-red-600 to-red-800 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-red-900/40 hover:brightness-110 transition disabled:opacity-50"
-                >
-                  {isDeleting ? 'Deleting...' : 'Delete Member'}
-                </button>
+              <div className="space-y-1">
+                <h3 className="text-lg font-black text-[#FDFBF7]">Confirm Deletion</h3>
+                <p className="text-xs text-white/70 leading-relaxed">
+                  Are you sure you want to delete this member? This action cannot be undone.
+                </p>
+                <p className="text-xs font-bold text-red-300 mt-2">
+                  {memberToDelete?.firstName} {memberToDelete?.lastName} ({memberToDelete?.email})
+                  {memberToDelete?.officerPosition && ` — ${memberToDelete.officerPosition.replace(/_/g, ' ').toUpperCase()}`}
+                </p>
               </div>
             </div>
+
+            <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={() => setMemberToDelete(null)}
+                className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-bold uppercase tracking-wider text-white hover:bg-white/10 transition"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isDeleting}
+                onClick={confirmDeleteMember}
+                className="rounded-xl bg-gradient-to-r from-red-600 to-red-800 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-lg shadow-red-900/40 hover:brightness-110 transition disabled:opacity-50"
+              >
+                {isDeleting ? 'Deleting...' : 'Delete Member'}
+              </button>
+            </div>
           </div>
-        )}
+        </ModalPortal>
 
       </div>
     </div>

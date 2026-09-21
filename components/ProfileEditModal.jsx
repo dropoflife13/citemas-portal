@@ -1,4 +1,6 @@
 import { X } from 'lucide-react';
+import { useBodyScrollLock } from '@/lib/useBodyScrollLock';
+import ModalPortal from '@/components/ModalPortal';
 
 export default function ProfileEditModal({
   isOpen,
@@ -8,16 +10,10 @@ export default function ProfileEditModal({
   saving,
   onSubmit,
 }) {
-  if (!isOpen) return null;
+  useBodyScrollLock(isOpen);
 
   return (
-    <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-4 backdrop-blur-md"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="edit-profile-title"
-      style={{ isolation: 'isolate' }}
-    >
+    <ModalPortal isOpen={isOpen} onClose={onClose}>
       <div className="relative z-[10000] flex max-h-[calc(100vh-2rem)] w-full max-w-2xl flex-col overflow-hidden rounded-[32px] border border-white/15 bg-[#140909] shadow-[0_35px_100px_rgba(0,0,0,0.8)]">
         <div className="flex shrink-0 items-center justify-between gap-3 border-b border-white/10 p-6 md:p-8">
           <h2
@@ -204,6 +200,6 @@ export default function ProfileEditModal({
           </form>
         </div>
       </div>
-    </div>
+    </ModalPortal>
   );
 }

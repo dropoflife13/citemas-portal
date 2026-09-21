@@ -1,6 +1,7 @@
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 import { generateToken } from '@/lib/auth';
+import { logActivity } from '@/lib/logActivity';
 import { NextResponse } from 'next/server';
 import { registerSchema } from '@/lib/validators';
 
@@ -55,6 +56,16 @@ export async function POST(req) {
       staffApprovalStatus: accountType === 'student' ? 'not_applicable' : 'pending',
     });
     await newUser.save();
+
+    await logActivity({
+      req,
+      actor: newUser,
+      action: 'user.registered',
+      targetType: 'User',
+      targetId: newUser._id,
+      targetName: `${firstName} ${lastName}`,
+      metadata: { email, role: newUser.role, applicationStatus: newUser.applicationStatus },
+    });
 
     const token = generateToken(newUser);
     return NextResponse.json(

@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { Award, ExternalLink, Trash2, Shield, Calendar, Building, Globe, Lock } from 'lucide-react';
+import { useBodyScrollLock } from '@/lib/useBodyScrollLock';
+import ModalPortal from '@/components/ModalPortal';
 
 export default function AchievementCard({
   achievement,
@@ -11,6 +13,8 @@ export default function AchievementCard({
 }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+
+  useBodyScrollLock(showConfirm);
 
   const isOwner = currentUserId && String(achievement.user?._id || achievement.user) === String(currentUserId);
   const canDelete = isOwner || isStaff;
@@ -141,36 +145,34 @@ export default function AchievementCard({
       </div>
 
       {/* Confirmation Modal */}
-      {showConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
-          <div className="relative w-full max-w-sm rounded-2xl border border-red-500/30 bg-[#160a0a] p-6 shadow-2xl space-y-4 text-left">
-            <div className="space-y-2">
-              <h4 className="text-base font-black text-white">Delete Achievement</h4>
-              <p className="text-xs text-white/70">
-                Are you sure you want to delete <strong className="text-white">&ldquo;{achievement.title}&rdquo;</strong>? This cannot be undone.
-              </p>
-            </div>
-            <div className="flex items-center justify-end gap-3 pt-2">
-              <button
-                type="button"
-                disabled={isDeleting}
-                onClick={() => setShowConfirm(false)}
-                className="rounded-xl border border-white/10 px-3 py-1.5 text-xs font-bold text-white hover:bg-white/10 transition"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                disabled={isDeleting}
-                onClick={handleDelete}
-                className="rounded-xl bg-red-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-red-700 transition disabled:opacity-50"
-              >
-                {isDeleting ? 'Deleting...' : 'Confirm Delete'}
-              </button>
-            </div>
+      <ModalPortal isOpen={showConfirm} onClose={() => setShowConfirm(false)}>
+        <div className="relative w-full max-w-sm rounded-2xl border border-red-500/30 bg-[#160a0a] p-6 shadow-2xl space-y-4 text-left">
+          <div className="space-y-2">
+            <h4 className="text-base font-black text-white">Delete Achievement</h4>
+            <p className="text-xs text-white/70">
+              Are you sure you want to delete <strong className="text-white">&ldquo;{achievement.title}&rdquo;</strong>? This cannot be undone.
+            </p>
+          </div>
+          <div className="flex items-center justify-end gap-3 pt-2">
+            <button
+              type="button"
+              disabled={isDeleting}
+              onClick={() => setShowConfirm(false)}
+              className="rounded-xl border border-white/10 px-3 py-1.5 text-xs font-bold text-white hover:bg-white/10 transition"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              disabled={isDeleting}
+              onClick={handleDelete}
+              className="rounded-xl bg-red-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-red-700 transition disabled:opacity-50"
+            >
+              {isDeleting ? 'Deleting...' : 'Confirm Delete'}
+            </button>
           </div>
         </div>
-      )}
+      </ModalPortal>
     </div>
   );
 }

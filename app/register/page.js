@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useToast } from '@/components/Toast';
 import { useAuth } from '@/lib/AuthContext';
 
 const YEAR_LEVELS = ['1st', '2nd', '3rd', '4th', 'Graduate'];
@@ -33,6 +34,7 @@ const ACCOUNT_TYPES = [
 export default function RegisterPage() {
   const router = useRouter();
   const { login } = useAuth();
+  const { showToast } = useToast();
 
   const [form, setForm] = useState({
     accountType: 'student',
@@ -47,8 +49,6 @@ export default function RegisterPage() {
     specialization: '',
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
-  const [notice, setNotice] = useState('');
   const [loading, setLoading] = useState(false);
   const isStudent = form.accountType === 'student';
 
@@ -70,8 +70,6 @@ export default function RegisterPage() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setError('');
-    setNotice('');
     setLoading(true);
 
     try {
@@ -83,12 +81,12 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (!res.ok) {
-        setError(data.error || 'Something went wrong');
+        showToast(data.error || 'Something went wrong', 'error');
         return;
       }
 
       if (!isStudent) {
-        setNotice('Your staff registration was received. An administrator must verify your ID before staff access is activated.');
+        showToast('Your staff registration was received. An administrator must verify your ID before staff access is activated.', 'success');
         setTimeout(() => router.push('/login'), 2200);
         return;
       }
@@ -96,7 +94,7 @@ export default function RegisterPage() {
       login(data.token, data.user);
       router.push('/dashboard');
     } catch {
-      setError('Could not connect to the server');
+      showToast('Could not connect to the server', 'error');
     } finally {
       setLoading(false);
     }
@@ -122,9 +120,6 @@ export default function RegisterPage() {
           <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Create Account</h1>
           <p className="mt-1.5 text-xs text-slate-400">Register as a student or adviser.</p>
         </div>
-
-        {error && <StatusMessage type="error" text={error} />}
-        {notice && <StatusMessage type="success" text={notice} />}
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <fieldset>
@@ -207,7 +202,7 @@ export default function RegisterPage() {
             </Field>
           )}
 
-          <button type="submit" disabled={loading || Boolean(notice)} className="mt-2 w-full rounded-2xl bg-gradient-to-r from-red-600 via-red-600 to-orange-600 py-4 text-xs font-bold uppercase tracking-[0.2em] text-white shadow-md shadow-red-950/50 transition-all hover:from-red-500 hover:to-orange-500 hover:shadow-lg hover:shadow-red-600/30 disabled:cursor-not-allowed disabled:opacity-55">
+          <button type="submit" disabled={loading} className="mt-2 w-full rounded-2xl bg-gradient-to-r from-red-600 via-red-600 to-orange-600 py-4 text-xs font-bold uppercase tracking-[0.2em] text-white shadow-md shadow-red-950/50 transition-all hover:from-red-500 hover:to-orange-500 hover:shadow-lg hover:shadow-red-600/30 disabled:cursor-not-allowed disabled:opacity-55">
             {loading ? 'Creating Account...' : `Create ${isStudent ? 'Student' : 'Staff'} Account`}
           </button>
         </form>
@@ -223,9 +218,4 @@ const selectClass = 'w-full cursor-pointer rounded-2xl border border-white/10 bg
 
 function Field({ label, children }) {
   return <div><label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-300">{label}</label>{children}</div>;
-}
-
-function StatusMessage({ type, text }) {
-  const isError = type === 'error';
-  return <div className={`mb-6 rounded-2xl border px-4 py-3.5 text-xs font-medium ${isError ? 'border-red-500/30 bg-red-500/10 text-red-200' : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-100'}`}>{text}</div>;
 }

@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useAuth } from '@/lib/AuthContext';
 import { useRouter } from 'next/navigation';
+import AdminNotificationBell from './AdminNotificationBell';
 
 // CITEMAS Palette
 const CITEMAS_RED = '#DC2626';
@@ -12,6 +13,7 @@ const MUTED = 'rgba(253,251,247,0.85)';
 export default function Navbar() {
   const auth = useAuth();
   const user = auth?.user ?? null;
+  const isStaff = user && ['super_admin', 'teacher', 'officer'].includes(user.role);
   const logout = auth?.logout ?? (() => {});
   const loading = auth?.loading ?? false;
   const router = useRouter();
@@ -96,6 +98,9 @@ export default function Navbar() {
                   Admin
                 </Link>
               )}
+
+              {/* Admin notification bell — staff only */}
+              {isStaff && <AdminNotificationBell />}
 
               {/* User Profile Badge */}
               <Link

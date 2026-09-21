@@ -26,27 +26,51 @@ export async function PATCH(req, { params }) {
       return NextResponse.json({ error: 'Decision must be "approved" or "rejected"' }, { status: 400 });
     }
 
-    const application = await Application.findById(id);
+    const application = await Application.findById(id).populate('applicant', 'firstName lastName email role applicationStatus');
     if (!application) {
       return NextResponse.json({ error: 'Application not found' }, { status: 404 });
     }
 
+    const applicant = application.applicant || {};
+    const applicantId = applicant._id || application.applicant;
+    const applicantName = `${applicant.firstName || ''} ${applicant.lastName || ''}`.trim() || 'Unknown';
+    const previousRole = applicant.role || 'user';
+    const previousApplicationStatus = applicant.applicationStatus || 'pending';
+
+    // Step b: Update Application document status
     application.status = decision;
     application.reviewedBy = currentUser.id;
     application.reviewedAt = new Date();
     await application.save();
 
-    // If approved, promote the applicant to "member"
-    if (decision === 'approved') {
-      await User.findByIdAndUpdate(application.applicant, { role: 'member' });
-    } else {
-      // If rejected, restore members to "member" (their base role).
-      // Only legacy "user"/"applicant" accounts go back to "user" so they can reapply.
-      const applicant = await User.findById(application.applicant).select('role');
-      if (applicant && applicant.role === 'applicant') {
-        await User.findByIdAndUpdate(application.applicant, { role: 'user' });
-      }
+    // Step c: Update User document (role + applicationStatus)
+    const newRole = decision === 'approved' ? 'member' : (previousRole === 'applicant' ? 'user' : previousRole);
+    const newApplicationStatus = decision === 'approved' ? 'approved' : 'rejected';
+
+    if (applicantId) {
+      await User.findByIdAndUpdate(applicantId, {
+        role: newRole,
+        applicationStatus: newApplicationStatus,
+      });
     }
+
+    // Step d: Call logActivity AFTER User record is updated successfully
+    await logActivity({
+      req,
+      actor: currentUser,
+      action: decision === 'approved' ? 'application.approved' : 'application.rejected',
+      targetType: 'Application',
+      targetId: id,
+      targetName: applicantName,
+      metadata: {
+        applicantId,
+        applicantName,
+        previousRole,
+        newRole,
+        previousApplicationStatus,
+        newApplicationStatus,
+      },
+    });
 
     return NextResponse.json(application);
   } catch (err) {

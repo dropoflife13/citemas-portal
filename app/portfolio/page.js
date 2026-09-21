@@ -7,6 +7,8 @@ import AccessDenied from '@/components/AccessDenied';
 import AchievementCard from '@/components/AchievementCard';
 import AchievementModal from '@/components/AchievementModal';
 import { Award, Plus, FolderGit2 } from 'lucide-react';
+import { useBodyScrollLock } from '@/lib/useBodyScrollLock';
+import ModalPortal from '@/components/ModalPortal';
 
 const CITEMAS_RED = '#DC2626';
 const CITEMAS_DARK_RED = '#7F1D1D';
@@ -34,6 +36,8 @@ export default function PortfolioPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isAchievementModalOpen, setIsAchievementModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('all'); // 'all', 'my_posts', 'achievements'
+
+  useBodyScrollLock(isModalOpen);
 
   const [form, setForm] = useState({
     title: '',
@@ -448,71 +452,69 @@ export default function PortfolioPage() {
         )}
       </div>
 
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-2xl rounded-[30px] border border-white/10 bg-[#170c0c] p-6 shadow-[0_30px_90px_rgba(0,0,0,0.8)]">
-            <div className="mb-5 flex items-center justify-between border-b border-white/10 pb-4">
-              <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-red-300">New Submission</p>
-                <h2 className="mt-2 text-2xl font-black text-[#F8F2EC]">Add to the gallery</h2>
-              </div>
-              <button onClick={() => setIsModalOpen(false)} className="rounded-full border border-white/10 bg-[#1a0d0d] px-3 py-1.5 text-[#F8F2EC]/70">✕</button>
+      <ModalPortal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <div className="w-full max-w-2xl rounded-[30px] border border-white/10 bg-[#170c0c] p-6 shadow-[0_30px_90px_rgba(0,0,0,0.8)]">
+          <div className="mb-5 flex items-center justify-between border-b border-white/10 pb-4">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-red-300">New Submission</p>
+              <h2 className="mt-2 text-2xl font-black text-[#F8F2EC]">Add to the gallery</h2>
+            </div>
+            <button onClick={() => setIsModalOpen(false)} className="rounded-full border border-white/10 bg-[#1a0d0d] px-3 py-1.5 text-[#F8F2EC]/70">✕</button>
+          </div>
+
+          {formError && <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">{formError}</div>}
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="mb-1 block text-[10px] font-black uppercase tracking-[0.2em] text-[rgba(248,242,236,0.6)]">Title</label>
+              <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required className="w-full rounded-xl border border-white/10 bg-[#1a0d0d] px-3 py-3 text-sm text-[#F8F2EC] outline-none placeholder:text-[#F8F2EC]/35 focus:border-red-500" placeholder="Project title" />
             </div>
 
-            {formError && <div className="mb-4 rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">{formError}</div>}
+            <div>
+              <label className="mb-1 block text-[10px] font-black uppercase tracking-[0.2em] text-[rgba(248,242,236,0.6)]">Description</label>
+              <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required rows={4} className="w-full resize-none rounded-xl border border-white/10 bg-[#1a0d0d] px-3 py-3 text-sm text-[#F8F2EC] outline-none placeholder:text-[#F8F2EC]/35 focus:border-red-500" placeholder="Tell people what this work is about" />
+            </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid gap-4 sm:grid-cols-2">
               <div>
-                <label className="mb-1 block text-[10px] font-black uppercase tracking-[0.2em] text-[rgba(248,242,236,0.6)]">Title</label>
-                <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required className="w-full rounded-xl border border-white/10 bg-[#1a0d0d] px-3 py-3 text-sm text-[#F8F2EC] outline-none placeholder:text-[#F8F2EC]/35 focus:border-red-500" placeholder="Project title" />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-[10px] font-black uppercase tracking-[0.2em] text-[rgba(248,242,236,0.6)]">Description</label>
-                <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} required rows={4} className="w-full resize-none rounded-xl border border-white/10 bg-[#1a0d0d] px-3 py-3 text-sm text-[#F8F2EC] outline-none placeholder:text-[#F8F2EC]/35 focus:border-red-500" placeholder="Tell people what this work is about" />
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div>
-                  <label className="mb-1 block text-[10px] font-black uppercase tracking-[0.2em] text-[rgba(248,242,236,0.6)]">Specialization</label>
-                  <select value={form.specialization} onChange={(e) => setForm({ ...form, specialization: e.target.value })} className="w-full rounded-xl border border-white/10 bg-[#1a0d0d] px-3 py-3 text-sm text-[#F8F2EC] outline-none focus:border-red-500">
-                    <option value="digital_arts">Digital Arts</option>
-                    <option value="traditional_arts">Traditional Arts</option>
-                    <option value="voice_acting">Voice Acting</option>
-                    <option value="video_editing">Video Editing</option>
-                    <option value="photography">Photography</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="mb-1 block text-[10px] font-black uppercase tracking-[0.2em] text-[rgba(248,242,236,0.6)]">Level</label>
-                  <select value={form.level} onChange={(e) => setForm({ ...form, level: e.target.value })} className="w-full rounded-xl border border-white/10 bg-[#1a0d0d] px-3 py-3 text-sm text-[#F8F2EC] outline-none focus:border-red-500">
-                    <option value="beginner">Beginner</option>
-                    <option value="intermediate">Intermediate</option>
-                    <option value="advanced">Advanced</option>
-                    <option value="expert">Expert</option>
-                  </select>
-                </div>
+                <label className="mb-1 block text-[10px] font-black uppercase tracking-[0.2em] text-[rgba(248,242,236,0.6)]">Specialization</label>
+                <select value={form.specialization} onChange={(e) => setForm({ ...form, specialization: e.target.value })} className="w-full rounded-xl border border-white/10 bg-[#1a0d0d] px-3 py-3 text-sm text-[#F8F2EC] outline-none focus:border-red-500">
+                  <option value="digital_arts">Digital Arts</option>
+                  <option value="traditional_arts">Traditional Arts</option>
+                  <option value="voice_acting">Voice Acting</option>
+                  <option value="video_editing">Video Editing</option>
+                  <option value="photography">Photography</option>
+                </select>
               </div>
 
               <div>
-                <label className="mb-1 block text-[10px] font-black uppercase tracking-[0.2em] text-[rgba(248,242,236,0.6)]">Media File</label>
-                <input type="file" accept="image/*,video/*" onChange={(e) => setFile(e.target.files[0])} className="w-full rounded-xl border border-white/10 bg-[#1a0d0d] px-3 py-3 text-sm text-[#F8F2EC] file:mr-3 file:rounded-full file:border-0 file:bg-red-600 file:px-3 file:py-2 file:text-[10px] file:font-black file:uppercase file:tracking-[0.2em] file:text-[#F8F2EC]" />
+                <label className="mb-1 block text-[10px] font-black uppercase tracking-[0.2em] text-[rgba(248,242,236,0.6)]">Level</label>
+                <select value={form.level} onChange={(e) => setForm({ ...form, level: e.target.value })} className="w-full rounded-xl border border-white/10 bg-[#1a0d0d] px-3 py-3 text-sm text-[#F8F2EC] outline-none focus:border-red-500">
+                  <option value="beginner">Beginner</option>
+                  <option value="intermediate">Intermediate</option>
+                  <option value="advanced">Advanced</option>
+                  <option value="expert">Expert</option>
+                </select>
               </div>
+            </div>
 
-              <div>
-                <label className="mb-1 block text-[10px] font-black uppercase tracking-[0.2em] text-[rgba(248,242,236,0.6)]">External URL</label>
-                <input value={form.mediaUrl} onChange={(e) => setForm({ ...form, mediaUrl: e.target.value })} placeholder="https://..." className="w-full rounded-xl border border-white/10 bg-[#1a0d0d] px-3 py-3 text-sm text-[#F8F2EC] outline-none placeholder:text-[#F8F2EC]/35 focus:border-red-500" disabled={!!file} />
-              </div>
+            <div>
+              <label className="mb-1 block text-[10px] font-black uppercase tracking-[0.2em] text-[rgba(248,242,236,0.6)]">Media File</label>
+              <input type="file" accept="image/*,video/*" onChange={(e) => setFile(e.target.files[0])} className="w-full rounded-xl border border-white/10 bg-[#1a0d0d] px-3 py-3 text-sm text-[#F8F2EC] file:mr-3 file:rounded-full file:border-0 file:bg-red-600 file:px-3 file:py-2 file:text-[10px] file:font-black file:uppercase file:tracking-[0.2em] file:text-[#F8F2EC]" />
+            </div>
 
-              <div className="flex justify-end gap-3 pt-2">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="rounded-full border border-white/10 bg-[#1a0d0d] px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-[#F8F2EC]/70">Cancel</button>
-                <button type="submit" disabled={uploading} className="rounded-full bg-gradient-to-r from-red-600 to-red-800 px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] text-[#F8F2EC] disabled:opacity-60">{uploading ? 'Uploading...' : 'Submit'}</button>
-              </div>
-            </form>
-          </div>
+            <div>
+              <label className="mb-1 block text-[10px] font-black uppercase tracking-[0.2em] text-[rgba(248,242,236,0.6)]">External URL</label>
+              <input value={form.mediaUrl} onChange={(e) => setForm({ ...form, mediaUrl: e.target.value })} placeholder="https://..." className="w-full rounded-xl border border-white/10 bg-[#1a0d0d] px-3 py-3 text-sm text-[#F8F2EC] outline-none placeholder:text-[#F8F2EC]/35 focus:border-red-500" disabled={!!file} />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-2">
+              <button type="button" onClick={() => setIsModalOpen(false)} className="rounded-full border border-white/10 bg-[#1a0d0d] px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] text-[#F8F2EC]/70">Cancel</button>
+              <button type="submit" disabled={uploading} className="rounded-full bg-gradient-to-r from-red-600 to-red-800 px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] text-[#F8F2EC] disabled:opacity-60">{uploading ? 'Uploading...' : 'Submit'}</button>
+            </div>
+          </form>
         </div>
-      )}
+      </ModalPortal>
 
       {/* Post Achievement Modal */}
       <AchievementModal

@@ -3,6 +3,9 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/AuthContext';
+import EventCarousel from '@/components/EventCarousel';
+import { useBodyScrollLock } from '@/lib/useBodyScrollLock';
+import ModalPortal from '@/components/ModalPortal';
 
 // CITEMAS Aesthetic Colors & Theme helpers
 const CITEMAS_RED = '#DC2626';
@@ -88,15 +91,36 @@ export default function EventsPage() {
 
   // Modal State for Creation Form
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [form, setForm] = useState({ title: '', description: '', date: '', location: '', capacity: '', image: '' });
+  const [form, setForm] = useState({
+    title: '',
+    description: '',
+    date: '',
+    location: '',
+    capacity: '',
+    image: '',
+    images: [],
+    highlights: '',
+  });
   const [formError, setFormError] = useState('');
   const [uploadingCreate, setUploadingCreate] = useState(false);
 
   // Edit modal state
   const [editingEvent, setEditingEvent] = useState(null);
-  const [editForm, setEditForm] = useState({ title: '', description: '', date: '', location: '', capacity: '', image: '' });
+  const [editForm, setEditForm] = useState({
+    title: '',
+    description: '',
+    date: '',
+    location: '',
+    capacity: '',
+    image: '',
+    images: [],
+    highlights: '',
+  });
   const [editError, setEditError] = useState('');
   const [uploadingEdit, setUploadingEdit] = useState(false);
+
+  useBodyScrollLock(isCreateModalOpen);
+  useBodyScrollLock(Boolean(editingEvent));
 
   const canManageRoles = ['officer', 'teacher', 'adviser', 'super_admin'];
   const canCreate = user && canManageRoles.includes(user.role);
@@ -123,60 +147,76 @@ export default function EventsPage() {
 
   // Cloudinary Upload Widget Helper for Creation
   async function handleCloudinaryUploadCreate(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
 
     setUploadingCreate(true);
-    const dataObj = new FormData();
-    dataObj.append('file', file);
-    dataObj.append('upload_preset', 'citemas_preset'); // Replace with your actual Cloudinary upload preset if different
+    const uploadedUrls = [];
 
-    try {
-      const res = await fetch('https://api.cloudinary.com/v1_1/dvh7zcfwv/image/upload', { // Replace with your Cloudinary cloud name if different
-        method: 'POST',
-        body: dataObj,
-      });
-      const data = await res.json();
-      if (data.secure_url) {
-        setForm((prev) => ({ ...prev, image: data.secure_url }));
-      } else {
-        alert('Image upload failed via Cloudinary.');
+    for (const file of files) {
+      const dataObj = new FormData();
+      dataObj.append('file', file);
+      dataObj.append('upload_preset', 'citemas_preset');
+
+      try {
+        const res = await fetch('https://api.cloudinary.com/v1_1/dvh7zcfwv/image/upload', {
+          method: 'POST',
+          body: dataObj,
+        });
+        const data = await res.json();
+        if (data.secure_url) {
+          uploadedUrls.push(data.secure_url);
+        }
+      } catch (err) {
+        console.error(err);
       }
-    } catch (err) {
-      console.error(err);
-      alert('Error uploading image to Cloudinary.');
-    } finally {
-      setUploadingCreate(false);
     }
+
+    if (uploadedUrls.length > 0) {
+      setForm((prev) => ({
+        ...prev,
+        image: prev.image || uploadedUrls[0],
+        images: [...prev.images, ...uploadedUrls],
+      }));
+    }
+    setUploadingCreate(false);
   }
 
   // Cloudinary Upload Widget Helper for Editing
   async function handleCloudinaryUploadEdit(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
 
     setUploadingEdit(true);
-    const dataObj = new FormData();
-    dataObj.append('file', file);
-    dataObj.append('upload_preset', 'citemas_preset');
+    const uploadedUrls = [];
 
-    try {
-      const res = await fetch('https://api.cloudinary.com/v1_1/dvh7zcfwv/image/upload', {
-        method: 'POST',
-        body: dataObj,
-      });
-      const data = await res.json();
-      if (data.secure_url) {
-        setEditForm((prev) => ({ ...prev, image: data.secure_url }));
-      } else {
-        alert('Image upload failed via Cloudinary.');
+    for (const file of files) {
+      const dataObj = new FormData();
+      dataObj.append('file', file);
+      dataObj.append('upload_preset', 'citemas_preset');
+
+      try {
+        const res = await fetch('https://api.cloudinary.com/v1_1/dvh7zcfwv/image/upload', {
+          method: 'POST',
+          body: dataObj,
+        });
+        const data = await res.json();
+        if (data.secure_url) {
+          uploadedUrls.push(data.secure_url);
+        }
+      } catch (err) {
+        console.error(err);
       }
-    } catch (err) {
-      console.error(err);
-      alert('Error uploading image to Cloudinary.');
-    } finally {
-      setUploadingEdit(false);
     }
+
+    if (uploadedUrls.length > 0) {
+      setEditForm((prev) => ({
+        ...prev,
+        image: prev.image || uploadedUrls[0],
+        images: [...prev.images, ...uploadedUrls],
+      }));
+    }
+    setUploadingEdit(false);
   }
 
   async function handleCreate(e) {
@@ -193,6 +233,7 @@ export default function EventsPage() {
         body: JSON.stringify({
           ...form,
           capacity: form.capacity ? Number(form.capacity) : null,
+          isPast: new Date(form.date) < new Date(),
         }),
       });
       const data = await res.json();
@@ -200,7 +241,7 @@ export default function EventsPage() {
         setFormError(data.error || 'Failed to create event');
         return;
       }
-      setForm({ title: '', description: '', date: '', location: '', capacity: '', image: '' });
+      setForm({ title: '', description: '', date: '', location: '', capacity: '', image: '', images: [], highlights: '' });
       setIsCreateModalOpen(false);
       loadEvents();
     } catch (err) {
@@ -239,6 +280,8 @@ export default function EventsPage() {
       location: event.location || '',
       capacity: event.capacity !== null && event.capacity !== undefined ? event.capacity : '',
       image: event.image || '',
+      images: Array.isArray(event.images) ? event.images : [],
+      highlights: event.highlights || '',
     });
   }
 
@@ -256,6 +299,7 @@ export default function EventsPage() {
         body: JSON.stringify({
           ...editForm,
           capacity: editForm.capacity !== '' ? Number(editForm.capacity) : null,
+          isPast: new Date(editForm.date) < new Date(),
         }),
       });
       const data = await res.json();
@@ -308,10 +352,10 @@ export default function EventsPage() {
             Directory Hub
           </span>
           <h1 className="text-4xl font-black tracking-tight" style={{ color: CITEMAS_CREAM }}>
-            <span className="bg-gradient-to-r from-red-500 via-amber-400 to-red-600 bg-clip-text text-transparent drop-shadow-sm">CITEMAS</span> Events
+            <span className="bg-gradient-to-r from-red-500 via-amber-400 to-red-600 bg-clip-text text-transparent drop-shadow-sm">CITEMAS</span> Events & Archives
           </h1>
           <p className="text-sm font-medium" style={{ color: MUTED }}>
-            Explore immersive media workshops, digital exhibits, and technical guilds.
+            Explore immersive media workshops, digital exhibits, past event history, and technical showcases.
           </p>
         </div>
 
@@ -340,14 +384,14 @@ export default function EventsPage() {
                   : 'text-slate-300 hover:text-white'
               }`}
             >
-              Previous Archives ({previousEvents.length})
+              Past Event History ({previousEvents.length})
             </button>
           </div>
 
           {/* Add Event Button for Authorized Staff */}
           {canCreate && (
             <SpatialButton onClick={() => setIsCreateModalOpen(true)} variant="primary">
-              + Add Event
+              + Post Event / History
             </SpatialButton>
           )}
         </div>
@@ -376,22 +420,30 @@ export default function EventsPage() {
             canManageRoles.includes(user.role) ||
             (event.createdBy?._id || event.createdBy) === user.id;
 
+          const allImages = Array.isArray(event.images) && event.images.length > 0
+            ? event.images
+            : event.image ? [event.image] : [];
+
           return (
             <SpatialGlassPanel key={event._id} depth="front" className="flex flex-col justify-between space-y-6 group">
               <div className="space-y-4">
-                {/* Event Image / Media banner */}
-                <div className="h-48 w-full rounded-2xl overflow-hidden bg-black/50 border border-white/15 relative shadow-inner">
-                  {event.image ? (
-                    <img src={event.image} alt={event.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-red-950/80 to-black text-4xl">
-                      🏛️
+                {/* Event Image / Multi-image Carousel */}
+                {activeTab === 'previous' || allImages.length > 1 ? (
+                  <EventCarousel images={allImages} title={event.title} />
+                ) : (
+                  <div className="h-48 w-full rounded-2xl overflow-hidden bg-black/50 border border-white/15 relative shadow-inner">
+                    {event.image ? (
+                      <img src={event.image} alt={event.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-red-950/80 to-black text-4xl">
+                        🏛️
+                      </div>
+                    )}
+                    <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-black/70 text-amber-300 backdrop-blur-md border border-white/20 shadow-md">
+                      {activeTab === 'upcoming' ? 'Scheduled' : 'Past Archive'}
                     </div>
-                  )}
-                  <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-black/70 text-amber-300 backdrop-blur-md border border-white/20 shadow-md">
-                    {activeTab === 'upcoming' ? 'Scheduled' : 'Archived'}
                   </div>
-                </div>
+                )}
 
                 <div className="flex justify-between items-start gap-2">
                   <h3 className="font-black text-lg tracking-tight line-clamp-1" style={{ color: CITEMAS_CREAM }}>
@@ -415,6 +467,13 @@ export default function EventsPage() {
                 </div>
 
                 <p className="text-xs text-slate-300 line-clamp-3 leading-relaxed">{event.description}</p>
+
+                {event.highlights && (
+                  <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10 text-xs text-amber-200/90 leading-relaxed font-light">
+                    <span className="font-bold text-amber-400 uppercase text-[10px] block mb-0.5">Highlights</span>
+                    {event.highlights}
+                  </div>
+                )}
               </div>
 
               {/* Bottom Card Footer with RSVP / Attendee details */}
@@ -444,231 +503,267 @@ export default function EventsPage() {
         })}
       </div>
 
-      {/* CREATE EVENT MODAL (Glassmorphism Styled) */}
-      {isCreateModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
-          <div
-            className="relative w-full max-w-lg rounded-[36px] p-8 space-y-6 text-slate-100 border border-white/25 shadow-[0_0_100px_rgba(220,38,38,0.3)] overflow-hidden"
-            style={{
-              background: 'radial-gradient(circle at 50% 10%, rgba(127, 29, 29, 0.45) 0%, rgba(10, 4, 4, 0.95) 90%)',
-              backdropFilter: 'blur(40px) saturate(200%)',
-            }}
-          >
-            <div className="flex justify-between items-center border-b border-white/10 pb-4">
-              <h2 className="text-xl font-black uppercase tracking-wider text-amber-300">Create New Event</h2>
-              <button
-                onClick={() => setIsCreateModalOpen(false)}
-                className="text-slate-400 hover:text-white font-bold text-lg"
-              >
-                ✕
-              </button>
+      {/* CREATE EVENT / HISTORY MODAL */}
+      <ModalPortal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)}>
+        <div
+          className="relative w-full max-w-lg rounded-[36px] p-8 space-y-6 text-slate-100 border border-white/25 shadow-[0_0_100px_rgba(220,38,38,0.3)] overflow-hidden max-h-[90vh] overflow-y-auto"
+          style={{
+            background: 'radial-gradient(circle at 50% 10%, rgba(127, 29, 29, 0.45) 0%, rgba(10, 4, 4, 0.95) 90%)',
+            backdropFilter: 'blur(40px) saturate(200%)',
+          }}
+        >
+          <div className="flex justify-between items-center border-b border-white/10 pb-4">
+            <h2 className="text-xl font-black uppercase tracking-wider text-amber-300">Create Event / Archive</h2>
+            <button
+              onClick={() => setIsCreateModalOpen(false)}
+              className="text-slate-400 hover:text-white font-bold text-lg"
+            >
+              ✕
+            </button>
+          </div>
+
+          {formError && <p className="text-red-400 text-xs font-semibold">{formError}</p>}
+
+          <form onSubmit={handleCreate} className="space-y-4">
+            <div>
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Title</label>
+              <input
+                placeholder="Event Name"
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                required
+                className="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 shadow-inner"
+              />
             </div>
 
-            {formError && <p className="text-red-400 text-xs font-semibold">{formError}</p>}
-
-            <form onSubmit={handleCreate} className="space-y-4">
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Title</label>
-                <input
-                  placeholder="Event Name"
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  required
-                  className="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 shadow-inner"
-                />
-              </div>
-
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Description</label>
-                <textarea
-                  placeholder="Provide event details..."
-                  value={form.description}
-                  onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  required
-                  rows="3"
-                  className="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 shadow-inner"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Date & Time</label>
-                  <input
-                    type="datetime-local"
-                    value={form.date}
-                    onChange={(e) => setForm({ ...form, date: e.target.value })}
-                    required
-                    className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-red-500 shadow-inner"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Capacity (Optional)</label>
-                  <input
-                    type="number"
-                    min="1"
-                    placeholder="Unlimited"
-                    value={form.capacity}
-                    onChange={(e) => setForm({ ...form, capacity: e.target.value })}
-                    className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 shadow-inner"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Location</label>
-                <input
-                  placeholder="Venue or Link"
-                  value={form.location}
-                  onChange={(e) => setForm({ ...form, location: e.target.value })}
-                  required
-                  className="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 shadow-inner"
-                />
-              </div>
-
-              {/* Cloudinary Image Picker / Uploader for Create */}
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Event Banner Image</label>
-                <div className="flex gap-2 items-center">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleCloudinaryUploadCreate}
-                    className="w-full text-xs text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:bg-red-600 file:text-white hover:file:bg-red-700 bg-black/50 border border-white/15 rounded-xl px-3 py-2"
-                  />
-                </div>
-                {uploadingCreate && <p className="text-amber-400 text-[10px] mt-1">Uploading image to Cloudinary...</p>}
-                {form.image && (
-                  <div className="mt-2 flex items-center gap-3">
-                    <img src={form.image} alt="Preview" className="h-12 w-12 object-cover rounded-lg border border-white/20" />
-                    <span className="text-[10px] text-slate-400 truncate max-w-[280px]">{form.image}</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
-                <SpatialButton type="button" variant="secondary" onClick={() => setIsCreateModalOpen(false)}>
-                  Cancel
-                </SpatialButton>
-                <SpatialButton type="submit" variant="primary">
-                  Publish Event
-                </SpatialButton>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* EDIT EVENT MODAL (Glassmorphism Styled with Cloudinary) */}
-      {editingEvent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
-          <div
-            className="relative w-full max-w-lg rounded-[36px] p-8 space-y-6 text-slate-100 border border-white/25 shadow-[0_0_100px_rgba(245,158,11,0.25)] overflow-hidden"
-            style={{
-              background: 'radial-gradient(circle at 50% 10%, rgba(245, 158, 11, 0.35) 0%, rgba(10, 4, 4, 0.95) 90%)',
-              backdropFilter: 'blur(40px) saturate(200%)',
-            }}
-          >
-            <div className="flex justify-between items-center border-b border-white/10 pb-4">
-              <h2 className="text-xl font-black uppercase tracking-wider text-amber-300">Edit Event Module</h2>
-              <button
-                onClick={() => setEditingEvent(null)}
-                className="text-slate-400 hover:text-white font-bold text-lg"
-              >
-                ✕
-              </button>
+            <div>
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Description</label>
+              <textarea
+                placeholder="Provide event details..."
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                required
+                rows="3"
+                className="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 shadow-inner"
+              />
             </div>
 
-            {editError && <p className="text-red-400 text-xs font-semibold">{editError}</p>}
-
-            <form onSubmit={handleUpdate} className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Title</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Date & Time</label>
                 <input
-                  value={editForm.title}
-                  onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                  type="datetime-local"
+                  value={form.date}
+                  onChange={(e) => setForm({ ...form, date: e.target.value })}
                   required
-                  className="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500 shadow-inner"
+                  className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-red-500 shadow-inner"
                 />
               </div>
-
               <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Description</label>
-                <textarea
-                  value={editForm.description}
-                  onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
-                  required
-                  rows="3"
-                  className="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500 shadow-inner"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Date & Time</label>
-                  <input
-                    type="datetime-local"
-                    value={editForm.date}
-                    onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
-                    required
-                    className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 shadow-inner"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Capacity</label>
-                  <input
-                    type="number"
-                    min="1"
-                    placeholder="Unlimited"
-                    value={editForm.capacity}
-                    onChange={(e) => setEditForm({ ...editForm, capacity: e.target.value })}
-                    className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500 shadow-inner"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Location</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Capacity (Optional)</label>
                 <input
-                  value={editForm.location}
-                  onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
-                  required
-                  className="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500 shadow-inner"
+                  type="number"
+                  min="1"
+                  placeholder="Unlimited"
+                  value={form.capacity}
+                  onChange={(e) => setForm({ ...form, capacity: e.target.value })}
+                  className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 shadow-inner"
                 />
               </div>
+            </div>
 
-              {/* Cloudinary Image Picker / Uploader for Edit */}
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Event Banner Image</label>
-                <div className="flex gap-2 items-center">
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleCloudinaryUploadEdit}
-                    className="w-full text-xs text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:bg-amber-600 file:text-white hover:file:bg-amber-700 bg-black/50 border border-white/15 rounded-xl px-3 py-2"
-                  />
+            <div>
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Location</label>
+              <input
+                placeholder="Venue or Link"
+                value={form.location}
+                onChange={(e) => setForm({ ...form, location: e.target.value })}
+                required
+                className="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 shadow-inner"
+              />
+            </div>
+
+            <div>
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Event Highlights (Optional for Past History)</label>
+              <textarea
+                placeholder="Key takeaways, winning teams, summary..."
+                value={form.highlights}
+                onChange={(e) => setForm({ ...form, highlights: e.target.value })}
+                rows="2"
+                className="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 shadow-inner"
+              />
+            </div>
+
+            {/* Multi-Image Cloudinary Uploader */}
+            <div>
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Event Images (Multiple for Carousel)</label>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleCloudinaryUploadCreate}
+                className="w-full text-xs text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:bg-red-600 file:text-white hover:file:bg-red-700 bg-black/50 border border-white/15 rounded-xl px-3 py-2"
+              />
+              {uploadingCreate && <p className="text-amber-400 text-[10px] mt-1">Uploading image(s)...</p>}
+              
+              {form.images.length > 0 && (
+                <div className="mt-3 grid grid-cols-4 gap-2">
+                  {form.images.map((url, i) => (
+                    <div key={i} className="relative group rounded-lg overflow-hidden h-16 border border-white/20">
+                      <img src={url} alt={`Uploaded ${i}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setForm((p) => ({ ...p, images: p.images.filter((_, idx) => idx !== i) }))}
+                        className="absolute top-1 right-1 bg-black/80 text-red-400 text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
                 </div>
-                {uploadingEdit && <p className="text-amber-400 text-[10px] mt-1">Uploading image to Cloudinary...</p>}
-                {editForm.image && (
-                  <div className="mt-2 flex items-center gap-3">
-                    <img src={editForm.image} alt="Preview" className="h-12 w-12 object-cover rounded-lg border border-white/20" />
-                    <span className="text-[10px] text-slate-400 truncate max-w-[280px]">{editForm.image}</span>
-                  </div>
-                )}
-              </div>
+              )}
+            </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
-                <SpatialButton type="button" variant="secondary" onClick={() => setEditingEvent(null)}>
-                  Cancel
-                </SpatialButton>
-                <SpatialButton type="submit" variant="primary">
-                  Save Changes
-                </SpatialButton>
-              </div>
-            </form>
-          </div>
+            <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+              <SpatialButton type="button" variant="secondary" onClick={() => setIsCreateModalOpen(false)}>
+                Cancel
+              </SpatialButton>
+              <SpatialButton type="submit" variant="primary">
+                Publish Event
+              </SpatialButton>
+            </div>
+          </form>
         </div>
-      )}
+      </ModalPortal>
 
+      {/* EDIT EVENT MODAL */}
+      <ModalPortal isOpen={Boolean(editingEvent)} onClose={() => setEditingEvent(null)}>
+        <div
+          className="relative w-full max-w-lg rounded-[36px] p-8 space-y-6 text-slate-100 border border-white/25 shadow-[0_0_100px_rgba(245,158,11,0.25)] overflow-hidden max-h-[90vh] overflow-y-auto"
+          style={{
+            background: 'radial-gradient(circle at 50% 10%, rgba(245, 158, 11, 0.35) 0%, rgba(10, 4, 4, 0.95) 90%)',
+            backdropFilter: 'blur(40px) saturate(200%)',
+          }}
+        >
+          <div className="flex justify-between items-center border-b border-white/10 pb-4">
+            <h2 className="text-xl font-black uppercase tracking-wider text-amber-300">Edit Event Module</h2>
+            <button
+              onClick={() => setEditingEvent(null)}
+              className="text-slate-400 hover:text-white font-bold text-lg"
+            >
+              ✕
+            </button>
+          </div>
+
+          {editError && <p className="text-red-400 text-xs font-semibold">{editError}</p>}
+
+          <form onSubmit={handleUpdate} className="space-y-4">
+            <div>
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Title</label>
+              <input
+                value={editForm.title}
+                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                required
+                className="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500 shadow-inner"
+              />
+            </div>
+
+            <div>
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Description</label>
+              <textarea
+                value={editForm.description}
+                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+                required
+                rows="3"
+                className="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500 shadow-inner"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Date & Time</label>
+                <input
+                  type="datetime-local"
+                  value={editForm.date}
+                  onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
+                  required
+                  className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 shadow-inner"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Capacity</label>
+                <input
+                  type="number"
+                  min="1"
+                  placeholder="Unlimited"
+                  value={editForm.capacity}
+                  onChange={(e) => setEditForm({ ...editForm, capacity: e.target.value })}
+                  className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500 shadow-inner"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Location</label>
+              <input
+                value={editForm.location}
+                onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
+                required
+                className="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500 shadow-inner"
+              />
+            </div>
+
+            <div>
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Event Highlights</label>
+              <textarea
+                value={editForm.highlights}
+                onChange={(e) => setEditForm({ ...editForm, highlights: e.target.value })}
+                rows="2"
+                className="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500 shadow-inner"
+              />
+            </div>
+
+            {/* Multi-Image Uploader for Edit */}
+            <div>
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Event Banner / Carousel Images</label>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleCloudinaryUploadEdit}
+                className="w-full text-xs text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:bg-amber-600 file:text-white hover:file:bg-amber-700 bg-black/50 border border-white/15 rounded-xl px-3 py-2"
+              />
+              {uploadingEdit && <p className="text-amber-400 text-[10px] mt-1">Uploading image(s)...</p>}
+              
+              {editForm.images.length > 0 && (
+                <div className="mt-3 grid grid-cols-4 gap-2">
+                  {editForm.images.map((url, i) => (
+                    <div key={i} className="relative group rounded-lg overflow-hidden h-16 border border-white/20">
+                      <img src={url} alt={`Uploaded ${i}`} className="w-full h-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setEditForm((p) => ({ ...p, images: p.images.filter((_, idx) => idx !== i) }))}
+                        className="absolute top-1 right-1 bg-black/80 text-red-400 text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
+              <SpatialButton type="button" variant="secondary" onClick={() => setEditingEvent(null)}>
+                Cancel
+              </SpatialButton>
+              <SpatialButton type="submit" variant="primary">
+                Save Changes
+              </SpatialButton>
+            </div>
+          </form>
+        </div>
+      </ModalPortal>
     </div>
   );
 }
