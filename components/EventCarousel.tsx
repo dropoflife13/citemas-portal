@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type MouseEvent } from 'react';
 
 export default function EventCarousel({ images = [], title = '' }) {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -13,12 +13,12 @@ export default function EventCarousel({ images = [], title = '' }) {
     );
   }
 
-  const prevSlide = (e) => {
+  const prevSlide = (e: MouseEvent) => {
     e.stopPropagation();
     setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
   };
 
-  const nextSlide = (e) => {
+  const nextSlide = (e: MouseEvent) => {
     e.stopPropagation();
     setCurrentIndex((prev) => (prev + 1) % images.length);
   };
