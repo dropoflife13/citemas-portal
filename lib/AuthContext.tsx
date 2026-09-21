@@ -54,6 +54,18 @@ function getStoredUser(): AuthUser | null {
   }
 }
 
+function isTokenExpired(token: string): boolean {
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return true;
+    const payload = JSON.parse(atob(parts[1]));
+    if (!payload.exp) return true;
+    return payload.exp < Date.now() / 1000;
+  } catch {
+    return true;
+  }
+}
+
 /* ─────────────────────────────────────────────
    Context
    ───────────────────────────────────────────── */
@@ -131,6 +143,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const storedUser = getStoredUser();
 
         if (storedToken) {
+          if (isTokenExpired(storedToken)) {
+            logout();
+            return;
+          }
           setToken(storedToken);
           if (storedUser) setUser(storedUser);
           await refreshSession(storedToken);
