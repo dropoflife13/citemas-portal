@@ -103,6 +103,7 @@ export default function EventsPage() {
   });
   const [formError, setFormError] = useState('');
   const [uploadingCreate, setUploadingCreate] = useState(false);
+  const [createMode, setCreateMode] = useState('upcoming');
 
   // Edit modal state
   const [editingEvent, setEditingEvent] = useState(null);
@@ -144,6 +145,10 @@ export default function EventsPage() {
   useEffect(() => {
     if (token) loadEvents();
   }, [token]);
+
+  useEffect(() => {
+    setForm({ title: '', description: '', date: '', location: '', capacity: '', image: '', images: [], highlights: '' });
+  }, [isCreateModalOpen, createMode]);
 
   // Cloudinary Upload Widget Helper for Creation
   async function handleCloudinaryUploadCreate(e) {
@@ -233,7 +238,7 @@ export default function EventsPage() {
         body: JSON.stringify({
           ...form,
           capacity: form.capacity ? Number(form.capacity) : null,
-          isPast: new Date(form.date) < new Date(),
+          isPast: createMode === 'past',
         }),
       });
       const data = await res.json();
@@ -522,11 +527,37 @@ export default function EventsPage() {
             </button>
           </div>
 
+          {/* Mode Toggle */}
+          <div className="flex gap-2 mb-4">
+            <button
+              type="button"
+              onClick={() => setCreateMode('upcoming')}
+              className={`flex-1 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                createMode === 'upcoming'
+                  ? 'bg-red-600/30 border border-red-500/50 text-red-300'
+                  : 'border border-white/10 text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              Upcoming Event
+            </button>
+            <button
+              type="button"
+              onClick={() => setCreateMode('past')}
+              className={`flex-1 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                createMode === 'past'
+                  ? 'bg-amber-500/30 border border-amber-500/50 text-amber-300'
+                  : 'border border-white/10 text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+            >
+              Past Event Archive
+            </button>
+          </div>
+
           {formError && <p className="text-red-400 text-xs font-semibold">{formError}</p>}
 
           <form onSubmit={handleCreate} className="space-y-4">
             <div>
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Title</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">{createMode === 'upcoming' ? 'EVENT TITLE' : 'EVENT NAME'}</label>
               <input
                 placeholder="Event Name"
                 value={form.title}
@@ -550,7 +581,7 @@ export default function EventsPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Date & Time</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">{createMode === 'upcoming' ? 'DATE & TIME (must be in the future)' : 'EVENT DATE (in the past)'}</label>
                 <input
                   type="datetime-local"
                   value={form.date}
@@ -559,21 +590,23 @@ export default function EventsPage() {
                   className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-red-500 shadow-inner"
                 />
               </div>
-              <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Capacity (Optional)</label>
-                <input
-                  type="number"
-                  min="1"
-                  placeholder="Unlimited"
-                  value={form.capacity}
-                  onChange={(e) => setForm({ ...form, capacity: e.target.value })}
-                  className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 shadow-inner"
-                />
-              </div>
+              {createMode === 'upcoming' && (
+                <div>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">CAPACITY (OPTIONAL)</label>
+                  <input
+                    type="number"
+                    min="1"
+                    placeholder="Unlimited"
+                    value={form.capacity}
+                    onChange={(e) => setForm({ ...form, capacity: e.target.value })}
+                    className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 shadow-inner"
+                  />
+                </div>
+              )}
             </div>
 
             <div>
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Location</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">{createMode === 'upcoming' ? 'VENUE OR LINK' : 'WHERE IT HAPPENED'}</label>
               <input
                 placeholder="Venue or Link"
                 value={form.location}
@@ -584,9 +617,9 @@ export default function EventsPage() {
             </div>
 
             <div>
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Event Highlights (Optional for Past History)</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">{createMode === 'upcoming' ? 'EVENT HIGHLIGHTS (OPTIONAL)' : 'HIGHLIGHTS / SUMMARY (what happened, who won, key moments)'}</label>
               <textarea
-                placeholder="Key takeaways, winning teams, summary..."
+                placeholder={createMode === 'upcoming' ? 'Key takeaways, agenda, speakers...' : 'Key takeaways, winning teams, summary...'}
                 value={form.highlights}
                 onChange={(e) => setForm({ ...form, highlights: e.target.value })}
                 rows="2"
@@ -596,7 +629,7 @@ export default function EventsPage() {
 
             {/* Multi-Image Cloudinary Uploader */}
             <div>
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Event Images (Multiple for Carousel)</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">{createMode === 'past' ? 'GALLERY IMAGES (multiple for carousel)' : 'EVENT HERO IMAGE'}</label>
               <input
                 type="file"
                 accept="image/*"
@@ -629,7 +662,7 @@ export default function EventsPage() {
                 Cancel
               </SpatialButton>
               <SpatialButton type="submit" variant="primary">
-                Publish Event
+                {createMode === 'upcoming' ? 'PUBLISH EVENT' : 'ARCHIVE EVENT'}
               </SpatialButton>
             </div>
           </form>
