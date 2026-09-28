@@ -14,23 +14,28 @@ export async function GET(req) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
 
-  await connectDB();
+  try {
+    await connectDB();
 
-  if (STAFF_ROLES.includes(currentUser.role)) {
-    const entries = await Portfolio.find()
-      .populate('owner', 'firstName lastName email role studentId department yearLevel')
-      .sort({ createdAt: -1 });
-    return NextResponse.json(entries);
+    if (STAFF_ROLES.includes(currentUser.role)) {
+      const entries = await Portfolio.find()
+        .populate('owner', 'firstName lastName email role studentId department yearLevel')
+        .sort({ createdAt: -1 });
+      return NextResponse.json(entries);
+    }
+
+    if (currentUser.role === 'member' || currentUser.role === 'alumni') {
+      const entries = await Portfolio.find({ owner: currentUser.id })
+        .populate('owner', 'firstName lastName email')
+        .sort({ createdAt: -1 });
+      return NextResponse.json(entries);
+    }
+
+    return NextResponse.json({ error: 'You do not have permission to view portfolios' }, { status: 403 });
+  } catch (err) {
+    console.error('GET portfolio error:', err);
+    return NextResponse.json({ error: 'Failed to load portfolios' }, { status: 500 });
   }
-
-  if (currentUser.role === 'member' || currentUser.role === 'alumni') {
-    const entries = await Portfolio.find({ owner: currentUser.id })
-      .populate('owner', 'firstName lastName email')
-      .sort({ createdAt: -1 });
-    return NextResponse.json(entries);
-  }
-
-  return NextResponse.json({ error: 'You do not have permission to view portfolios' }, { status: 403 });
 }
 
 export async function POST(req) {

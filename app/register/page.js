@@ -11,7 +11,8 @@ const SPECIALIZATIONS = [
   { value: 'traditional_arts', label: 'Traditional Arts' },
   { value: 'digital_arts', label: 'Digital Arts' },
   { value: 'voice_acting', label: 'Voice Acting' },
-  { value: 'video_editing', label: 'Video Editing' },
+  { value: 'animation', label: 'Animation' },
+  { value: 'videography', label: 'Videography' },
   { value: 'photography', label: 'Photography' },
 ];
 const DEPARTMENTS = [

@@ -23,7 +23,8 @@ const SPECIALIZATION_LABELS = {
   traditional_arts: 'Traditional Arts',
   digital_arts: 'Digital Arts',
   voice_acting: 'Voice Acting',
-  video_editing: 'Video Editing',
+  animation: 'Animation',
+  videography: 'Videography',
   photography: 'Photography',
 };
 

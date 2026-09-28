@@ -6,6 +6,7 @@ import { useAuth } from '@/lib/AuthContext';
 import EventCarousel from '@/components/EventCarousel';
 import { useBodyScrollLock } from '@/lib/useBodyScrollLock';
 import ModalPortal from '@/components/ModalPortal';
+import AccessDenied from '@/components/AccessDenied';
 
 // CITEMAS Aesthetic Colors & Theme helpers
 const CITEMAS_RED = '#DC2626';
@@ -276,7 +277,12 @@ export default function EventsPage() {
   function startEdit(event) {
     setEditingEvent(event);
     setEditError('');
-    const formattedDate = event.date ? new Date(event.date).toISOString().slice(0, 16) : '';
+    const isPastEvent = event.isPast || (event.date && new Date(event.date) < new Date());
+    const formattedDate = event.date
+      ? (isPastEvent
+          ? new Date(event.date).toISOString().slice(0, 10)
+          : new Date(event.date).toISOString().slice(0, 16))
+      : '';
 
     setEditForm({
       title: event.title || '',
@@ -337,7 +343,17 @@ export default function EventsPage() {
   }
 
   if (loading) return <div className="p-12 text-center text-slate-300">Loading spatial modules...</div>;
-  if (!user) return <div className="p-12 text-center text-slate-300">Please log in to view events.</div>;
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-transparent px-4 py-12">
+        <AccessDenied
+          title="Events Access Restricted"
+          resourceName="community events"
+          message="This section is available to CITEMAS members."
+        />
+      </div>
+    );
+  }
 
   const now = new Date();
   const upcomingEvents = events.filter((ev) => new Date(ev.date) >= now);
@@ -467,7 +483,7 @@ export default function EventsPage() {
                 </div>
 
                 <div className="text-xs space-y-1 font-medium" style={{ color: MUTED }}>
-                  <p>📅 {new Date(event.date).toLocaleString()}</p>
+                  <p>📅 {activeTab === 'previous' || event.isPast ? new Date(event.date).toLocaleDateString() : new Date(event.date).toLocaleString()}</p>
                   <p>📍 {event.location}</p>
                 </div>
 
@@ -511,7 +527,7 @@ export default function EventsPage() {
       {/* CREATE EVENT / HISTORY MODAL */}
       <ModalPortal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)}>
         <div
-          className="relative w-full max-w-lg rounded-[36px] p-8 space-y-6 text-slate-100 border border-white/25 shadow-[0_0_100px_rgba(220,38,38,0.3)] overflow-hidden max-h-[90vh] overflow-y-auto"
+          className="relative w-full max-w-lg rounded-2xl p-8 space-y-6 text-slate-100 border border-white/25 shadow-[0_0_100px_rgba(220,38,38,0.3)] overflow-hidden max-h-[90vh] overflow-y-auto"
           style={{
             background: 'radial-gradient(circle at 50% 10%, rgba(127, 29, 29, 0.45) 0%, rgba(10, 4, 4, 0.95) 90%)',
             backdropFilter: 'blur(40px) saturate(200%)',
@@ -531,7 +547,10 @@ export default function EventsPage() {
           <div className="flex gap-2 mb-4">
             <button
               type="button"
-              onClick={() => setCreateMode('upcoming')}
+              onClick={() => {
+                setCreateMode('upcoming');
+                setForm((prev) => ({ ...prev, date: '' }));
+              }}
               className={`flex-1 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
                 createMode === 'upcoming'
                   ? 'bg-red-600/30 border border-red-500/50 text-red-300'
@@ -542,7 +561,10 @@ export default function EventsPage() {
             </button>
             <button
               type="button"
-              onClick={() => setCreateMode('past')}
+              onClick={() => {
+                setCreateMode('past');
+                setForm((prev) => ({ ...prev, date: '' }));
+              }}
               className={`flex-1 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
                 createMode === 'past'
                   ? 'bg-amber-500/30 border border-amber-500/50 text-amber-300'
@@ -581,9 +603,9 @@ export default function EventsPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">{createMode === 'upcoming' ? 'DATE & TIME (must be in the future)' : 'EVENT DATE (in the past)'}</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">{createMode === 'upcoming' ? 'DATE & TIME ' : 'EVENT DATE'}</label>
                 <input
-                  type="datetime-local"
+                  type={createMode === 'upcoming' ? 'datetime-local' : 'date'}
                   value={form.date}
                   onChange={(e) => setForm({ ...form, date: e.target.value })}
                   required
@@ -672,7 +694,7 @@ export default function EventsPage() {
       {/* EDIT EVENT MODAL */}
       <ModalPortal isOpen={Boolean(editingEvent)} onClose={() => setEditingEvent(null)}>
         <div
-          className="relative w-full max-w-lg rounded-[36px] p-8 space-y-6 text-slate-100 border border-white/25 shadow-[0_0_100px_rgba(245,158,11,0.25)] overflow-hidden max-h-[90vh] overflow-y-auto"
+          className="relative w-full max-w-lg rounded-2xl p-8 space-y-6 text-slate-100 border border-white/25 shadow-[0_0_100px_rgba(245,158,11,0.25)] overflow-hidden max-h-[90vh] overflow-y-auto"
           style={{
             background: 'radial-gradient(circle at 50% 10%, rgba(245, 158, 11, 0.35) 0%, rgba(10, 4, 4, 0.95) 90%)',
             backdropFilter: 'blur(40px) saturate(200%)',
@@ -714,9 +736,11 @@ export default function EventsPage() {
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">Date & Time</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">
+                  {editingEvent?.isPast || (editingEvent?.date && new Date(editingEvent.date) < new Date()) ? 'Event Date' : 'Date & Time'}
+                </label>
                 <input
-                  type="datetime-local"
+                  type={editingEvent?.isPast || (editingEvent?.date && new Date(editingEvent.date) < new Date()) ? 'date' : 'datetime-local'}
                   value={editForm.date}
                   onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
                   required

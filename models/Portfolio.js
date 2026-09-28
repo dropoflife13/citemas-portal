@@ -20,7 +20,7 @@ const portfolioSchema = new mongoose.Schema({
   },
   specialization: {
     type: String,
-    enum: ['traditional_arts', 'digital_arts', 'voice_acting', 'video_editing', 'photography'],
+    enum: ['traditional_arts', 'digital_arts', 'animation', 'voice_acting', 'videography', 'photography'],
     required: true,
   },
   mediaUrl: {

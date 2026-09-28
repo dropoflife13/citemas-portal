@@ -146,7 +146,8 @@ export default function ProfileEditModal({
                   <option value="traditional_arts">Traditional Arts</option>
                   <option value="digital_arts">Digital Arts</option>
                   <option value="voice_acting">Voice Acting</option>
-                  <option value="video_editing">Video Editing</option>
+                  <option value="animation">Animation</option>
+                  <option value="videography">Videography</option>
                   <option value="photography">Photography</option>
                 </select>
               </div>

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Achievement from '@/models/Achievement';
+import '@/models/User';
 import { getUserFromRequest } from '@/lib/auth';
 import { logActivity } from '@/lib/logActivity';
 

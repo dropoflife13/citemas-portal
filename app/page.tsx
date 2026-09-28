@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
+import { SPECIALIZATIONS } from '@/lib/specializations';
+import SpecializationCard from '@/components/SpecializationCard';
 
 type OfficerRecord = {
   _id: string;
@@ -299,6 +301,20 @@ export default function Home() {
                 <div className="text-white font-bold text-xs uppercase tracking-wider mb-1">{stat.label}</div>
                 <div className="text-slate-500 text-[11px] font-light">{stat.detail}</div>
               </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Specializations Section */}
+        <section className="max-w-5xl mx-auto px-6 py-12 mb-20">
+          <div className="text-center mb-10">
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-red-500">What We Do</span>
+            <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight mt-1 text-white">Specializations</h2>
+            <p className="text-slate-400 text-xs mt-1">Explore the creative disciplines we teach and practice.</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {SPECIALIZATIONS.map((spec) => (
+              <SpecializationCard key={spec.key} spec={spec} />
             ))}
           </div>
         </section>
