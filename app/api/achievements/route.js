@@ -3,6 +3,7 @@ import connectDB from '@/lib/mongodb';
 import Achievement from '@/models/Achievement';
 import '@/models/User';
 import { getUserFromRequest } from '@/lib/auth';
+import { getFreshUser } from '@/lib/permissions';
 import { logActivity } from '@/lib/logActivity';
 
 const ALLOWED_CREATORS = ['super_admin', 'teacher', 'adviser', 'officer', 'member', 'alumni'];
@@ -13,28 +14,29 @@ export async function GET(req) {
     await connectDB();
 
     const currentUser = getUserFromRequest(req);
+    const fresh = currentUser ? await getFreshUser(currentUser.id) : null;
     const { searchParams } = new URL(req.url);
 
     const userId = searchParams.get('userId');
     const limitParam = parseInt(searchParams.get('limit') || '0', 10);
     const recent = searchParams.get('recent') === 'true';
 
-    const isStaff = currentUser && STAFF_ROLES.includes(currentUser.role);
+    const isStaff = fresh && STAFF_ROLES.includes(fresh.role);
     const filter = {};
 
     if (userId) {
       filter.user = userId;
       // If querying specific user and not owner/staff, only show public
-      if (!currentUser || (currentUser.id !== userId && !isStaff)) {
+      if (!fresh || (fresh.id !== userId && !isStaff)) {
         filter.visibility = 'public';
       }
     } else {
       // General list / Dashboard
       if (isStaff) {
         // staff can see all
-      } else if (currentUser) {
+      } else if (fresh) {
         // authenticated member sees public + own
-        filter.$or = [{ visibility: 'public' }, { user: currentUser.id }];
+        filter.$or = [{ visibility: 'public' }, { user: fresh.id }];
       } else {
         // unauthenticated sees public only
         filter.visibility = 'public';
@@ -69,8 +71,12 @@ export async function POST(req) {
   if (!currentUser) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
+  const fresh = await getFreshUser(currentUser.id);
+  if (!fresh) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  }
 
-  if (!ALLOWED_CREATORS.includes(currentUser.role)) {
+  if (!ALLOWED_CREATORS.includes(fresh.role)) {
     return NextResponse.json(
       { error: 'You do not have permission to post achievements' },
       { status: 403 }
@@ -108,7 +114,7 @@ export async function POST(req) {
     const safeVisibility = ['public', 'private'].includes(visibility) ? visibility : 'public';
 
     const achievement = new Achievement({
-      user: currentUser.id,
+      user: fresh.id,
       portfolio: portfolio || null,
       title: title.trim(),
       description: description.trim(),

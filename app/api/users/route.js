@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import connectDB from '@/lib/mongodb';
 import { getUserFromRequest } from '@/lib/auth';
+import { getFreshUser } from '@/lib/permissions';
 import User from '@/models/User';
 
 export async function GET(req) {
@@ -14,6 +15,11 @@ export async function GET(req) {
     );
   }
 
+  const fresh = await getFreshUser(currentUser.id);
+  if (!fresh) {
+    return NextResponse.json({ message: 'Not authenticated' }, { status: 401 });
+  }
+
   const canView = [
     'super_admin',
     'teacher',
@@ -21,7 +27,7 @@ export async function GET(req) {
     'officer',
     'alumni',
     'member',
-  ].includes(currentUser.role);
+  ].includes(fresh.role);
 
   if (!canView) {
     return NextResponse.json(
@@ -36,12 +42,12 @@ export async function GET(req) {
   try {
     await connectDB();
 
-    // Exclude super_admin from the directory (anonymize)
+    const VISIBLE_ROLES = ['member', 'alumni', 'officer'];
     const users = await User.find({
-      role: { $nin: ['super_admin'] },
+      role: { $in: VISIBLE_ROLES },
     })
       .select(
-        'firstName lastName email role officerPosition yearLevel department specialization bio phone graduationYear avatar'
+        'firstName lastName email role officerPosition yearLevel department specialization bio graduationYear avatar'
       )
       .sort({ role: 1, lastName: 1 })
       .lean(); // return plain objects (easier to serialize)

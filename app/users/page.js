@@ -110,7 +110,11 @@ export default function UsersDirectoryPage() {
     if (!canManageMembers || !member?._id) return;
 
     const draft = roleDrafts[member._id] || {};
-    const nextRole = draft.role || member.role || 'member';
+    const nextRole = draft.role || member.role;
+    if (!nextRole) {
+      showToast?.('Could not determine a role to save.', 'error');
+      return;
+    }
     const nextPosition = draft.officerPosition || member.officerPosition || null;
 
     try {
@@ -350,10 +354,11 @@ export default function UsersDirectoryPage() {
                       </label>
 
                       <select
-                        value={roleDrafts[member._id]?.role || member.role || 'member'}
+                        value={roleDrafts[member._id]?.role || member.role || ''}
                         onChange={(e) => handleRoleDraftChange(member._id, 'role', e.target.value)}
                         className="w-full rounded-xl border border-white/10 bg-[#1a0d0d] px-3 py-2 text-xs text-white focus:border-red-500 focus:outline-none"
                       >
+                        <option value="" disabled>Select role</option>
                         <option value="member">Member</option>
                         <option value="alumni">Alumni</option>
                         <option value="officer">Officer</option>

@@ -2,6 +2,7 @@ import connectDB from '@/lib/mongodb';
 import Portfolio from '@/models/Portfolio';
 import User from '@/models/User';
 import { getUserFromRequest } from '@/lib/auth';
+import { getFreshUser } from '@/lib/permissions';
 import { NextResponse } from 'next/server';
 
 const STAFF_ROLES = ['super_admin', 'teacher', 'adviser', 'officer'];
@@ -13,18 +14,22 @@ export async function GET(req) {
   if (!currentUser) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
+  const fresh = await getFreshUser(currentUser.id);
+  if (!fresh) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  }
 
   try {
     await connectDB();
 
-    if (STAFF_ROLES.includes(currentUser.role)) {
+    if (STAFF_ROLES.includes(fresh.role)) {
       const entries = await Portfolio.find()
         .populate('owner', 'firstName lastName email role studentId department yearLevel')
         .sort({ createdAt: -1 });
       return NextResponse.json(entries);
     }
 
-    if (currentUser.role === 'member' || currentUser.role === 'alumni') {
+    if (fresh.role === 'member' || fresh.role === 'alumni') {
       const entries = await Portfolio.find({ owner: currentUser.id })
         .populate('owner', 'firstName lastName email')
         .sort({ createdAt: -1 });
@@ -43,14 +48,18 @@ export async function POST(req) {
   if (!currentUser) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
-  if (!CAN_CREATE.includes(currentUser.role)) {
+  const fresh = await getFreshUser(currentUser.id);
+  if (!fresh) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  }
+  if (!CAN_CREATE.includes(fresh.role)) {
     return NextResponse.json({ error: 'You do not have permission to submit a portfolio' }, { status: 403 });
   }
 
   try {
     await connectDB();
 
-    if (currentUser.role === 'member') {
+    if (fresh.role === 'member') {
       const count = await Portfolio.countDocuments({ owner: currentUser.id });
       if (count >= MAX_ENTRIES_PER_MEMBER) {
         return NextResponse.json(
@@ -92,7 +101,11 @@ export async function DELETE(req) {
   if (!currentUser) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
-  if (!STAFF_ROLES.includes(currentUser.role)) {
+  const fresh = await getFreshUser(currentUser.id);
+  if (!fresh) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  }
+  if (!STAFF_ROLES.includes(fresh.role)) {
     return NextResponse.json({ error: 'Only staff can delete portfolio entries' }, { status: 403 });
   }
 

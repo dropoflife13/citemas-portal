@@ -63,7 +63,11 @@ export async function POST(req) {
       }
     });
   } catch (err) {
-    console.error('Login error:', err);
+    console.error('[login] error:', {
+      message: err?.message,
+      code: err?.code,
+      name: err?.name,
+    });
     return NextResponse.json({ error: 'Unable to sign in. Please try again.' }, { status: 500 });
   }
 }

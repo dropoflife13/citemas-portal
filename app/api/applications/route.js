@@ -2,7 +2,10 @@ import connectDB from '@/lib/mongodb';
 import Application from '@/models/Application';
 import User from '@/models/User';
 import { getUserFromRequest } from '@/lib/auth';
+import { getFreshUser } from '@/lib/permissions';
 import { NextResponse } from 'next/server';
+
+const REVIEW_ROLES = ['officer', 'teacher', 'adviser', 'super_admin'];
 
 // GET all applications — officers/teachers/admin only
 export async function GET(req) {
@@ -10,7 +13,11 @@ export async function GET(req) {
   if (!currentUser) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
-  if (!['officer', 'teacher', 'adviser', 'super_admin'].includes(currentUser.role)) {
+  const fresh = await getFreshUser(currentUser.id);
+  if (!fresh) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  }
+  if (!REVIEW_ROLES.includes(fresh.role)) {
     return NextResponse.json({ error: 'You do not have permission to view applications' }, { status: 403 });
   }
 

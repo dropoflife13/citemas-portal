@@ -90,6 +90,11 @@ export async function POST(req) {
       { status: 201 }
     );
   } catch (err) {
+    console.error('[register] error:', {
+      message: err?.message,
+      code: err?.code,
+      name: err?.name,
+    });
     if (err?.code === 11000) {
       return NextResponse.json({ error: 'That email or institutional ID is already registered.' }, { status: 400 });
     }

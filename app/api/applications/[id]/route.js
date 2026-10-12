@@ -2,6 +2,7 @@ import connectDB from '@/lib/mongodb';
 import Application from '@/models/Application';
 import User from '@/models/User';
 import { getUserFromRequest } from '@/lib/auth';
+import { getFreshUser } from '@/lib/permissions';
 import { NextResponse } from 'next/server';
 import { logActivity } from '@/lib/logActivity';
 
@@ -13,7 +14,11 @@ export async function PATCH(req, { params }) {
   if (!currentUser) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
-  if (!REVIEW_ROLES.includes(currentUser.role)) {
+  const fresh = await getFreshUser(currentUser.id);
+  if (!fresh) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  }
+  if (!REVIEW_ROLES.includes(fresh.role)) {
     return NextResponse.json({ error: 'You do not have permission to review applications' }, { status: 403 });
   }
 
@@ -84,7 +89,11 @@ export async function DELETE(req, { params }) {
   if (!currentUser) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
   }
-  if (!REVIEW_ROLES.includes(currentUser.role)) {
+  const fresh = await getFreshUser(currentUser.id);
+  if (!fresh) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  }
+  if (!REVIEW_ROLES.includes(fresh.role)) {
     return NextResponse.json({ error: 'You do not have permission to delete applications' }, { status: 403 });
   }
 
