@@ -131,7 +131,7 @@ export default function EventsSpatialShowcase({ token, isHero = true }) {
 
         {/* Footer Meta Row */}
         <div className="relative z-10 flex items-center justify-between pt-3 border-t border-white/[0.08] text-[10px] font-space font-semibold uppercase tracking-wider text-[#86868b]">
-          <span>PHINMA CITEMAS GUILD</span>
+          <span>PHINMA CITEMAS ORG</span>
           <span className="text-[#02d2e3]">STATUS: PRE-EXHIBIT</span>
         </div>
       </div>

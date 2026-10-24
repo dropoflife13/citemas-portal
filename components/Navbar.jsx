@@ -21,41 +21,11 @@ export default function Navbar() {
   const loading = auth?.loading ?? false;
   const router = useRouter();
   const pathname = usePathname();
-  const isHome = pathname === '/';
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [container, setContainer] = useState(null);
-  const [isVisible, setIsVisible] = useState(true);
-  const [isScrolled, setIsScrolled] = useState(false);
 
   useBodyScrollLock(isDrawerOpen);
-
-  // Dynamic Scroll-Aware Header: hide on scroll down, reveal on scroll up, blur past 50px
-  useEffect(() => {
-    let lastScrollY = typeof window !== 'undefined' ? window.scrollY : 0;
-
-    const onScroll = () => {
-      const currentScrollY = window.scrollY;
-
-      // Blur trigger (> 50px)
-      setIsScrolled(currentScrollY > 50);
-
-      // Scroll direction & visibility
-      if (currentScrollY <= 15) {
-        setIsVisible(true);
-      } else if (currentScrollY > lastScrollY && currentScrollY > 75) {
-        setIsVisible(false); // scrolling down
-      } else if (currentScrollY < lastScrollY) {
-        setIsVisible(true); // scrolling up
-      }
-
-      lastScrollY = currentScrollY;
-    };
-
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => window.removeEventListener('scroll', onScroll);
-  }, []);
 
   // Setup SSR-safe portal container
   useEffect(() => {
@@ -106,68 +76,59 @@ export default function Navbar() {
         { href: '/portfolio', label: 'Portfolio' },
       ];
 
-  const centerLinkClass = 'text-white/70 transition-colors duration-200 hover:text-white';
-
   return (
-    <nav
-      className={`fixed top-0 left-0 w-full z-50 text-[12px] font-semibold uppercase tracking-widest transition-transform duration-300 ${
-        isVisible || isDrawerOpen ? 'translate-y-0' : '-translate-y-full'
-      } ${
-        isScrolled
-          ? 'backdrop-blur-xl bg-[#090a0b]/80 border-b border-white/10'
-          : 'bg-transparent border-b border-transparent'
-      }`}
-    >
-      <div className="grid w-full grid-cols-[auto_1fr_auto] items-center gap-8 px-8 py-4 md:px-12">
-        {/* Left — Logo Brand */}
-        <Link
-          href="/"
-          className="group flex shrink-0 items-center gap-3.5 transition-transform duration-150 active:scale-95"
-        >
-          <div className="relative flex h-10 w-10 items-center justify-center transition-all duration-200 group-hover:scale-105">
-            <img
-              src="/logo.png"
-              alt="CITEMAS Logo"
-              className="h-full w-full object-contain filter drop-shadow-[0_4px_12px_rgba(217,41,41,0.5)]"
-            />
-          </div>
-          <span
-            className="block text-xl font-black leading-none tracking-[-0.06em] transition-colors duration-200 group-hover:text-red-400"
-            style={{ color: CITEMAS_CREAM, fontFamily: 'Fraunces, Georgia, serif' }}
-          >
-            CITEMAS
-          </span>
-        </Link>
-
-        {/* Center — Primary navigation links (Screens ≥ 1024px) */}
-        <div className="hidden items-center justify-center gap-8 lg:flex xl:gap-10">
-          {loading ? (
-            <div className="flex animate-pulse items-center gap-8">
-              <div className="h-3 w-16 rounded-full bg-white/10" />
-              <div className="h-3 w-16 rounded-full bg-white/10" />
-              <div className="h-3 w-16 rounded-full bg-white/10" />
-            </div>
-          ) : (
-            centerLinks.map((link) => {
-              const isActive = pathname === link.href;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={`relative py-1 transition-all duration-200 hover:scale-105 inline-block ${
-                    isActive
-                      ? 'text-red-500 font-bold after:absolute after:bottom-[-4px] after:left-0 after:right-0 after:h-[2px] after:bg-red-500 after:rounded-full'
-                      : 'text-white/70 hover:text-white'
-                  }`}
-                >
-                  {link.label}
-                </Link>
-              );
-            })
-          )}
+    <nav className="w-full h-16 md:h-20 px-6 flex items-center justify-between border-b border-white/10 bg-white/5 backdrop-blur-md text-[12px] font-semibold uppercase tracking-widest">
+      {/* Left — Logo Brand */}
+      <Link
+        href="/"
+        className="group flex shrink-0 items-center gap-3.5 transition-transform duration-150 active:scale-95"
+      >
+        <div className="relative flex h-9 w-9 items-center justify-center transition-all duration-200 group-hover:scale-105">
+          <img
+            src="/logo.png"
+            alt="CITEMAS Logo"
+            className="h-full w-full object-contain filter drop-shadow-[0_4px_12px_rgba(217,41,41,0.5)]"
+          />
         </div>
+        <span
+          className="block text-xl font-black leading-none tracking-[-0.06em] transition-colors duration-200 group-hover:text-red-400"
+          style={{ color: CITEMAS_CREAM, fontFamily: 'Fraunces, Georgia, serif' }}
+        >
+          CITEMAS
+        </span>
+      </Link>
 
-        {/* Right — Auth / profile actions (Screens ≥ 1024px) */}
+      {/* Center — Primary navigation links (Screens ≥ 1024px) */}
+      <div className="hidden items-center justify-center gap-8 lg:flex xl:gap-10">
+        {loading ? (
+          <div className="flex animate-pulse items-center gap-8">
+            <div className="h-3 w-16 rounded-full bg-white/10" />
+            <div className="h-3 w-16 rounded-full bg-white/10" />
+            <div className="h-3 w-16 rounded-full bg-white/10" />
+          </div>
+        ) : (
+          centerLinks.map((link) => {
+            const isActive = pathname === link.href;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`relative py-1 transition-all duration-200 hover:scale-105 inline-block ${
+                  isActive
+                    ? 'text-red-500 font-bold after:absolute after:bottom-[-4px] after:left-0 after:right-0 after:h-[2px] after:bg-red-500 after:rounded-full'
+                    : 'text-white/70 hover:text-white'
+                }`}
+              >
+                {link.label}
+              </Link>
+            );
+          })
+        )}
+      </div>
+
+      {/* Right — Actions / Profile & Mobile Menu Toggle */}
+      <div className="flex items-center gap-3">
+        {/* Desktop actions (Screens ≥ 1024px) */}
         <div className="hidden items-center justify-end gap-3 lg:flex">
           {loading ? (
             <div className="h-8 w-24 animate-pulse rounded-full bg-white/10" />
@@ -235,7 +196,7 @@ export default function Navbar() {
         </div>
 
         {/* Mobile Hamburger Button (Screens < 1024px) */}
-        <div className="col-start-3 flex items-center justify-self-end lg:hidden">
+        <div className="flex items-center lg:hidden">
           <button
             onClick={() => setIsDrawerOpen(true)}
             className="flex items-center justify-center rounded-xl p-2 text-white/80 transition-all duration-150 hover:bg-white/[0.08] hover:text-white active:scale-95"
