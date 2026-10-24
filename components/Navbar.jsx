@@ -233,19 +233,6 @@ export default function Navbar() {
                     LOG OUT
                   </span>
                 </div>
-
-                {/* Logged-in Primary CTA: Studio Hub */}
-                <Link
-                  href="/dashboard"
-                  className="group relative inline-flex items-center justify-center gap-2 px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest text-white overflow-hidden transition-all duration-300 shadow-[0_0_20px_rgba(220,38,38,0.35)] hover:shadow-[0_0_30px_rgba(234,88,12,0.55)] active:scale-95 border border-red-500/40"
-                >
-                  <span className="absolute inset-0 bg-gradient-to-r from-red-600 via-red-500 to-orange-500 transition-transform duration-300 group-hover:scale-105" />
-                  <span className="absolute inset-0 opacity-0 group-hover:opacity-100 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.25)_0%,transparent_70%)] transition-opacity duration-300" />
-                  <span className="relative z-10 flex items-center gap-1.5 font-mono text-[11px] font-extrabold tracking-wider">
-                    <span>Studio Hub</span>
-                    <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
-                  </span>
-                </Link>
               </>
             ) : (
               <>
