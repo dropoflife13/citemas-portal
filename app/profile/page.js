@@ -6,6 +6,17 @@ import { useAuth } from '@/lib/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Camera, Edit3, User, CheckCircle2 } from 'lucide-react';
 
+const ROLE_BADGES = {
+  super_admin: { label: 'Admin', style: 'border-red-500/50 bg-red-500/20 text-red-300' },
+  officer: { label: 'Officer', style: 'border-amber-500/40 bg-amber-500/10 text-amber-300' },
+  teacher: { label: 'Teacher', style: 'border-purple-500/40 bg-purple-500/10 text-purple-300' },
+  adviser: { label: 'Adviser', style: 'border-purple-500/40 bg-purple-500/10 text-purple-300' },
+  member: { label: 'Member', style: 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300' },
+  alumni: { label: 'Alumni', style: 'border-blue-500/40 bg-blue-500/10 text-blue-300' },
+  applicant: { label: 'Applicant', style: 'border-amber-500/30 bg-amber-500/10 text-amber-200' },
+  user: { label: 'Student', style: 'border-slate-500/30 bg-slate-500/10 text-slate-300' },
+};
+
 export default function ProfilePage() {
   const { user: authUser, token, loading: authLoading, updateUser } = useAuth();
   const router = useRouter();
@@ -215,9 +226,14 @@ export default function ProfilePage() {
 
                 <div className="space-y-1.5 pt-2">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full border border-red-500/30 bg-red-500/10 px-3 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] text-red-300">
-                      {profile.role === 'super_admin' ? 'Admin' : 'Member'}
-                    </span>
+                    {(() => {
+                      const badge = ROLE_BADGES[profile.role] || { label: profile.role || 'Student', style: 'border-slate-500/30 bg-slate-500/10 text-slate-300' };
+                      return (
+                        <span className={`rounded-full border px-3 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] ${badge.style}`}>
+                          {badge.label}
+                        </span>
+                      );
+                    })()}
 
                     {profile.officerPosition && (
                       <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-3 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] text-amber-200 capitalize">

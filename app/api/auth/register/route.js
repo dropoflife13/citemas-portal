@@ -54,6 +54,7 @@ export async function POST(req) {
       // Staff accounts are verified before they receive teacher/adviser permissions.
       role: accountType === 'student' ? 'user' : 'applicant',
       staffApprovalStatus: accountType === 'student' ? 'not_applicable' : 'pending',
+      applicationStatus: 'not_applied',
     });
     await newUser.save();
 
@@ -77,6 +78,7 @@ export async function POST(req) {
           lastName,
           email,
           role: newUser.role,
+          applicationStatus: newUser.applicationStatus,
           accountType: newUser.accountType,
           staffApprovalStatus: newUser.staffApprovalStatus,
           officerPosition: newUser.officerPosition,

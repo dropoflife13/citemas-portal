@@ -52,6 +52,7 @@ export async function POST(req) {
         lastName: user.lastName,
         email: user.email,
         role: user.role,
+        applicationStatus: user.applicationStatus,
         accountType: user.accountType,
         staffApprovalStatus: user.staffApprovalStatus,
         officerPosition: user.officerPosition,

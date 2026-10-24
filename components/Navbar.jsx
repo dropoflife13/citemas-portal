@@ -150,7 +150,7 @@ export default function Navbar() {
                 <span>{user.firstName}</span>
                 {user.role && (
                   <span className="text-[10px] opacity-70 uppercase font-black">
-                    ({user.role})
+                    ({user.role === 'user' ? 'student' : user.role.replace('_', ' ')})
                   </span>
                 )}
               </Link>
@@ -280,7 +280,7 @@ export default function Navbar() {
                       </span>
                       {user.role && (
                         <span className="text-[10px] text-red-400 uppercase font-black tracking-wider">
-                          {user.role.replace('_', ' ')}
+                          {user.role === 'user' ? 'Student' : user.role.replace('_', ' ')}
                         </span>
                       )}
                     </div>

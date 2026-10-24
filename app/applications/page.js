@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, Fragment } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   CheckCircle2,
@@ -46,10 +47,17 @@ export default function ApplicationsPage() {
     portfolioLink: '',
   });
   const [formError, setFormError] = useState('');
+  const [appStatusData, setAppStatusData] = useState({
+    status: null,
+    hasApplication: false,
+    application: null,
+  });
 
   const isStaff = ['super_admin', 'teacher', 'adviser', 'officer'].includes(user?.role);
-  const isApplicant = user?.role === 'applicant';
-  const canApply = user && !isStaff && !isApplicant;
+  const isMember = user?.role === 'member' || appStatusData.status === 'approved';
+  const isApplicant = user?.role === 'applicant' || appStatusData.status === 'pending';
+  const isRejected = appStatusData.status === 'rejected';
+  const canApply = Boolean(user && !isStaff && !isApplicant && !isMember);
 
   async function loadApplications() {
     try {
@@ -83,7 +91,23 @@ export default function ApplicationsPage() {
     if (user && token && isStaff) {
       loadApplications();
     } else if (user && token) {
-      setLoading(false);
+      fetch('/api/applications/status', {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (data) {
+            setAppStatusData({
+              status: data.status,
+              hasApplication: data.hasApplication,
+              application: data.application,
+            });
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          setLoading(false);
+        });
     }
   }, [authLoading, user, token, isStaff, router]);
 
@@ -213,18 +237,18 @@ export default function ApplicationsPage() {
             </h1>
           </div>
 
-          {canApply && (
+          {(canApply || isRejected) && (
             <button
               onClick={() => setShowForm((prev) => !prev)}
               className="rounded-xl bg-gradient-to-r from-red-600 to-red-800 px-6 py-3 text-xs font-black uppercase tracking-[0.18em] text-white shadow-lg shadow-red-900/40 border border-white/20 transition-all hover:scale-[1.02] active:scale-95"
             >
-              {showForm ? 'Cancel Application' : '+ Submit Application'}
+              {showForm ? 'Cancel Application' : (isRejected ? '+ Re-apply for Membership' : '+ Submit Application')}
             </button>
           )}
         </div>
 
         {/* Application Form */}
-        {canApply && showForm && (
+        {(canApply || isRejected) && showForm && (
           <form onSubmit={handleSubmit} className="rounded-[28px] border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.02] p-8 shadow-[0_30px_70px_rgba(0,0,0,0.6)] backdrop-blur-2xl animate-fadeIn">
             <h2 className="text-xl font-black uppercase tracking-[0.18em] text-white mb-6">New Guild Application</h2>
             
@@ -285,13 +309,116 @@ export default function ApplicationsPage() {
           </form>
         )}
 
-        {/* Applicant Status Notice */}
-        {isApplicant && !canApply && (
-          <div className="rounded-[28px] border border-amber-500/30 bg-amber-500/10 p-6 backdrop-blur-xl text-amber-100 flex items-start gap-4">
-            <Clock3 size={24} className="text-amber-300 shrink-0 mt-0.5" />
+        {/* Approved Member Status Card */}
+        {isMember && !isStaff && (
+          <div className="rounded-[28px] border border-emerald-500/30 bg-gradient-to-br from-emerald-500/[0.08] to-white/[0.02] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-2xl space-y-5 animate-fadeIn">
+            <div className="flex items-center gap-3.5">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-emerald-500/40 bg-emerald-500/10 text-emerald-300">
+                <CheckCircle2 size={24} />
+              </div>
+              <div>
+                <span className="inline-block rounded-full border border-emerald-500/40 bg-emerald-500/20 px-3 py-0.5 text-[10px] font-black uppercase tracking-widest text-emerald-200">
+                  Membership Active & Verified
+                </span>
+                <h2 className="text-2xl font-black text-white">Official CITEMAS Member</h2>
+              </div>
+            </div>
+            <p className="text-sm text-white/70 max-w-2xl leading-relaxed">
+              Congratulations! Your membership application has been approved. You have full access to the member directory, student creative portfolios, community events, and studio exhibitions.
+            </p>
+            <div className="flex flex-wrap items-center gap-3 pt-2">
+              <Link
+                href="/users"
+                className="rounded-xl bg-gradient-to-r from-red-600 to-red-800 px-5 py-3 text-xs font-black uppercase tracking-wider text-white shadow-lg transition hover:brightness-110 active:scale-95"
+              >
+                Browse Member Directory
+              </Link>
+              <Link
+                href="/portfolio"
+                className="rounded-xl border border-white/15 bg-white/[0.04] px-5 py-3 text-xs font-black uppercase tracking-wider text-white hover:bg-white/10 transition active:scale-95"
+              >
+                View Student Portfolios
+              </Link>
+              <Link
+                href="/profile"
+                className="rounded-xl border border-transparent px-4 py-3 text-xs font-semibold text-white/60 hover:text-white transition"
+              >
+                My Profile
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* Applicant Under Review Card */}
+        {isApplicant && !isStaff && (
+          <div className="rounded-[28px] border border-amber-500/30 bg-gradient-to-br from-amber-500/[0.08] to-white/[0.02] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-2xl text-amber-100 flex items-start gap-4 animate-fadeIn">
+            <Clock3 size={28} className="text-amber-300 shrink-0 mt-0.5" />
+            <div className="space-y-2">
+              <span className="inline-block rounded-full border border-amber-500/40 bg-amber-500/20 px-3 py-0.5 text-[10px] font-black uppercase tracking-widest text-amber-200">
+                Application Under Review
+              </span>
+              <h2 className="text-xl font-bold text-white">Application Submitted Successfully</h2>
+              <p className="text-xs text-amber-100/80 leading-relaxed max-w-xl">
+                Your guild application {appStatusData.application?.specialization ? `for ${SPECIALIZATION_LABELS[appStatusData.application.specialization] || appStatusData.application.specialization}` : ''} has been received and is currently under review by our executive officers and advisers. Once reviewed, your role will update automatically.
+              </p>
+              <div className="pt-2">
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center gap-2 rounded-xl border border-white/15 bg-white/[0.06] px-4 py-2 text-xs font-bold text-white hover:bg-white/10 transition"
+                >
+                  Return to Dashboard
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Rejected Application Card */}
+        {isRejected && !showForm && !isStaff && (
+          <div className="rounded-[28px] border border-red-500/30 bg-gradient-to-br from-red-500/[0.08] to-white/[0.02] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-2xl text-red-100 flex items-start gap-4 animate-fadeIn">
+            <XCircle size={28} className="text-red-300 shrink-0 mt-0.5" />
+            <div className="space-y-2">
+              <span className="inline-block rounded-full border border-red-500/40 bg-red-500/20 px-3 py-0.5 text-[10px] font-black uppercase tracking-widest text-red-200">
+                Application Update
+              </span>
+              <h2 className="text-xl font-bold text-white">Previous Application Not Approved</h2>
+              <p className="text-xs text-red-100/80 leading-relaxed max-w-xl">
+                Your previous membership application was not approved. You are welcome to revise your portfolio link and motivation letter and submit a new application for review.
+              </p>
+              <div className="pt-2">
+                <button
+                  onClick={() => setShowForm(true)}
+                  className="rounded-xl bg-gradient-to-r from-red-600 to-red-800 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-white shadow-lg transition hover:brightness-110 active:scale-95"
+                >
+                  Re-apply for Membership
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Student Onboarding Card (Not Applied Yet) */}
+        {canApply && !showForm && !isStaff && (
+          <div className="rounded-[28px] border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-8 shadow-[0_25px_60px_rgba(0,0,0,0.5)] backdrop-blur-2xl text-center space-y-5 max-w-2xl mx-auto py-12 animate-fadeIn">
+            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-red-500/30 bg-red-500/10 text-red-400">
+              <FileText size={28} />
+            </div>
+            <div className="space-y-2">
+              <span className="inline-block rounded-full border border-red-500/30 bg-red-500/10 px-3 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] text-red-300">
+                Student Account
+              </span>
+              <h2 className="text-2xl font-black text-white">Apply for CITEMAS Guild Membership</h2>
+              <p className="text-xs text-white/70 max-w-md mx-auto leading-relaxed">
+                You are currently registered with a Student account. Choose your creative specialization, submit your motivation statement and portfolio link, and apply to become an official CITEMAS member.
+              </p>
+            </div>
             <div>
-              <p className="text-base font-bold">Application Submitted Successfully</p>
-              <p className="mt-1 text-xs text-amber-100/80">Your application is currently under review by our officers. We will update your role once reviewed.</p>
+              <button
+                onClick={() => setShowForm(true)}
+                className="rounded-xl bg-gradient-to-r from-red-600 to-red-800 px-6 py-3 text-xs font-black uppercase tracking-[0.18em] text-white shadow-lg shadow-red-900/40 border border-white/20 transition-all hover:scale-[1.02] active:scale-95"
+              >
+                + Start Application
+              </button>
             </div>
           </div>
         )}

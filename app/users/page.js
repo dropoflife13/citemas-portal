@@ -300,9 +300,11 @@ export default function UsersDirectoryPage() {
                           ? 'border-red-500/50 bg-red-500/20 text-red-300' 
                           : member.role === 'officer' || member.isOfficer 
                           ? 'border-amber-500/40 bg-amber-500/10 text-amber-300'
-                          : 'border-red-500/30 bg-red-500/10 text-red-300'
+                          : member.role === 'alumni'
+                          ? 'border-blue-500/40 bg-blue-500/10 text-blue-300'
+                          : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'
                       }`}>
-                        {member.role === 'super_admin' ? 'Admin' : member.role === 'officer' || member.isOfficer ? 'Officer' : 'Member'}
+                        {member.role === 'super_admin' ? 'Admin' : member.role === 'officer' || member.isOfficer ? 'Officer' : member.role === 'alumni' ? 'Alumni' : 'Member'}
                       </span>
                       {member.yearLevel && (
                         <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.18em] text-white/70">
