@@ -582,282 +582,245 @@ export default function ApplicationsPage() {
               </div>
             </div>
 
-            <div className="overflow-hidden rounded-[28px] border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.02] shadow-[0_30px_70px_rgba(0,0,0,0.6)] backdrop-blur-2xl">
-              <div className="overflow-x-auto">
-                <table className="min-w-full border-collapse text-left">
-                  <thead className="bg-black/60 text-red-200/70 border-b border-white/10">
-                    <tr>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em]">Applicant</th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em]">Academic Context</th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em]">Specialization</th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em]">Portfolio</th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em]">Status</th>
-                      <th className="px-6 py-4 text-[10px] font-black uppercase tracking-[0.2em]">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/10">
-                    {loading ? (
-                      <tr>
-                        <td colSpan="6" className="px-6 py-12 text-center text-red-200/50 font-medium">Loading applications...</td>
-                      </tr>
-                    ) : filteredApplications.length === 0 ? (
-                      <tr>
-                        <td colSpan="6" className="px-6 py-16 text-center text-slate-400">
-                          <div className="flex flex-col items-center gap-3">
-                            <UserCheck size={36} className="text-slate-600" />
-                            <div className="text-sm font-bold text-slate-300">
-                              {applications.length === 0
-                                ? 'No applications have been submitted yet.'
-                                : 'No applications match your active filter or search.'}
-                            </div>
-                            <p className="text-xs text-slate-500 max-w-sm">
-                              {applications.length === 0
-                                ? 'When students apply for guild membership, their submissions will appear here for review.'
-                                : 'Try adjusting your search criteria or resetting filters to see other records.'}
-                            </p>
-                          </div>
-                        </td>
-                      </tr>
-                    ) : (
-                      filteredApplications.map((app) => {
-                        const applicant = app.applicant || {};
-                        const applicantId = applicant._id || app.applicant;
-                        const isSelf = String(applicantId) === String(user?.id);
-                        const status = app.status || 'pending';
-                        const isExpanded = expandedId === app._id;
-                        const isDeleting = confirmDeleteId === app._id;
-                        const isDenying = confirmDenyId === app._id;
+            {/* Sleek Editorial Vertical List (No HTML Table) */}
+            <div className="border-t border-white/10 divide-y divide-white/10">
+              {loading ? (
+                <div className="py-16 text-center text-red-200/50 font-mono text-xs">
+                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-red-500/30 border-t-red-500 mx-auto mb-2" />
+                  LOADING APPLICATION REPOSITORY...
+                </div>
+              ) : filteredApplications.length === 0 ? (
+                <div className="py-20 text-center">
+                  <UserCheck size={36} className="mx-auto text-slate-600 mb-3" />
+                  <div className="font-display text-2xl font-black uppercase text-slate-300">
+                    {applications.length === 0
+                      ? 'No applications submitted yet'
+                      : 'No applications match filter'}
+                  </div>
+                  <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 font-mono">
+                    {applications.length === 0
+                      ? 'When students apply for guild membership, their submissions will appear here.'
+                      : 'Try resetting filters or modifying your search keyword.'}
+                  </p>
+                </div>
+              ) : (
+                filteredApplications.map((app) => {
+                  const applicant = app.applicant || {};
+                  const applicantId = applicant._id || app.applicant;
+                  const isSelf = String(applicantId) === String(user?.id);
+                  const status = app.status || 'pending';
+                  const isExpanded = expandedId === app._id;
+                  const isDeleting = confirmDeleteId === app._id;
+                  const isDenying = confirmDenyId === app._id;
 
-                        return (
-                          <Fragment key={app._id}>
-                            <tr className="hover:bg-white/[0.02] transition-colors align-middle">
-                              <td className="px-6 py-4">
-                                <div className="font-bold text-white flex items-center gap-2">
-                                  <span>{applicant.firstName || 'Unknown'} {applicant.lastName || ''}</span>
-                                  {isSelf && (
-                                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-500/20 text-red-300 border border-red-500/30 uppercase font-black tracking-wider">
-                                      You
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="mt-0.5 text-xs text-slate-400">{applicant.email || 'No email'}</div>
-                              </td>
-
-                              <td className="px-6 py-4 text-xs text-slate-300">
-                                {applicant.studentId ? (
-                                  <div>
-                                    <span className="font-mono text-white/90">{applicant.studentId}</span>
-                                    {applicant.yearLevel && (
-                                      <span className="text-slate-500 ml-1.5">• {applicant.yearLevel} Year</span>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <span className="text-slate-500">Not recorded</span>
-                                )}
-                                {applicant.department && (
-                                  <div className="text-[11px] text-slate-500 truncate max-w-[200px]" title={applicant.department}>
-                                    {applicant.department}
-                                  </div>
-                                )}
-                              </td>
-
-                              <td className="px-6 py-4 text-xs font-medium text-white/80">
-                                {SPECIALIZATION_LABELS[app.specialization] || app.specialization}
-                              </td>
-
-                              <td className="px-6 py-4 text-xs">
-                                {app.portfolioLink ? (
-                                  <a
-                                    href={app.portfolioLink}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="inline-flex items-center gap-1 text-red-400 hover:text-red-300 underline underline-offset-4 font-bold"
-                                  >
-                                    <span>View Portfolio</span>
-                                    <ExternalLink size={11} />
-                                  </a>
-                                ) : (
-                                  <span className="text-slate-600">No link</span>
-                                )}
-                              </td>
-
-                              <td className="px-6 py-4">
-                                <span className={`inline-flex rounded-full px-3 py-1 text-[10px] font-black uppercase tracking-[0.14em] ${STATUS_STYLES[status] || STATUS_STYLES.pending}`}>
-                                  {status}
-                                </span>
-                              </td>
-
-                              <td className="px-6 py-4">
-                                <div className="flex items-center gap-1.5">
-                                  {/* Details toggle */}
-                                  <button
-                                    type="button"
-                                    onClick={() => setExpandedId(isExpanded ? null : app._id)}
-                                    className="inline-flex items-center gap-1 rounded-xl border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-white/80 hover:border-red-400/50 hover:text-white transition-all cursor-pointer"
-                                  >
-                                    <Eye size={12} />
-                                    <span>Details</span>
-                                  </button>
-
-                                  {/* Accept Button */}
-                                  <button
-                                    type="button"
-                                    onClick={() => handleApplicationDecision(app._id, 'approved')}
-                                    disabled={actioningId === app._id || status === 'approved' || isSelf}
-                                    title={isSelf ? 'Self-approval is prohibited' : 'Accept application'}
-                                    className="inline-flex items-center gap-1 rounded-xl bg-emerald-600 px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-white hover:bg-emerald-500 transition-all disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
-                                  >
-                                    <CheckCircle2 size={12} />
-                                    <span>{actioningId === app._id ? '...' : 'Accept'}</span>
-                                  </button>
-
-                                  {/* Deny Button with inline confirm */}
-                                  {isDenying ? (
-                                    <div className="inline-flex items-center gap-1 animate-fadeIn">
-                                      <button
-                                        type="button"
-                                        onClick={() => handleApplicationDecision(app._id, 'rejected')}
-                                        disabled={actioningId === app._id}
-                                        className="rounded-xl bg-red-700 px-2 py-1 text-[9px] font-black uppercase tracking-wider text-white hover:bg-red-600 cursor-pointer"
-                                      >
-                                        Confirm
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() => setConfirmDenyId(null)}
-                                        className="rounded-xl border border-white/10 px-2 py-1 text-[9px] font-medium text-slate-400 hover:text-white cursor-pointer"
-                                      >
-                                        Cancel
-                                      </button>
-                                    </div>
-                                  ) : (
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setConfirmDenyId(app._id);
-                                        setConfirmDeleteId(null);
-                                      }}
-                                      disabled={actioningId === app._id || status === 'rejected' || isSelf}
-                                      title={isSelf ? 'Self-review is prohibited' : 'Deny application'}
-                                      className="inline-flex items-center gap-1 rounded-xl bg-red-600/80 px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-white hover:bg-red-500 transition-all disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
-                                    >
-                                      <XCircle size={12} />
-                                      <span>Deny</span>
-                                    </button>
-                                  )}
-
-                                  {/* Delete Button with inline confirm */}
-                                  {isDeleting ? (
-                                    <div className="inline-flex items-center gap-1 animate-fadeIn">
-                                      <button
-                                        type="button"
-                                        onClick={() => handleDeleteApplication(app._id)}
-                                        disabled={actioningId === app._id}
-                                        className="rounded-xl bg-rose-700 px-2 py-1 text-[9px] font-black uppercase tracking-wider text-white hover:bg-rose-600 cursor-pointer"
-                                      >
-                                        Delete
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() => setConfirmDeleteId(null)}
-                                        className="rounded-xl border border-white/10 px-2 py-1 text-[9px] font-medium text-slate-400 hover:text-white cursor-pointer"
-                                      >
-                                        Cancel
-                                      </button>
-                                    </div>
-                                  ) : (
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        setConfirmDeleteId(app._id);
-                                        setConfirmDenyId(null);
-                                      }}
-                                      disabled={actioningId === app._id}
-                                      title="Delete application record"
-                                      className="inline-flex items-center gap-1 rounded-xl border border-red-500/30 bg-red-500/10 px-2.5 py-1.5 text-[10px] font-black uppercase tracking-[0.16em] text-red-300 hover:bg-red-500/20 hover:text-red-200 transition-all disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
-                                    >
-                                      <Trash2 size={12} />
-                                    </button>
-                                  )}
-                                </div>
-                              </td>
-                            </tr>
-
-                            {/* Expandable Details Drawer */}
-                            {isExpanded && (
-                              <tr key={`${app._id}-details`} className="bg-black/50">
-                                <td colSpan="6" className="px-6 py-6 border-b border-white/10">
-                                  <div className="grid gap-6 md:grid-cols-[1.3fr_0.7fr]">
-                                    <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
-                                      <div className="mb-3 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-red-400">
-                                        <FileText size={14} />
-                                        Motivation Statement
-                                      </div>
-                                      <p className="whitespace-pre-wrap text-xs leading-relaxed text-slate-300">
-                                        {app.motivationLetter || 'No motivation letter provided.'}
-                                      </p>
-
-                                      {app.portfolioLink && (
-                                        <div className="mt-4 pt-4 border-t border-white/10">
-                                          <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">Portfolio Destination</div>
-                                          <a
-                                            href={app.portfolioLink}
-                                            target="_blank"
-                                            rel="noreferrer"
-                                            className="text-xs text-red-400 hover:text-red-300 underline font-mono break-all inline-flex items-center gap-1"
-                                          >
-                                            <span>{app.portfolioLink}</span>
-                                            <ExternalLink size={12} />
-                                          </a>
-                                        </div>
-                                      )}
-                                    </div>
-
-                                    <div className="space-y-3 rounded-2xl border border-white/10 bg-white/[0.02] p-5">
-                                      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-white/60">
-                                        <GraduationCap size={14} />
-                                        Academic & Audit Verification
-                                      </div>
-                                      <div className="space-y-2 text-xs text-slate-300">
-                                        <p><span className="text-slate-500">Full Name:</span> {applicant.firstName || ''} {applicant.lastName || ''}</p>
-                                        <p><span className="text-slate-500">Student ID:</span> {applicant.studentId || 'None'}</p>
-                                        <p><span className="text-slate-500">Department:</span> {applicant.department || 'Not selected'}</p>
-                                        <p><span className="text-slate-500">Year Level:</span> {applicant.yearLevel ? `${applicant.yearLevel} Year` : 'Unassigned'}</p>
-                                        <p><span className="text-slate-500">Submitted:</span> {new Date(app.createdAt).toLocaleString()}</p>
-                                        <p><span className="text-slate-500">Current Role:</span> <span className="font-mono text-white uppercase">{applicant.role || 'user'}</span></p>
-
-                                        {app.reviewedBy && (
-                                          <div className="mt-3 pt-3 border-t border-white/10 text-xs">
-                                            <p className="text-emerald-400 font-semibold">
-                                              Reviewed by {app.reviewedBy.firstName || 'Officer'} {app.reviewedBy.lastName || ''} ({app.reviewedBy.role || 'officer'})
-                                            </p>
-                                            {app.reviewedAt && (
-                                              <p className="text-[11px] text-slate-500">
-                                                On {new Date(app.reviewedAt).toLocaleString()}
-                                              </p>
-                                            )}
-                                          </div>
-                                        )}
-
-                                        {isSelf && (
-                                          <div className="mt-2 rounded-xl border border-red-500/30 bg-red-500/10 p-2 text-[11px] text-red-300 flex items-center gap-1.5">
-                                            <ShieldAlert size={14} className="shrink-0" />
-                                            <span>SEC-05 Invariant: Self-approval is disabled. Another officer or adviser must approve this.</span>
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </div>
-                                </td>
-                              </tr>
+                  return (
+                    <div key={app._id} className="py-6 transition-all duration-300 hover:bg-white/[0.01]">
+                      {/* Main Application Row */}
+                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        {/* Left: Applicant Name (Massive 3xl-5xl font) + Academic Sub-info */}
+                        <div className="space-y-1.5 flex-1 min-w-0">
+                          <div className="flex items-center gap-3">
+                            <h3 className="font-display text-3xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight text-white hover:text-red-400 transition-colors">
+                              {applicant.firstName || 'Unknown'} {applicant.lastName || ''}
+                            </h3>
+                            {isSelf && (
+                              <span className="text-[9px] px-2 py-0.5 rounded-full bg-red-500/20 text-red-300 border border-red-500/40 uppercase font-mono font-bold">
+                                You
+                              </span>
                             )}
-                          </Fragment>
-                        );
-                      })
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-mono text-slate-400">
+                            <span className="text-red-400 font-bold uppercase tracking-wider">
+                              {SPECIALIZATION_LABELS[app.specialization] || app.specialization}
+                            </span>
+                            <span>•</span>
+                            <span>{applicant.email || 'No email'}</span>
+                            {applicant.studentId && (
+                              <>
+                                <span>•</span>
+                                <span>ID: {applicant.studentId}</span>
+                              </>
+                            )}
+                            {applicant.yearLevel && (
+                              <>
+                                <span>•</span>
+                                <span>{applicant.yearLevel} Year</span>
+                              </>
+                            )}
+                            {applicant.department && (
+                              <>
+                                <span>•</span>
+                                <span className="truncate max-w-[200px]">{applicant.department}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Right: Glowing Status Pill + Action Buttons */}
+                        <div className="flex flex-wrap items-center gap-3 shrink-0">
+                          {app.portfolioLink && (
+                            <a
+                              href={app.portfolioLink}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.04] text-xs font-mono text-slate-300 hover:text-white hover:border-white/20 transition-all"
+                            >
+                              <span>Portfolio</span>
+                              <ExternalLink size={11} />
+                            </a>
+                          )}
+
+                          {/* Glowing Status Pill */}
+                          <span className={`inline-flex rounded-full px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.18em] ${STATUS_STYLES[status] || STATUS_STYLES.pending}`}>
+                            {status}
+                          </span>
+
+                          {/* Details Toggle */}
+                          <button
+                            type="button"
+                            onClick={() => setExpandedId(isExpanded ? null : app._id)}
+                            className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3.5 py-1.5 text-[10px] font-mono uppercase tracking-wider text-white/80 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+                          >
+                            <Eye size={12} />
+                            <span>{isExpanded ? 'Close' : 'Inspect'}</span>
+                          </button>
+
+                          {/* Accept Button */}
+                          <button
+                            type="button"
+                            onClick={() => handleApplicationDecision(app._id, 'approved')}
+                            disabled={actioningId === app._id || status === 'approved' || isSelf}
+                            title={isSelf ? 'Self-approval is prohibited' : 'Accept application'}
+                            className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-wider text-white hover:bg-emerald-500 shadow-md shadow-emerald-950/50 transition-all disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
+                          >
+                            <CheckCircle2 size={12} />
+                            <span>{actioningId === app._id ? '...' : 'Accept'}</span>
+                          </button>
+
+                          {/* Deny Button with inline confirm */}
+                          {isDenying ? (
+                            <div className="inline-flex items-center gap-1 animate-fadeIn">
+                              <button
+                                type="button"
+                                onClick={() => handleApplicationDecision(app._id, 'rejected')}
+                                disabled={actioningId === app._id}
+                                className="rounded-full bg-red-700 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-white hover:bg-red-600 cursor-pointer"
+                              >
+                                Confirm
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setConfirmDenyId(null)}
+                                className="rounded-full border border-white/10 px-2.5 py-1 text-[9px] font-medium text-slate-400 hover:text-white cursor-pointer"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setConfirmDenyId(app._id);
+                                setConfirmDeleteId(null);
+                              }}
+                              disabled={actioningId === app._id || status === 'rejected' || isSelf}
+                              title={isSelf ? 'Self-review is prohibited' : 'Deny application'}
+                              className="inline-flex items-center gap-1.5 rounded-full bg-red-600/80 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-wider text-white hover:bg-red-500 transition-all disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
+                            >
+                              <XCircle size={12} />
+                              <span>Deny</span>
+                            </button>
+                          )}
+
+                          {/* Delete Button with inline confirm */}
+                          {isDeleting ? (
+                            <div className="inline-flex items-center gap-1 animate-fadeIn">
+                              <button
+                                type="button"
+                                onClick={() => handleDeleteApplication(app._id)}
+                                disabled={actioningId === app._id}
+                                className="rounded-full bg-rose-700 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-white hover:bg-rose-600 cursor-pointer"
+                              >
+                                Delete
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setConfirmDeleteId(null)}
+                                className="rounded-full border border-white/10 px-2.5 py-1 text-[9px] font-medium text-slate-400 hover:text-white cursor-pointer"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setConfirmDeleteId(app._id);
+                                setConfirmDenyId(null);
+                              }}
+                              disabled={actioningId === app._id}
+                              title="Delete application record"
+                              className="p-2 rounded-full border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-200 transition-all disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Expandable Details Drawer */}
+                      {isExpanded && (
+                        <div className="mt-4 rounded-3xl border border-white/10 bg-[#090a0b]/90 p-6 backdrop-blur-2xl grid gap-6 md:grid-cols-[1.3fr_0.7fr]">
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-red-400">
+                              <FileText size={14} />
+                              MOTIVATION STATEMENT
+                            </div>
+                            <p className="whitespace-pre-wrap text-xs leading-relaxed text-slate-300 font-light">
+                              {app.motivationLetter || 'No motivation letter provided.'}
+                            </p>
+                            {app.portfolioLink && (
+                              <div className="pt-3 border-t border-white/10 text-xs font-mono">
+                                <span className="text-slate-500">Destination: </span>
+                                <a
+                                  href={app.portfolioLink}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-red-400 hover:text-red-300 underline inline-flex items-center gap-1"
+                                >
+                                  {app.portfolioLink}
+                                  <ExternalLink size={11} />
+                                </a>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="space-y-2 border-t md:border-t-0 md:border-l border-white/10 md:pl-6 text-xs font-mono text-slate-400">
+                            <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-white/60 mb-2">
+                              <GraduationCap size={14} />
+                              AUDIT TELEMETRY
+                            </div>
+                            <p><span className="text-slate-500">Submitted:</span> {new Date(app.createdAt).toLocaleString()}</p>
+                            <p><span className="text-slate-500">Role:</span> {applicant.role || 'user'}</p>
+                            {app.reviewedBy && (
+                              <div className="pt-2 text-emerald-400">
+                                Reviewed by {app.reviewedBy.firstName || 'Officer'} ({app.reviewedBy.role || 'officer'})
+                              </div>
+                            )}
+                            {isSelf && (
+                              <div className="mt-2 rounded-xl border border-red-500/30 bg-red-500/10 p-2 text-[11px] text-red-300 flex items-center gap-1.5">
+                                <ShieldAlert size={14} className="shrink-0" />
+                                <span>SEC-05: Self-approval disabled.</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              )}
             </div>
           </div>
         )}

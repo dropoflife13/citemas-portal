@@ -102,113 +102,181 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="relative min-h-screen w-full bg-[#070305] px-4 py-16 text-slate-100 selection:bg-red-500 selection:text-white sm:px-6">
-      <div className="pointer-events-none absolute left-[10%] top-[-5%] h-[500px] w-[500px] rounded-full bg-red-600/10 blur-[140px]" />
-      <div className="pointer-events-none absolute bottom-[-5%] right-[10%] h-[500px] w-[500px] rounded-full bg-orange-600/8 blur-[140px]" />
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.06),rgba(255,255,255,0))]" />
+    <div className="min-h-screen w-full bg-[#070305] text-slate-100 selection:bg-red-500 selection:text-white flex flex-col lg:flex-row relative overflow-hidden">
+      {/* Ambient Red Glows */}
+      <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-red-600/10 rounded-full blur-[160px] pointer-events-none" />
+      <div className="absolute bottom-10 right-10 w-[500px] h-[500px] bg-orange-600/10 rounded-full blur-[160px] pointer-events-none" />
 
-      <div className="relative z-10 mx-auto w-full max-w-2xl rounded-3xl border border-white/10 bg-white/[0.02] p-8 shadow-2xl backdrop-blur-2xl sm:p-12">
-        <div className="mb-8">
-          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-red-500">Join the Community</span>
-          <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">Create Account</h1>
-          <p className="mt-1.5 text-xs text-slate-400">Register as a student or adviser.</p>
+      {/* Left 50%: Massive Editorial Brand & Headline */}
+      <div className="w-full lg:w-1/2 min-h-[35vh] lg:min-h-screen relative p-8 sm:p-14 lg:p-20 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-white/10 bg-[#090a0b]/60 backdrop-blur-3xl z-10">
+        {/* Technical Top Bar */}
+        <div className="flex items-center justify-between text-[11px] font-mono tracking-widest uppercase text-slate-500">
+          <span className="flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-ping" />
+            INITIATION // 02
+          </span>
+          <Link href="/" className="hover:text-white transition-colors">
+            ← RETURN HOME
+          </Link>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <fieldset>
-            <legend className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-300">Account type</legend>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {ACCOUNT_TYPES.map((type) => (
-                <label
-                  key={type.value}
-                  className={`cursor-pointer rounded-2xl border p-3 transition-colors ${
-                    form.accountType === type.value
-                      ? 'border-red-500/70 bg-red-500/10'
-                      : 'border-white/10 bg-white/[0.02] hover:border-white/25'
-                  }`}
-                >
-                  <input className="sr-only" type="radio" name="accountType" value={type.value} checked={form.accountType === type.value} onChange={handleChange} />
-                  <span className="block text-xs font-black uppercase tracking-wider text-white">{type.label}</span>
-                  <span className="mt-1 block text-[10px] leading-relaxed text-slate-400">{type.detail}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
-
-          {!isStudent && (
-            <div className="rounded-2xl border border-amber-400/25 bg-amber-400/5 px-4 py-3 text-xs leading-relaxed text-amber-100/90">
-              Adviser registrations are reviewed before staff permissions are enabled.
-            </div>
-          )}
-
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field label="First Name"><input name="firstName" placeholder="First Name" value={form.firstName} onChange={handleChange} required className={inputClass} /></Field>
-            <Field label="Last Name"><input name="lastName" placeholder="Last Name" value={form.lastName} onChange={handleChange} required className={inputClass} /></Field>
+        {/* Massive Editorial Headline */}
+        <div className="my-auto py-10 space-y-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-red-500/30 bg-red-500/10 text-red-300 text-[10px] font-mono tracking-widest uppercase">
+            CREATIVE COHORT
           </div>
 
-          <Field label="Email Address">
-            <input name="email" type="email" placeholder={isStudent ? 'name@phinmaed.com' : 'name@school.edu'} value={form.email} onChange={handleChange} required className={inputClass} />
-            {isStudent && <p className="mt-1.5 text-[10px] text-slate-500">Student accounts only accept an email ending in @phinmaed.com.</p>}
-          </Field>
+          <h1 className="font-display text-5xl sm:text-7xl lg:text-8xl font-black uppercase tracking-tighter leading-[0.88] text-white">
+            JOIN <br />
+            <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-white lowercase tracking-normal">
+              guild.
+            </span>
+          </h1>
 
-          <Field label="Password">
-            <div className="relative">
-              <input name="password" type={showPassword ? 'text' : 'password'} placeholder="At least 8 characters" value={form.password} onChange={handleChange} minLength={8} required className={`${inputClass} pr-12`} />
-              <button type="button" onClick={() => setShowPassword((current) => !current)} className="absolute right-4 top-1/2 -translate-y-1/2 p-1 text-xs text-slate-400 hover:text-white" aria-label={showPassword ? 'Hide password' : 'Show password'}>
-                {showPassword ? 'Hide' : 'Show'}
-              </button>
-            </div>
-          </Field>
+          <p className="font-sans text-sm sm:text-base text-slate-400 max-w-md font-light leading-relaxed">
+            Register as a student creator or faculty adviser. Uniting digital artists, animators, videographers, photographers, and traditional painters.
+          </p>
+        </div>
 
-          {isStudent ? (
-            <div className="grid gap-5 sm:grid-cols-2">
-              <Field label="Student ID">
-                <input name="studentId" placeholder="04-2122-033338" value={form.studentId} onChange={handleChange} pattern="04-[0-9]{4}-[0-9]{6}" title="Use the format 04-2122-033338" required className={inputClass} />
-              </Field>
-              <Field label="Year Level">
-                <select name="yearLevel" value={form.yearLevel} onChange={handleChange} required className={selectClass}>
-                  <option value="" disabled>Select year</option>
-                  {YEAR_LEVELS.map((year) => <option key={year} value={year}>{year} Year</option>)}
-                </select>
-              </Field>
+        {/* Technical Footer Telemetry */}
+        <div className="flex items-center justify-between text-[10px] font-mono tracking-widest text-slate-500 uppercase border-t border-white/10 pt-4">
+          <span>6 CREATIVE DISCIPLINES</span>
+          <span>CAMPUS COHORT // PHINMA</span>
+        </div>
+      </div>
+
+      {/* Right 50%: Clean Editorial Form with Bottom-Border Inputs */}
+      <div className="w-full lg:w-1/2 min-h-screen flex items-center justify-center p-8 sm:p-14 lg:p-20 relative z-10 overflow-y-auto">
+        <div className="w-full max-w-xl space-y-8 my-auto py-8">
+          <div>
+            <div className="text-[10px] font-mono uppercase tracking-widest text-red-500">ACCOUNT CREATION</div>
+            <h2 className="font-display text-3xl sm:text-4xl font-black uppercase tracking-tight text-white mt-1">
+              Create Guild Account
+            </h2>
+            <p className="text-xs text-slate-400 mt-1 font-mono">
+              Register with your institutional credentials.
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Account Type Selector: Minimal Editorial Toggle */}
+            <fieldset className="space-y-2">
+              <legend className="text-[10px] font-mono uppercase tracking-widest text-slate-400">Account Type</legend>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {ACCOUNT_TYPES.map((type) => (
+                  <label
+                    key={type.value}
+                    className={`cursor-pointer rounded-2xl border p-4 transition-all ${
+                      form.accountType === type.value
+                        ? 'border-red-500/70 bg-red-500/10 shadow-[0_0_15px_rgba(239,68,68,0.2)]'
+                        : 'border-white/10 bg-transparent hover:border-white/20'
+                    }`}
+                  >
+                    <input className="sr-only" type="radio" name="accountType" value={type.value} checked={form.accountType === type.value} onChange={handleChange} />
+                    <span className="block text-xs font-mono font-bold uppercase tracking-wider text-white">{type.label}</span>
+                    <span className="mt-1 block text-[10px] leading-relaxed text-slate-400">{type.detail}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+
+            {!isStudent && (
+              <div className="rounded-xl border border-amber-400/25 bg-amber-400/5 px-4 py-3 text-xs font-mono leading-relaxed text-amber-200">
+                Notice: Adviser registrations are verified by administrators before elevated permissions are granted.
+              </div>
+            )}
+
+            <div className="grid gap-6 sm:grid-cols-2">
+              <Field label="First Name"><input name="firstName" placeholder="First Name" value={form.firstName} onChange={handleChange} required className={inputClass} /></Field>
+              <Field label="Last Name"><input name="lastName" placeholder="Last Name" value={form.lastName} onChange={handleChange} required className={inputClass} /></Field>
             </div>
-          ) : (
-            <Field label="Adviser ID">
-              <input name="staffId" placeholder="Institution-issued staff ID" value={form.staffId} onChange={handleChange} required className={inputClass} />
-              <p className="mt-1.5 text-[10px] text-slate-500">Use the ID issued by the university. Student IDs are not accepted here.</p>
+
+            <Field label="Email Address">
+              <input name="email" type="email" placeholder={isStudent ? 'name@phinmaed.com' : 'name@school.edu'} value={form.email} onChange={handleChange} required className={inputClass} />
+              {isStudent && <p className="mt-1.5 text-[10px] font-mono text-slate-500">Student accounts accept emails ending in @phinmaed.com.</p>}
             </Field>
-          )}
 
-          <Field label="Department">
-            <select name="department" value={form.department} onChange={handleChange} required className={selectClass}>
-              <option value="" disabled>Select department</option>
-              {DEPARTMENTS.map((department) => <option key={department} value={department}>{department}</option>)}
-            </select>
-          </Field>
+            <Field label="Password">
+              <div className="relative">
+                <input name="password" type={showPassword ? 'text' : 'password'} placeholder="At least 8 characters" value={form.password} onChange={handleChange} minLength={8} required className={`${inputClass} pr-12`} />
+                <button type="button" onClick={() => setShowPassword((current) => !current)} className="absolute right-0 top-1/2 -translate-y-1/2 p-1 text-xs font-mono text-slate-400 hover:text-white" aria-label={showPassword ? 'Hide password' : 'Show password'}>
+                  {showPassword ? 'HIDE' : 'SHOW'}
+                </button>
+              </div>
+            </Field>
 
-          {isStudent && (
-            <Field label="Specialization">
-              <select name="specialization" value={form.specialization} onChange={handleChange} required className={selectClass}>
-                <option value="" disabled>Select specialization</option>
-                {SPECIALIZATIONS.map((specialization) => <option key={specialization.value} value={specialization.value}>{specialization.label}</option>)}
+            {isStudent ? (
+              <div className="grid gap-6 sm:grid-cols-2">
+                <Field label="Student ID">
+                  <input name="studentId" placeholder="04-2122-033338" value={form.studentId} onChange={handleChange} pattern="04-[0-9]{4}-[0-9]{6}" title="Use the format 04-2122-033338" required className={inputClass} />
+                </Field>
+                <Field label="Year Level">
+                  <select name="yearLevel" value={form.yearLevel} onChange={handleChange} required className={selectClass}>
+                    <option value="" disabled className="bg-[#090a0b]">Select year</option>
+                    {YEAR_LEVELS.map((year) => <option key={year} value={year} className="bg-[#090a0b]">{year} Year</option>)}
+                  </select>
+                </Field>
+              </div>
+            ) : (
+              <Field label="Adviser ID">
+                <input name="staffId" placeholder="Institution-issued staff ID" value={form.staffId} onChange={handleChange} required className={inputClass} />
+                <p className="mt-1.5 text-[10px] font-mono text-slate-500">Use the ID issued by the university.</p>
+              </Field>
+            )}
+
+            <Field label="Department">
+              <select name="department" value={form.department} onChange={handleChange} required className={selectClass}>
+                <option value="" disabled className="bg-[#090a0b]">Select department</option>
+                {DEPARTMENTS.map((department) => <option key={department} value={department} className="bg-[#090a0b]">{department}</option>)}
               </select>
             </Field>
-          )}
 
-          <button type="submit" disabled={loading} className="mt-2 w-full rounded-2xl bg-gradient-to-r from-red-600 via-red-600 to-orange-600 py-4 text-xs font-bold uppercase tracking-[0.2em] text-white shadow-md shadow-red-950/50 transition-all hover:from-red-500 hover:to-orange-500 hover:shadow-lg hover:shadow-red-600/30 disabled:cursor-not-allowed disabled:opacity-55">
-            {loading ? 'Creating Account...' : `Create ${isStudent ? 'Student' : 'Staff'} Account`}
-          </button>
-        </form>
+            {isStudent && (
+              <Field label="Specialization">
+                <select name="specialization" value={form.specialization} onChange={handleChange} required className={selectClass}>
+                  <option value="" disabled className="bg-[#090a0b]">Select specialization</option>
+                  {SPECIALIZATIONS.map((specialization) => <option key={specialization.value} value={specialization.value} className="bg-[#090a0b]">{specialization.label}</option>)}
+                </select>
+              </Field>
+            )}
 
-        <p className="mt-8 text-center text-xs text-slate-400">Already have an account? <Link href="/login" className="font-semibold text-red-400 underline decoration-red-500/30 underline-offset-4 transition-colors hover:text-red-300">Sign in</Link></p>
+            {/* Massive Full-Width Pill Submit Button with Arrow Icon */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-full bg-gradient-to-r from-red-600 to-orange-600 py-4 px-8 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-red-950/60 hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-3 cursor-pointer disabled:opacity-60"
+            >
+              {loading ? (
+                <span>Creating Account...</span>
+              ) : (
+                <>
+                  <span>Create {isStudent ? 'Student' : 'Staff'} Account</span>
+                  <span className="text-sm font-bold">→</span>
+                </>
+              )}
+            </button>
+          </form>
+
+          <div className="pt-4 border-t border-white/10 text-center text-xs font-mono text-slate-400">
+            ALREADY HAVE AN ACCOUNT?{' '}
+            <Link href="/login" className="font-bold text-red-400 hover:text-red-300 underline underline-offset-4 ml-1">
+              SIGN IN →
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
 
-const inputClass = 'w-full rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3.5 text-sm text-white outline-none transition-all placeholder:text-slate-600 hover:border-white/20 focus:border-red-500/80 focus:bg-white/[0.04] focus:ring-4 focus:ring-red-500/10';
-const selectClass = 'w-full cursor-pointer rounded-2xl border border-white/10 bg-[#0c0507] px-4 py-3.5 text-sm text-white outline-none transition-all hover:border-white/20 focus:border-red-500/80 focus:ring-4 focus:ring-red-500/10';
+const inputClass = 'w-full bg-transparent border-b border-white/20 py-3 text-sm text-white placeholder:text-slate-600 outline-none rounded-none transition-colors focus:border-red-500 font-sans';
+const selectClass = 'w-full cursor-pointer bg-transparent border-b border-white/20 py-3 text-sm text-white outline-none rounded-none transition-colors focus:border-red-500 font-sans';
 
 function Field({ label, children }) {
-  return <div><label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-300">{label}</label>{children}</div>;
+  return (
+    <div className="space-y-1">
+      <label className="block text-[10px] font-mono uppercase tracking-widest text-slate-400">{label}</label>
+      {children}
+    </div>
+  );
 }

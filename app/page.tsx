@@ -302,7 +302,7 @@ export default function Home() {
         <section
           onMouseMove={handleHeroMouseMove}
           onMouseLeave={handleHeroMouseLeave}
-          className="sticky top-0 h-screen w-full flex items-center px-6 sm:px-12 md:px-16 lg:px-24 overflow-hidden relative"
+          className="sticky top-0 min-h-screen h-screen w-full flex flex-col justify-between px-6 sm:px-12 md:px-16 lg:px-24 pt-20 pb-16 overflow-hidden relative"
           style={{
             transform: `scale(${1 - cardProgress[0] * 0.08})`,
             filter: `brightness(${1 - cardProgress[0] * 0.45})`,
@@ -382,66 +382,54 @@ export default function Home() {
             />
           </svg>
 
-          {/* Floating Assets Arranged in Elliptical Path (z-15) */}
-          <div className="absolute inset-0 pointer-events-none z-[15] hidden sm:block overflow-hidden">
+          {/* Floating Assets Arranged Strictly on Right Side (z-10, Clean Images without Text Labels) */}
+          <div className="absolute inset-0 pointer-events-none z-10 hidden sm:block overflow-hidden">
             {/* Floating Asset A: Top Right Orbit */}
             <div
-              className="absolute right-[8%] lg:right-[14%] top-[14%] rotate-6 hover:rotate-0 hover:scale-110 transition-all duration-300 pointer-events-auto cursor-pointer"
+              className="absolute right-[4%] lg:right-[8%] top-[12%] rotate-6 hover:rotate-0 hover:scale-110 transition-all duration-300 pointer-events-auto cursor-pointer"
               style={{
                 transform: `translate3d(${mouseOffset.x * 24}px, ${mouseOffset.y * 18}px, 0) rotate(6deg)`,
               }}
             >
-              <div className="p-1 rounded-2xl bg-black/60 border border-white/20 backdrop-blur-md">
-                <div className="w-36 lg:w-44 h-24 lg:h-28 rounded-xl overflow-hidden relative">
+              <div className="p-1 rounded-2xl bg-black/60 border border-white/20 backdrop-blur-md shadow-2xl">
+                <div className="w-36 lg:w-44 h-24 lg:h-28 rounded-xl overflow-hidden">
                   <img src="/orgpic.jpg" alt="Guild Sprint" className="w-full h-full object-cover filter contrast-110" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                  <span className="absolute bottom-1.5 left-2 text-[9px] font-mono tracking-widest uppercase text-cyan-300">
-                    01 // SPRINT
-                  </span>
                 </div>
               </div>
             </div>
 
             {/* Floating Asset B: Lower Right Orbit */}
             <div
-              className="absolute right-[2%] lg:right-[6%] bottom-[18%] -rotate-12 hover:rotate-0 hover:scale-110 transition-all duration-300 pointer-events-auto cursor-pointer"
+              className="absolute right-[2%] lg:right-[5%] bottom-[20%] -rotate-12 hover:rotate-0 hover:scale-110 transition-all duration-300 pointer-events-auto cursor-pointer"
               style={{
                 transform: `translate3d(${mouseOffset.x * -18}px, ${mouseOffset.y * -14}px, 0) rotate(-12deg)`,
               }}
             >
-              <div className="p-1 rounded-2xl bg-black/60 border border-white/20 backdrop-blur-md">
-                <div className="w-40 lg:w-48 h-28 lg:h-32 rounded-xl overflow-hidden relative">
+              <div className="p-1 rounded-2xl bg-black/60 border border-white/20 backdrop-blur-md shadow-2xl">
+                <div className="w-40 lg:w-48 h-28 lg:h-32 rounded-xl overflow-hidden">
                   <img src="/orgpic2.jpg" alt="Exhibition Gallery" className="w-full h-full object-cover filter contrast-110" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                  <span className="absolute bottom-1.5 left-2 text-[9px] font-mono tracking-widest uppercase text-purple-300">
-                    02 // EXHIBITION
-                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Floating Asset C: Center-Left Accent Orbit */}
+            {/* Floating Asset C: Upper-Right Accent Orbit (Strictly right of center) */}
             <div
-              className="absolute left-[38%] lg:left-[45%] top-[10%] rotate-3 hover:rotate-0 hover:scale-110 transition-all duration-300 pointer-events-auto cursor-pointer hidden md:block"
+              className="absolute right-[22%] lg:right-[26%] top-[8%] rotate-3 hover:rotate-0 hover:scale-110 transition-all duration-300 pointer-events-auto cursor-pointer hidden md:block"
               style={{
                 transform: `translate3d(${mouseOffset.x * 12}px, ${mouseOffset.y * 22}px, 0) rotate(3deg)`,
               }}
             >
-              <div className="p-1 rounded-2xl bg-black/60 border border-white/20 backdrop-blur-md">
-                <div className="w-32 lg:w-36 h-20 lg:h-24 rounded-xl overflow-hidden relative">
+              <div className="p-1 rounded-2xl bg-black/60 border border-white/20 backdrop-blur-md shadow-2xl">
+                <div className="w-32 lg:w-36 h-20 lg:h-24 rounded-xl overflow-hidden">
                   <img src="/orgpic3.jpg" alt="Media Studio" className="w-full h-full object-cover filter contrast-110" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                  <span className="absolute bottom-1.5 left-2 text-[9px] font-mono tracking-widest uppercase text-emerald-300">
-                    03 // STUDIO
-                  </span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* 3D Official CITEMAS Logo Centerpiece (z-10) */}
+          {/* 3D Official CITEMAS Logo Centerpiece (z-20) */}
           <div
-            className="absolute right-[-10%] sm:right-[-5%] top-0 h-full w-full sm:w-[75vw] md:w-[65vw] lg:w-[60vw] min-w-[500px] md:min-w-[620px] lg:min-w-[700px] flex items-center justify-center pointer-events-auto z-10"
+            className="absolute right-[-10%] sm:right-[-5%] top-0 h-full w-full sm:w-[75vw] md:w-[65vw] lg:w-[60vw] min-w-[500px] md:min-w-[620px] lg:min-w-[700px] flex items-center justify-center pointer-events-auto z-20"
             style={{
               transform: `translate3d(${mouseOffset.x * 16}px, ${mouseOffset.y * 12}px, 0)`,
               transition: 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
@@ -458,8 +446,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Hero Typography & CTAs (z-20) */}
-          <div className="relative z-20 w-full max-w-2xl lg:max-w-3xl space-y-7 pointer-events-auto pb-14">
+          {/* Hero Typography & CTAs (z-20) - Centered vertically with zero marquee overlap */}
+          <div className="relative z-20 my-auto w-full max-w-2xl lg:max-w-3xl space-y-7 pointer-events-auto pb-6">
             <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 backdrop-blur-md">
               <span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
               <span className="text-[11px] font-mono tracking-widest text-slate-300 uppercase">

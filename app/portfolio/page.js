@@ -413,17 +413,17 @@ export default function PortfolioPage() {
                   </div>
                 ) : (
                   <div className="relative flex h-64 items-center justify-center rounded-2xl border border-white/10 bg-[#090a0b]/90 overflow-hidden shadow-inner">
-                    {/* Massive Faded Watermark */}
+                    {/* Massive Faded Typographic Watermark (SHOWCASE) */}
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-                      <span className="font-display text-7xl sm:text-8xl font-black uppercase tracking-tighter text-white/[0.04]">
-                        PORTFOLIO
+                      <span className="font-display text-7xl sm:text-8xl lg:text-[150px] font-black uppercase tracking-tighter text-white/[0.05]">
+                        SHOWCASE
                       </span>
                     </div>
                     {/* Faint Blueprint Grid Overlay */}
                     <div
-                      className="absolute inset-0 pointer-events-none opacity-20"
+                      className="absolute inset-0 pointer-events-none opacity-25"
                       style={{
-                        backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+                        backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.12) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.12) 1px, transparent 1px)`,
                         backgroundSize: '32px 32px',
                       }}
                     />
@@ -570,7 +570,7 @@ export default function PortfolioPage() {
             </div>
           )
         ) : displayedEntries.length > 0 ? (
-          <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+          <section className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {displayedEntries.map((entry) => {
               const isOwner = (entry.owner?._id || entry.owner?.id || entry.owner) === currentUserId;
               const canDeleteThis = isStaff || isOwner;
@@ -578,82 +578,90 @@ export default function PortfolioPage() {
               return (
                 <article
                   key={entry._id}
-                  className="group overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.01] shadow-xl transition-all duration-300 hover:border-white/20 flex flex-col justify-between"
+                  className="group relative overflow-hidden rounded-2xl border border-white/10 bg-[#090a0b]/90 hover:border-red-500/50 transition-all duration-500 flex flex-col justify-between"
                 >
-                  <div>
-                    {/* Media Card Preview */}
-                    <div
-                      onClick={() => setSelectedEntry(entry)}
-                      className="overflow-hidden border-b border-white/10 bg-black/60 relative cursor-pointer group"
-                    >
-                      {entry.mediaUrl ? (
-                        entry.mediaUrl.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
-                          <img
-                            src={entry.mediaUrl}
-                            alt={entry.title}
-                            className="h-56 w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                        ) : (
-                          <div className="flex h-56 items-center justify-center bg-gradient-to-br from-red-950/50 to-black text-xs text-slate-300">
-                            External Media File
-                          </div>
-                        )
+                  {/* Full Bleed Image Edge-to-Edge */}
+                  <div
+                    onClick={() => setSelectedEntry(entry)}
+                    className="relative w-full aspect-[4/3] overflow-hidden bg-black/80 cursor-pointer"
+                  >
+                    {entry.mediaUrl ? (
+                      entry.mediaUrl.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
+                        <img
+                          src={entry.mediaUrl}
+                          alt={entry.title}
+                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 filter contrast-105"
+                        />
                       ) : (
-                        <div className="flex h-56 items-center justify-center bg-black/40 text-xs text-slate-500">
-                          No media preview
+                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-red-950/40 to-black text-xs font-mono text-slate-300">
+                          MEDIA ASSET
                         </div>
-                      )}
-
-                      {/* Specialization tag */}
-                      <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-black/75 text-amber-300 backdrop-blur-md border border-white/15">
-                        {SPECIALIZATION_LABELS[entry.specialization] || entry.specialization}
+                      )
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-black/60 text-xs font-mono text-slate-500">
+                        STUDIO EXHIBIT
                       </div>
+                    )}
 
-                      {/* Status indicator if pending */}
-                      {entry.status === 'pending' && (
-                        <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-amber-500/20 text-amber-300 backdrop-blur-md border border-amber-500/40">
-                          Under Review
-                        </div>
-                      )}
+                    {/* Gradient Overlay for Edge-to-Edge Feel */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-transparent opacity-80 group-hover:opacity-60 transition-opacity" />
+
+                    {/* Floating Discipline Badge */}
+                    <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[9px] font-mono uppercase tracking-widest bg-black/80 text-cyan-300 border border-white/15 backdrop-blur-md">
+                      {SPECIALIZATION_LABELS[entry.specialization] || entry.specialization}
                     </div>
 
-                    <div className="space-y-3 p-5">
-                      <div className="flex items-start justify-between gap-2">
-                        <h3 className="text-lg font-black text-white line-clamp-1 group-hover:text-red-300 transition-colors">
-                          {entry.title}
-                        </h3>
-                        {entry.level && (
-                          <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${LEVEL_COLORS[entry.level] || 'text-slate-400'}`}>
-                            {entry.level}
-                          </span>
-                        )}
+                    {/* Status Indicator if Pending */}
+                    {entry.status === 'pending' && (
+                      <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[9px] font-mono uppercase tracking-wider bg-amber-500/20 text-amber-300 backdrop-blur-md border border-amber-500/40">
+                        UNDER REVIEW
                       </div>
+                    )}
 
-                      <p className="line-clamp-2 text-xs leading-relaxed text-slate-400">
-                        {entry.description}
-                      </p>
+                    {/* Hover Inspect Pill */}
+                    <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <span className="px-3 py-1 rounded-full bg-red-600 text-white text-[10px] font-mono uppercase tracking-wider shadow-lg flex items-center gap-1">
+                        <Eye size={11} /> Inspect
+                      </span>
                     </div>
                   </div>
 
-                  <div className="p-5 pt-0">
-                    <div className="flex items-center justify-between gap-3 border-t border-white/10 pt-4 text-xs">
-                      <span className="truncate text-slate-500 text-[11px]">
-                        by {entry.owner?.firstName || entry.applicant?.name || 'Member'} {entry.owner?.lastName || ''}
+                  {/* Metadata Row Below Image with 1px border */}
+                  <div className="p-5 border-t border-white/10 space-y-3 bg-[#090a0b]/95">
+                    <div className="flex items-start justify-between gap-2">
+                      <h3 className="font-display text-xl sm:text-2xl font-black uppercase tracking-tight text-white group-hover:text-red-400 transition-colors line-clamp-1">
+                        {entry.title}
+                      </h3>
+                      {entry.level && (
+                        <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[9px] font-mono uppercase ${LEVEL_COLORS[entry.level] || 'text-slate-400 border-white/10'}`}>
+                          {entry.level}
+                        </span>
+                      )}
+                    </div>
+
+                    {entry.description && (
+                      <p className="line-clamp-2 text-xs font-sans text-slate-400 font-light leading-relaxed">
+                        {entry.description}
+                      </p>
+                    )}
+
+                    <div className="flex items-center justify-between gap-3 pt-3 border-t border-white/10 text-xs font-mono">
+                      <span className="text-slate-500 text-[11px] truncate">
+                        BY // {(entry.owner?.firstName || entry.applicant?.name || 'Member').toUpperCase()} {entry.owner?.lastName?.toUpperCase() || ''}
                       </span>
-                      <div className="flex items-center gap-1.5 shrink-0">
+                      <div className="flex items-center gap-2">
                         <button
                           type="button"
                           onClick={() => setSelectedEntry(entry)}
-                          className="rounded-xl border border-white/10 bg-white/[0.04] px-2.5 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
+                          className="px-3 py-1 rounded-full border border-white/10 bg-white/[0.04] text-[10px] font-mono uppercase text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
                         >
                           View
                         </button>
-
                         {canDeleteThis && (
                           <button
                             type="button"
                             onClick={() => setDeletingId(entry._id)}
-                            className="rounded-xl border border-red-500/20 bg-red-500/10 px-2 py-1.5 text-red-400 hover:text-red-300 hover:bg-red-500/20 transition cursor-pointer"
+                            className="p-1.5 rounded-full border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 transition cursor-pointer"
                             title="Delete artwork"
                           >
                             <Trash2 size={12} />
