@@ -77,143 +77,173 @@ export default function Navbar() {
       ];
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-50 h-16 md:h-20 px-6 flex items-center justify-between border-b border-white/10 bg-[#090a0b]/85 backdrop-blur-md text-[12px] font-semibold uppercase tracking-widest transition-colors duration-200">
-      {/* Left — Logo Brand */}
-      <Link
-        href="/"
-        className="group flex shrink-0 items-center gap-3.5 transition-transform duration-150 active:scale-95"
-      >
-        <div className="relative flex h-9 w-9 items-center justify-center transition-all duration-200 group-hover:scale-105">
-          <img
-            src="/logo.png"
-            alt="CITEMAS Logo"
-            className="h-full w-full object-contain filter drop-shadow-[0_4px_12px_rgba(217,41,41,0.5)]"
-          />
-        </div>
-        <span
-          className="block text-xl font-black leading-none tracking-[-0.06em] transition-colors duration-200 group-hover:text-red-400"
-          style={{ color: CITEMAS_CREAM, fontFamily: 'Fraunces, Georgia, serif' }}
-        >
-          CITEMAS
-        </span>
-      </Link>
-
-      {/* Center — Primary navigation links (Screens ≥ 1024px) */}
-      <div className="hidden items-center justify-center gap-8 lg:flex xl:gap-10">
-        {loading ? (
-          <div className="flex animate-pulse items-center gap-8">
-            <div className="h-3 w-16 rounded-full bg-white/10" />
-            <div className="h-3 w-16 rounded-full bg-white/10" />
-            <div className="h-3 w-16 rounded-full bg-white/10" />
-          </div>
-        ) : (
-          centerLinks.map((link) => {
-            const isActive = pathname === link.href;
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`relative py-1 transition-all duration-200 hover:scale-105 inline-block ${
-                  isActive
-                    ? 'text-red-500 font-bold after:absolute after:bottom-[-4px] after:left-0 after:right-0 after:h-[2px] after:bg-red-500 after:rounded-full'
-                    : 'text-white/70 hover:text-white'
-                }`}
-              >
-                {link.label}
-              </Link>
-            );
-          })
-        )}
-      </div>
-
-      {/* Right — Actions / Profile & Mobile Menu Toggle */}
-      <div className="flex items-center gap-3">
-        {/* Desktop actions (Screens ≥ 1024px) */}
-        <div className="hidden items-center justify-end gap-3 lg:flex">
-          {loading ? (
-            <div className="h-8 w-24 animate-pulse rounded-full bg-white/10" />
-          ) : user ? (
-            <>
-              {/* Admin link — only visible to super_admin */}
-              {user.role === 'super_admin' && (
-                <Link
-                  href="/admin"
-                  className="rounded-full border border-red-500/40 bg-red-500/10 px-3.5 py-1.5 text-[11px] font-black text-red-200 transition-all duration-150 hover:border-red-400 hover:bg-red-500/20 active:scale-95"
-                >
-                  Admin
-                </Link>
-              )}
-
-              {/* Admin notification bell — staff only */}
-              {isStaff && <AdminNotificationBell />}
-
-              {/* User Profile Badge */}
-              <Link
-                href="/profile"
-                className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-[11px] font-semibold text-white transition-all duration-150 hover:border-white/20 hover:bg-white/[0.08] active:scale-95"
-              >
-                <span>👤</span>
-                <span>{user.firstName}</span>
-                {user.role && (
-                  <span className="text-[10px] font-black uppercase opacity-70">
-                    ({user.role === 'user' ? 'student' : user.role.replace('_', ' ')})
-                  </span>
-                )}
-              </Link>
-
-              {/* Logout Button with Vercel-style Tooltip */}
-              <div className="group relative flex items-center">
-                <button
-                  onClick={handleLogout}
-                  aria-label="Log Out"
-                  className="flex items-center justify-center rounded-full border border-white/10 p-2.5 text-red-400 transition-all duration-150 hover:border-red-500/50 hover:bg-red-600/20 hover:text-red-300 active:scale-95 cursor-pointer"
-                >
-                  <LogOut className="h-4 w-4" />
-                </button>
-                <span className="absolute top-full right-0 mt-2 hidden group-hover:block bg-white text-black text-[10px] font-bold px-2 py-1 rounded shadow-lg whitespace-nowrap z-50">
-                  Log Out
-                </span>
-              </div>
-            </>
-          ) : (
-            <>
-              <Link
-                href="/login"
-                className="rounded-full px-4 py-2 text-[11px] font-semibold transition-colors duration-200 hover:text-white"
-                style={{ color: CITEMAS_CREAM }}
-              >
-                Log In
-              </Link>
-              <Link
-                href="/register"
-                className="rounded-full px-5 py-2.5 text-[11px] font-bold transition-all duration-150 hover:brightness-110 active:scale-95"
-                style={{ background: CITEMAS_RED, color: CITEMAS_CREAM }}
-              >
-                Register
-              </Link>
-            </>
-          )}
-        </div>
-
-        {/* Mobile Hamburger Button (Screens < 1024px) */}
-        <div className="flex items-center lg:hidden">
-          <button
-            onClick={() => setIsDrawerOpen(true)}
-            className="flex items-center justify-center rounded-xl p-2 text-white/80 transition-all duration-150 hover:bg-white/[0.08] hover:text-white active:scale-95"
-            aria-label="Open navigation menu"
-            aria-expanded={isDrawerOpen}
+    <nav
+      id="site-nav"
+      className="sticky top-0 left-0 z-50 w-full border-b border-white/10 bg-[#090a0b]/95 backdrop-blur-sm"
+    >
+      <div className="flex h-12 items-stretch justify-between">
+        {/* Left — Brand Logo & Main Links */}
+        <div className="flex min-w-0 items-stretch">
+          <Link
+            href="/"
+            className="flex items-center border-r border-white/10 px-4 hover:opacity-80 sm:px-5 transition-opacity"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="2"
-              stroke="currentColor"
-              className="h-6 w-6"
+            <div className="relative flex h-6 w-6 items-center justify-center">
+              <img
+                src="/logo.png"
+                alt="CITEMAS"
+                className="h-full w-full object-contain filter drop-shadow-[0_2px_8px_rgba(220,38,38,0.5)]"
+              />
+            </div>
+            <span
+              className="ml-2.5 hidden sm:inline text-xs font-black tracking-tight text-white"
+              style={{ fontFamily: 'Fraunces, Georgia, serif' }}
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-            </svg>
-          </button>
+              CITEMAS
+            </span>
+          </Link>
+
+          {/* Primary Navigation Links (Screens ≥ 1024px) */}
+          <div className="hidden min-w-0 items-stretch lg:flex">
+            <ul className="flex h-full items-stretch">
+              {loading ? (
+                <li className="flex items-center px-4 gap-3">
+                  <div className="h-3 w-12 rounded bg-white/10 animate-pulse" />
+                  <div className="h-3 w-12 rounded bg-white/10 animate-pulse" />
+                  <div className="h-3 w-12 rounded bg-white/10 animate-pulse" />
+                </li>
+              ) : (
+                centerLinks.map((link) => {
+                  const isActive = pathname === link.href;
+                  return (
+                    <li key={link.href} className="flex items-stretch">
+                      <Link
+                        href={link.href}
+                        className="group flex h-full items-center px-2 font-mono text-[11px] uppercase tracking-wider whitespace-nowrap"
+                      >
+                        <span
+                          className={`flex items-center px-2 py-0.5 transition-colors ${
+                            isActive
+                              ? 'bg-white text-black font-bold'
+                              : 'text-white/60 group-hover:text-white group-hover:bg-white/10'
+                          }`}
+                        >
+                          {link.label}
+                        </span>
+                      </Link>
+                    </li>
+                  );
+                })
+              )}
+            </ul>
+          </div>
+        </div>
+
+        {/* Right — Technical Actions & ArtCraft Block CTA */}
+        <div className="flex shrink-0 items-stretch">
+          <div className="hidden items-stretch md:flex">
+            {loading ? (
+              <div className="flex items-center px-4">
+                <div className="h-4 w-20 rounded bg-white/10 animate-pulse" />
+              </div>
+            ) : user ? (
+              <>
+                {/* Admin Link — super_admin only */}
+                {user.role === 'super_admin' && (
+                  <Link
+                    href="/admin"
+                    className="flex h-full items-center px-3 font-mono text-[11px] font-bold uppercase tracking-wider text-red-400 border-l border-white/10 hover:bg-red-500/10 transition-colors"
+                  >
+                    Admin
+                  </Link>
+                )}
+
+                {/* Staff Notification Bell */}
+                {isStaff && (
+                  <div className="flex w-12 items-center justify-center border-l border-white/10 text-white/70 hover:bg-white/5 transition-colors">
+                    <AdminNotificationBell />
+                  </div>
+                )}
+
+                {/* User Profile Badge */}
+                <Link
+                  href="/profile"
+                  className="flex h-full items-center gap-2 px-3.5 font-mono text-[11px] uppercase tracking-wider text-white/80 border-l border-white/10 hover:bg-white/5 hover:text-white transition-colors"
+                >
+                  <span className="text-xs">👤</span>
+                  <span className="font-bold">{user.firstName}</span>
+                  {user.role && (
+                    <span className="text-[9px] text-white/40">
+                      ({user.role === 'user' ? 'student' : user.role.replace('_', ' ')})
+                    </span>
+                  )}
+                </Link>
+
+                {/* Logout Button with Tooltip */}
+                <div className="group relative flex items-stretch">
+                  <button
+                    onClick={handleLogout}
+                    aria-label="Log Out"
+                    className="flex w-12 h-full items-center justify-center border-l border-white/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors cursor-pointer"
+                  >
+                    <LogOut className="h-3.5 w-3.5" />
+                  </button>
+                  <span className="absolute top-full right-0 mt-1 hidden group-hover:block bg-white text-black text-[9px] font-mono font-bold px-1.5 py-0.5 shadow-lg whitespace-nowrap z-50">
+                    LOG OUT
+                  </span>
+                </div>
+
+                {/* High-Contrast Full-Height CTA */}
+                <Link
+                  href="/dashboard"
+                  className="inline-flex items-center justify-center gap-2 font-mono font-bold uppercase tracking-[0.12em] text-[11px] h-full border-l border-white/10 bg-white text-black hover:bg-white/90 px-5 transition-opacity whitespace-nowrap"
+                >
+                  Studio Hub
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="flex h-full items-center px-4 font-mono text-[11px] font-bold uppercase tracking-wider text-white/70 border-l border-white/10 hover:bg-white/5 hover:text-white transition-colors"
+                >
+                  Log In
+                </Link>
+                <Link
+                  href="/register"
+                  className="inline-flex items-center justify-center gap-2 font-mono font-bold uppercase tracking-[0.12em] text-[11px] h-full border-l border-white/10 bg-white text-black hover:bg-white/90 px-5 transition-opacity whitespace-nowrap"
+                >
+                  Launch App
+                </Link>
+              </>
+            )}
+          </div>
+
+          {/* Mobile Hamburger Button (Screens < 1024px) */}
+          <div className="flex items-stretch lg:hidden">
+            <button
+              onClick={() => setIsDrawerOpen(true)}
+              className="flex w-12 items-center justify-center border-l border-white/10 text-white/70 hover:bg-white/10 hover:text-white transition-colors"
+              aria-label="Open main menu"
+              aria-expanded={isDrawerOpen}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M4 5h16" />
+                <path d="M4 12h16" />
+                <path d="M4 19h16" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 

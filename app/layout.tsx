@@ -32,20 +32,20 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body
         suppressHydrationWarning
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-transparent text-ink relative overflow-x-hidden`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-transparent text-ink relative overflow-x-clip`}
       >
         <AuthProvider>
           <ToastProvider>
             <Background />
 
-            {/* Header follows down the page wherever the user scrolls */}
+            {/* ArtCraft-style Sticky Header */}
             <Navbar />
 
             {/* Global Scroll Progress Spine */}
             <ScrollSpine />
 
-            {/* Main Content with pt-16 md:pt-20 offset so content starts below the fixed navbar */}
-            <main className="relative z-10 flex-1 flex flex-col pt-16 md:pt-20 pb-24">{children}</main>
+            {/* Main Content */}
+            <main className="relative z-10 flex-1 flex flex-col pb-24">{children}</main>
 
             <ConditionalFooter />
           </ToastProvider>
