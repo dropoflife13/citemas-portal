@@ -6,6 +6,8 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
+import ScrollSpine from '@/components/ScrollSpine';
+import EditorialNav from '@/components/EditorialNav';
 
 type OfficerRecord = {
   _id: string;
@@ -280,19 +282,9 @@ export default function Home() {
         />
       </div>
 
-      {/* Progress Story Indicators */}
-      <div className="fixed right-6 top-1/2 -translate-y-1/2 z-40 hidden md:flex flex-col gap-3">
-        {[0, 1, 2, 3].map((idx) => (
-          <div
-            key={idx}
-            className={`w-1 transition-all duration-300 rounded-full ${
-              activeCardIndex === idx
-                ? 'h-8 bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.8)]'
-                : 'h-2 bg-white/20'
-            }`}
-          />
-        ))}
-      </div>
+      {/* Editorial Index (Left) & Data Spine (Right) */}
+      <EditorialNav />
+      <ScrollSpine />
 
       {/* ═══════════════════════════════════════════════════
           STICKY STACK WRAPPER (400vh total height for 4 cards)
@@ -301,6 +293,7 @@ export default function Home() {
         
         {/* ── CARD 1: CITEMAS STUDIO & HERO (ART CRAFT STYLE) ── */}
         <section
+          id="hero"
           onMouseMove={handleHeroMouseMove}
           onMouseLeave={handleHeroMouseLeave}
           className="sticky top-0 min-h-screen h-screen w-full flex flex-col justify-between px-6 sm:px-12 md:px-16 lg:px-24 pt-20 pb-16 overflow-hidden relative"
@@ -512,7 +505,7 @@ export default function Home() {
         </section>
 
         {/* ── CARD 2: CRAFT & DISCIPLINES (EDITORIAL ROSTER) ── */}
-        <section className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden">
+        <section id="specializations" className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden">
           <div
             className="w-full max-w-7xl h-[86vh] rounded-3xl p-8 md:p-14 relative flex flex-col justify-between overflow-hidden transition-transform duration-75 border border-white/[0.08] backdrop-blur-2xl bg-[#090a0b]/95"
             style={{
@@ -573,7 +566,7 @@ export default function Home() {
         </section>
 
         {/* ── CARD 3: MOLTEN ENERGY & INSTRUMENTS ── */}
-        <section className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden">
+        <section id="telemetry" className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden">
           <div
             className="w-full max-w-7xl h-[86vh] rounded-3xl p-8 md:p-14 relative flex flex-col justify-between overflow-hidden transition-transform duration-75 border border-white/[0.08] backdrop-blur-2xl bg-[#090a0b]/95"
             style={{
@@ -637,7 +630,7 @@ export default function Home() {
         </section>
 
         {/* ── CARD 4: EXECUTIVE LEADERSHIP & HUB (50/50 EDITORIAL SPLIT) ── */}
-        <section className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden">
+        <section id="leadership" className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden">
           <div className="w-full max-w-7xl h-[86vh] rounded-3xl p-8 md:p-14 relative flex flex-col justify-between overflow-hidden border border-white/[0.08] backdrop-blur-2xl bg-[#090a0b]">
             {/* Header Telemetry */}
             <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-slate-400 uppercase">
