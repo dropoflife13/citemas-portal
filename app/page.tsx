@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight } from 'lucide-react';
 
 type OfficerRecord = {
   _id: string;
@@ -427,9 +428,9 @@ export default function Home() {
             </div>
           </div>
 
-          {/* 3D Official CITEMAS Logo Centerpiece (z-20) */}
+          {/* 3D Official CITEMAS Logo Centerpiece (z-10) */}
           <div
-            className="absolute right-[-10%] sm:right-[-5%] top-0 h-full w-full sm:w-[75vw] md:w-[65vw] lg:w-[60vw] min-w-[500px] md:min-w-[620px] lg:min-w-[700px] flex items-center justify-center pointer-events-auto z-20"
+            className="absolute right-[-10%] sm:right-[-5%] top-0 h-full w-full sm:w-[75vw] md:w-[65vw] lg:w-[60vw] min-w-[500px] md:min-w-[620px] lg:min-w-[700px] flex items-center justify-center pointer-events-auto z-10"
             style={{
               transform: `translate3d(${mouseOffset.x * 16}px, ${mouseOffset.y * 12}px, 0)`,
               transition: 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
@@ -446,8 +447,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Hero Typography & CTAs (z-20) - Centered vertically with zero marquee overlap */}
-          <div className="relative z-20 my-auto w-full max-w-2xl lg:max-w-3xl space-y-7 pointer-events-auto pb-6">
+          {/* Hero Typography & CTAs (z-20) - Elevated with pb-32 mb-24 to eliminate overlap */}
+          <div className="relative z-20 my-auto w-full max-w-2xl lg:max-w-3xl space-y-7 pointer-events-auto pb-32 mb-24">
             <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 backdrop-blur-md">
               <span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
               <span className="text-[11px] font-mono tracking-widest text-slate-300 uppercase">
@@ -473,40 +474,32 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Action Buttons */}
+            {/* Action Buttons: Primary Pill CTA restored */}
             <div className="flex flex-wrap items-center gap-4 pt-2">
-              {isLoggedIn ? (
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest mt-8 transition-colors cursor-pointer shadow-xl shadow-red-600/30"
+              >
+                <span>Enter Studio Dashboard</span>
+                <ArrowRight size={18} />
+              </Link>
+              {!isLoggedIn && (
                 <Link
-                  href="/dashboard"
-                  className="px-8 py-4 rounded-full bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold text-xs uppercase tracking-widest hover:brightness-110 shadow-xl shadow-red-600/35 transition-all cursor-pointer"
+                  href="/register"
+                  className="inline-flex items-center gap-2 border border-white/20 bg-white/5 hover:bg-white/10 text-white px-6 py-4 rounded-full font-semibold uppercase tracking-widest mt-8 transition-colors cursor-pointer text-xs"
                 >
-                  Enter Studio Dashboard &rarr;
+                  Join Guild
                 </Link>
-              ) : (
-                <>
-                  <Link
-                    href="/register"
-                    className="px-8 py-4 rounded-full bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold text-xs uppercase tracking-widest hover:brightness-110 shadow-xl shadow-red-600/35 transition-all cursor-pointer"
-                  >
-                    Join Guild
-                  </Link>
-                  <Link
-                    href="/login"
-                    className="px-8 py-4 rounded-full border border-white/20 bg-white/5 text-white font-semibold text-xs uppercase tracking-widest hover:bg-white/10 transition-all cursor-pointer"
-                  >
-                    Member Sign In
-                  </Link>
-                </>
               )}
-              <div className="flex items-center gap-2 text-xs font-mono text-slate-400 pl-2">
+              <div className="flex items-center gap-2 text-xs font-mono text-slate-400 pl-2 mt-8">
                 <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
                 <span>10°42&apos;N 122°34&apos;E // ILOILO</span>
               </div>
             </div>
           </div>
 
-          {/* 6. Fixed Bottom Marquee (z-30) */}
-          <div className="absolute bottom-0 left-0 right-0 h-12 border-t border-white/[0.08] bg-[#070305]/85 backdrop-blur-md overflow-hidden flex items-center z-30 pointer-events-none">
+          {/* 6. Fixed Bottom Marquee (z-50) */}
+          <div className="absolute bottom-0 left-0 w-full z-50 h-12 border-t border-white/10 bg-[#090a0b] backdrop-blur-md overflow-hidden flex items-center pointer-events-none">
             <div className="flex whitespace-nowrap animate-marquee font-mono text-[11px] font-bold tracking-[0.25em] uppercase text-white/60">
               <span className="mx-6">
                 DIGITAL ARTS • 3D ANIMATION • VIDEOGRAPHY • PHOTOGRAPHY • VOICE ACTING • TRADITIONAL ARTS • DIGITAL ARTS • 3D ANIMATION • VIDEOGRAPHY • PHOTOGRAPHY • VOICE ACTING • TRADITIONAL ARTS • 

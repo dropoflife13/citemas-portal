@@ -40,6 +40,7 @@ export default function ApplicationsPage() {
   const { showToast } = useToast();
   const router = useRouter();
 
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -97,9 +98,20 @@ export default function ApplicationsPage() {
   }
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
-      return;
+    if (typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem('citemas_token');
+      if (!storedToken) {
+        router.replace('/login');
+        return;
+      }
+    }
+
+    if (!authLoading) {
+      if (!user || !token) {
+        router.replace('/login');
+        return;
+      }
+      setCheckingAuth(false);
     }
 
     if (user && token && isStaff) {
@@ -247,7 +259,7 @@ export default function ApplicationsPage() {
     });
   }, [applications, searchQuery, statusFilter, specializationFilter]);
 
-  if (authLoading || (user && token && loading && isStaff)) {
+  if (checkingAuth || authLoading || !user || !token || (loading && isStaff)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#070305] text-[#FEF2F2]">
         <div className="flex flex-col items-center gap-3">

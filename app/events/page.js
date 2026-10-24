@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/Toast';
 import EventCarousel from '@/components/EventCarousel';
@@ -30,6 +31,27 @@ const MUTED = 'rgba(253,251,247,0.75)';
 
 export default function EventsPage() {
   const { user, token, loading } = useAuth();
+  const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  // Strict Auth Guard: verify token and redirect immediately if unauthenticated
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem('citemas_token');
+      if (!storedToken) {
+        router.replace('/login');
+        return;
+      }
+    }
+
+    if (!loading) {
+      if (!user || !token) {
+        router.replace('/login');
+        return;
+      }
+      setCheckingAuth(false);
+    }
+  }, [loading, user, token, router]);
   const { showToast } = useToast();
   const [events, setEvents] = useState([]);
   const [fetchError, setFetchError] = useState('');
@@ -323,7 +345,7 @@ export default function EventsPage() {
     setTimeout(() => setCopiedEmails(false), 2000);
   }
 
-  if (loading) {
+  if (checkingAuth || loading || !user || !token) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#070305] text-[#FEF2F2]">
         <div className="flex flex-col items-center gap-3">

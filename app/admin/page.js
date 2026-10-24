@@ -57,19 +57,30 @@ export default function AdminPage() {
   const [activityLogs, setActivityLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/login');
-      return;
+    if (typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem('citemas_token');
+      if (!storedToken) {
+        router.replace('/login');
+        return;
+      }
     }
 
-    if (!authLoading && user && !canAccessAdmin(user)) {
-      router.push('/dashboard');
-      return;
+    if (!authLoading) {
+      if (!user || !token) {
+        router.replace('/login');
+        return;
+      }
+      if (!canAccessAdmin(user)) {
+        router.replace('/dashboard');
+        return;
+      }
+      setCheckingAuth(false);
     }
 
-    if (user && token) {
+    if (user && token && canAccessAdmin(user)) {
       loadAdminData();
     }
   }, [authLoading, user, token, router]);
@@ -127,7 +138,7 @@ export default function AdminPage() {
     .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
     .slice(0, 4);
 
-  if (authLoading || loading) {
+  if (checkingAuth || authLoading || loading || !user || !token) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#110808] text-[#FDFBF7]">
         <p className="text-[#FDFBF7]/70">Loading admin dashboard...</p>

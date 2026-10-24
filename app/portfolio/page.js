@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/Toast';
 import AccessDenied from '@/components/AccessDenied';
@@ -44,8 +45,29 @@ const LEVEL_COLORS = {
 
 export default function PortfolioPage() {
   const { user, token, loading } = useAuth();
+  const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const { showToast } = useToast();
   const [entries, setEntries] = useState([]);
+
+  // Strict Auth Guard: verify token and redirect immediately if unauthenticated
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem('citemas_token');
+      if (!storedToken) {
+        router.replace('/login');
+        return;
+      }
+    }
+
+    if (!loading) {
+      if (!user || !token) {
+        router.replace('/login');
+        return;
+      }
+      setCheckingAuth(false);
+    }
+  }, [loading, user, token, router]);
   const [achievements, setAchievements] = useState([]);
   const [error, setError] = useState('');
 
@@ -285,7 +307,7 @@ export default function PortfolioPage() {
 
   const featureEntry = entries[0] || null;
 
-  if (loading) {
+  if (checkingAuth || loading || !user || !token) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#070305] text-[#FEF2F2]">
         <div className="flex flex-col items-center gap-3">

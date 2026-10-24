@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/AuthContext';
 import AchievementCard from '@/components/AchievementCard';
@@ -14,7 +15,9 @@ import LivePing from '@/components/LivePing';
 import EditorialButton from '@/components/EditorialButton';
 
 export default function DashboardPage() {
-  const { user, token } = useAuth();
+  const { user, token, loading: authLoading } = useAuth();
+  const router = useRouter();
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const [activeIdx, setActiveIdx] = useState(0);
   const [officerRows, setOfficerRows] = useState([]);
   const [achievements, setAchievements] = useState([]);
@@ -22,6 +25,24 @@ export default function DashboardPage() {
   const [dashboardStats, setDashboardStats] = useState({ members: 0, events: 0, portfolios: 0 });
   const [liveEvents, setLiveEvents] = useState([]);
   const [livePortfolios, setLivePortfolios] = useState([]);
+
+  // Strict Auth Guard: verify token and redirect immediately if unauthenticated
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem('citemas_token');
+      if (!storedToken) {
+        router.replace('/login');
+        return;
+      }
+    }
+    if (!authLoading) {
+      if (!user || !token) {
+        router.replace('/login');
+        return;
+      }
+      setCheckingAuth(false);
+    }
+  }, [authLoading, user, token, router]);
 
   const formatPosition = (position) => {
     if (!position) return 'Officer';
@@ -174,6 +195,17 @@ export default function DashboardPage() {
     image: entry.mediaUrl || '',
     summary: entry.description || '',
   }));
+
+  if (checkingAuth || authLoading || !user || !token) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#070305] text-[#FEF2F2]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-red-600 border-t-transparent" />
+          <p className="text-xs font-mono uppercase tracking-widest text-slate-400">Verifying Guild Session...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-[#090a0b] text-[#f5f5f7] selection:bg-[#DC2626] selection:text-white font-space bg-grid-faint">

@@ -14,6 +14,7 @@ export default function UsersDirectoryPage() {
   const { showToast } = useToast();
   const router = useRouter();
 
+  const [checkingAuth, setCheckingAuth] = useState(true);
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -56,6 +57,24 @@ export default function UsersDirectoryPage() {
       setIsRefreshing(false);
     }
   };
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedToken = localStorage.getItem('citemas_token');
+      if (!storedToken) {
+        router.replace('/login');
+        return;
+      }
+    }
+
+    if (!authLoading) {
+      if (!authUser || !token) {
+        router.replace('/login');
+        return;
+      }
+      setCheckingAuth(false);
+    }
+  }, [authLoading, authUser, token, router]);
 
   useEffect(() => {
     if (!authLoading && authUser && token && canView) {
@@ -169,7 +188,7 @@ export default function UsersDirectoryPage() {
 
   const uniqueDepartments = Array.from(new Set(users.map((u) => u.department).filter(Boolean)));
 
-  if (authLoading || (canView && loading && !isRefreshing)) {
+  if (checkingAuth || authLoading || !authUser || !token || (canView && loading && !isRefreshing)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-transparent text-[#FDFBF7]">
         <div className="flex flex-col items-center gap-3">
