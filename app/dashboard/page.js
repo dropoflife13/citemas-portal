@@ -518,7 +518,7 @@ export default function DashboardPage() {
           {current ? (
             <>
               {/* Featured Officer Stage (Spans 7 cols) */}
-              <div className="lg:col-span-7 bg-[#111111] border border-white/[0.08] plate-corner p-8 flex flex-col justify-between shadow-2xl relative overflow-hidden">
+              <div className="lg:col-span-7 bg-[#111111] border border-white/[0.08] plate-corner p-8 flex flex-col justify-between relative overflow-hidden">
                 <div className="absolute inset-0 bg-grid-faint opacity-40 pointer-events-none" />
                 <div className="absolute top-0 right-0 h-40 w-40 bg-[radial-gradient(circle,rgba(220,38,38,0.2),transparent_70%)] pointer-events-none" />
 
@@ -545,7 +545,7 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="relative z-10 my-8 flex flex-col sm:flex-row items-center gap-6">
-                  <div className="relative flex h-36 w-36 shrink-0 items-center justify-center rounded-[28px] overflow-hidden bg-black border border-white/20 shadow-2xl">
+                  <div className="relative flex h-36 w-36 shrink-0 items-center justify-center rounded-[28px] overflow-hidden bg-black border border-white/20">
                     <img src={current.image} alt={current.name} className="h-full w-full object-cover" />
                   </div>
 

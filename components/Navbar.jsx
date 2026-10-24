@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useRouter, usePathname } from 'next/navigation';
 import { useBodyScrollLock } from '@/lib/useBodyScrollLock';
 import AdminNotificationBell from './AdminNotificationBell';
+import { LogOut } from 'lucide-react';
 
 // CITEMAS Palette
 const CITEMAS_RED = '#DC2626';
@@ -128,11 +129,22 @@ export default function Navbar() {
               <div className="h-3 w-16 rounded-full bg-white/10" />
             </div>
           ) : (
-            centerLinks.map((link) => (
-              <Link key={link.href} href={link.href} className={centerLinkClass}>
-                {link.label}
-              </Link>
-            ))
+            centerLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`relative py-1 transition-all duration-200 hover:scale-105 inline-block ${
+                    isActive
+                      ? 'text-red-500 font-bold after:absolute after:bottom-[-4px] after:left-0 after:right-0 after:h-[2px] after:bg-red-500 after:rounded-full'
+                      : 'text-white/70 hover:text-white'
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })
           )}
         </div>
 
@@ -169,13 +181,19 @@ export default function Navbar() {
                 )}
               </Link>
 
-              {/* Logout Button */}
-              <button
-                onClick={handleLogout}
-                className="rounded-full border border-white/10 px-4 py-2 text-[11px] font-semibold text-red-400 transition-all duration-150 hover:border-red-500/50 hover:bg-red-600/20 hover:text-red-300 active:scale-95"
-              >
-                Log Out
-              </button>
+              {/* Logout Button with Vercel-style Tooltip */}
+              <div className="group relative flex items-center">
+                <button
+                  onClick={handleLogout}
+                  aria-label="Log Out"
+                  className="flex items-center justify-center rounded-full border border-white/10 p-2.5 text-red-400 transition-all duration-150 hover:border-red-500/50 hover:bg-red-600/20 hover:text-red-300 active:scale-95 cursor-pointer"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+                <span className="absolute top-full right-0 mt-2 hidden group-hover:block bg-white text-black text-[10px] font-bold px-2 py-1 rounded shadow-lg whitespace-nowrap z-50">
+                  Log Out
+                </span>
+              </div>
             </>
           ) : (
             <>
@@ -320,9 +338,10 @@ export default function Navbar() {
                         closeDrawer();
                         handleLogout();
                       }}
-                      className="w-full py-3 px-4 text-xs font-bold uppercase tracking-wider rounded-xl border border-white/10 hover:border-red-500/50 hover:bg-red-600/20 text-red-400 hover:text-red-300 transition-all active:scale-95 text-center"
+                      className="w-full flex items-center justify-center gap-2 py-3 px-4 text-xs font-bold uppercase tracking-wider rounded-xl border border-white/10 hover:border-red-500/50 hover:bg-red-600/20 text-red-400 hover:text-red-300 transition-all active:scale-95 text-center"
                     >
-                      Log Out
+                      <LogOut className="h-4 w-4" />
+                      <span>Log Out</span>
                     </button>
                   </div>
                 </>

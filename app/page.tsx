@@ -358,10 +358,10 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── CARD 2: CRAFT & DISCIPLINES ── */}
+        {/* ── CARD 2: CRAFT & DISCIPLINES (EDITORIAL ROSTER) ── */}
         <section className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden">
           <div
-            className="w-full max-w-7xl h-[86vh] rounded-3xl p-8 md:p-14 relative flex flex-col justify-between overflow-hidden transition-transform duration-75 border border-white/[0.08] backdrop-blur-2xl bg-[#090a0b]/90 shadow-2xl"
+            className="w-full max-w-7xl h-[86vh] rounded-3xl p-8 md:p-14 relative flex flex-col justify-between overflow-hidden transition-transform duration-75 border border-white/[0.08] backdrop-blur-2xl bg-[#090a0b]/95"
             style={{
               transform: `scale(${1 - cardProgress[1] * 0.08})`,
               filter: `brightness(${1 - cardProgress[1] * 0.45})`,
@@ -373,56 +373,48 @@ export default function Home() {
               <span>SIX CREATIVE TRACKS</span>
             </div>
 
-            {/* Content Body */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 my-auto items-center">
-              <div className="lg:col-span-6 space-y-5">
-                <span className="text-xs uppercase tracking-[0.3em] font-bold text-red-500">
-                  Disciplines of Excellence
-                </span>
-                <h2 className="font-display text-5xl sm:text-6xl md:text-7xl font-black uppercase tracking-[-0.03em] leading-[0.9] text-white">
-                  Craft &amp;<br />Discipline.
-                </h2>
-                <p className="font-sans text-sm md:text-base text-slate-300 leading-relaxed max-w-md">
-                  From procedural 3D environments to classical studio painting, our guild spans six specialized disciplines designed to foster professional standards.
-                </p>
-
-                <div className="grid grid-cols-2 gap-3 pt-2">
-                  {[
-                    { num: '01', name: 'Digital Arts' },
-                    { num: '02', name: '3D Animation' },
-                    { num: '03', name: 'Videography' },
-                    { num: '04', name: 'Photography' },
-                    { num: '05', name: 'Voice Acting' },
-                    { num: '06', name: 'Traditional Arts' },
-                  ].map((track) => (
-                    <div
-                      key={track.num}
-                      className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center gap-3 hover:border-red-500/40 transition-colors"
-                    >
-                      <span className="font-mono text-xs text-red-400 font-bold">{track.num}</span>
-                      <span className="text-xs font-bold text-slate-200 uppercase tracking-wider">{track.name}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Photo Showcase Frame */}
-              <div className="lg:col-span-6 relative h-64 lg:h-96 rounded-2xl overflow-hidden border border-white/15 shadow-2xl">
-                <img
-                  src="/orgpic.jpg"
-                  alt="CITEMAS Guild Creators"
-                  className="w-full h-full object-cover filter grayscale contrast-125 hover:grayscale-0 transition-all duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between text-xs font-mono text-slate-300">
-                  <span>STUDIO PRODUCTION COHORT</span>
-                  <span>ACTIVE GUILD ROSTER</span>
-                </div>
-              </div>
+            {/* Section Intro */}
+            <div className="space-y-3 pt-2">
+              <span className="text-xs uppercase tracking-[0.3em] font-bold text-red-500">
+                Disciplines of Excellence
+              </span>
+              <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-black uppercase tracking-[-0.03em] leading-none text-white">
+                Craft &amp; Discipline.
+              </h2>
             </div>
 
-            <div className="text-xs font-mono text-slate-500 pt-4 border-t border-white/[0.06]">
-              INTERACTION: HOVER DISCIPLINES TO INSPECT CURRICULUM
+            {/* Huge Full-Width Editorial Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-1 my-auto">
+              {[
+                { num: '01', name: 'Digital Arts', subtitle: 'Concept Art, UI/UX & Vector Design' },
+                { num: '02', name: '3D Animation', subtitle: 'Modeling, Rigging & Spatial CGI' },
+                { num: '03', name: 'Videography', subtitle: 'Cinematography, Directing & Editing' },
+                { num: '04', name: 'Photography', subtitle: 'Studio Lighting, Portraiture & Color' },
+                { num: '05', name: 'Voice Acting', subtitle: 'Audio Drama, Dubbing & Sound Design' },
+                { num: '06', name: 'Traditional Arts', subtitle: 'Illustration, Painting & Sculpture' },
+              ].map((track) => (
+                <div
+                  key={track.num}
+                  className="border-b border-white/10 py-5 sm:py-6 flex items-baseline justify-between group cursor-pointer transition-all duration-300 hover:border-red-500/60 hover:pl-3"
+                >
+                  <div className="flex items-baseline gap-4">
+                    <span className="font-mono text-lg sm:text-xl font-bold text-red-500/80 group-hover:text-red-400 transition-colors">
+                      {track.num}
+                    </span>
+                    <span className="font-display text-3xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight text-white group-hover:text-red-400 transition-colors">
+                      {track.name}
+                    </span>
+                  </div>
+                  <span className="text-xs font-mono text-slate-400 uppercase tracking-wider hidden sm:inline group-hover:text-slate-200 transition-colors">
+                    {track.subtitle}
+                  </span>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-between text-xs font-mono text-slate-500 pt-4 border-t border-white/[0.06]">
+              <span>DISCIPLINES SYNCHRONIZED</span>
+              <span>PHINMA CITE GUILD</span>
             </div>
           </div>
         </section>
@@ -430,7 +422,7 @@ export default function Home() {
         {/* ── CARD 3: MOLTEN ENERGY & INSTRUMENTS ── */}
         <section className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden">
           <div
-            className="w-full max-w-7xl h-[86vh] rounded-3xl p-8 md:p-14 relative flex flex-col justify-between overflow-hidden transition-transform duration-75 border border-white/[0.08] backdrop-blur-2xl bg-[#090a0b]/95 shadow-2xl"
+            className="w-full max-w-7xl h-[86vh] rounded-3xl p-8 md:p-14 relative flex flex-col justify-between overflow-hidden transition-transform duration-75 border border-white/[0.08] backdrop-blur-2xl bg-[#090a0b]/95"
             style={{
               transform: `scale(${1 - cardProgress[2] * 0.08})`,
               filter: `brightness(${1 - cardProgress[2] * 0.45})`,
@@ -451,7 +443,7 @@ export default function Home() {
                 <h2 className="font-display text-5xl sm:text-6xl md:text-7xl font-black uppercase tracking-[-0.03em] leading-[0.9] text-white">
                   Molten Energy.
                 </h2>
-                <p className="font-sans text-sm md:text-base text-slate-300 leading-relaxed">
+                <p className="font-sans text-sm md:text-base text-slate-300 leading-relaxed font-light">
                   Dynamic student exhibitions, hands-on production sprints, and cross-departmental creative summits shaping the creative identity of PHINMA University of Iloilo.
                 </p>
               </div>
@@ -466,9 +458,9 @@ export default function Home() {
                 ].map((stat, i) => (
                   <div
                     key={i}
-                    className="p-6 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-red-500/30 transition-all space-y-2 relative"
+                    className="p-6 sm:p-8 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-red-500/40 transition-all space-y-2 relative"
                   >
-                    <div className="font-display text-4xl sm:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400">
+                    <div className="font-display text-5xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400">
                       {stat.value}
                     </div>
                     <div className="text-xs font-bold uppercase tracking-wider text-white">
@@ -482,17 +474,16 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="text-xs font-mono text-slate-500 pt-4 border-t border-white/[0.06]">
-              STATUS: REALTIME GUILD REPOSITORY SYNCHRONIZED
+            <div className="flex items-center justify-between text-xs font-mono text-slate-500 pt-4 border-t border-white/[0.06]">
+              <span>TELEMETRY VERIFIED</span>
+              <span>METRICS REALTIME</span>
             </div>
           </div>
         </section>
 
         {/* ── CARD 4: EXECUTIVE LEADERSHIP & HUB ── */}
         <section className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden">
-          <div
-            className="w-full max-w-7xl h-[86vh] rounded-3xl p-8 md:p-14 relative flex flex-col justify-between overflow-hidden border border-white/[0.08] backdrop-blur-2xl bg-[#090a0b] shadow-2xl"
-          >
+          <div className="w-full max-w-7xl h-[86vh] rounded-3xl p-8 md:p-14 relative flex flex-col justify-between overflow-hidden border border-white/[0.08] backdrop-blur-2xl bg-[#090a0b]">
             {/* Header Telemetry */}
             <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-slate-400 uppercase">
               <span>GUILD // 04 [LEADERSHIP]</span>
@@ -500,22 +491,19 @@ export default function Home() {
             </div>
 
             {/* Leadership Showcase */}
-            <div className="my-auto space-y-6">
-              <div className="max-w-2xl space-y-2">
+            <div className="my-auto space-y-8">
+              <div className="space-y-2">
                 <span className="text-xs uppercase tracking-[0.3em] font-bold text-red-500">
                   Executive Roster
                 </span>
-                <h2 className="font-display text-5xl sm:text-6xl md:text-7xl font-black uppercase tracking-[-0.03em] leading-[0.9] text-white">
+                <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-black uppercase tracking-[-0.03em] leading-none text-white">
                   Leadership.
                 </h2>
-                <p className="font-sans text-sm md:text-base text-slate-300">
-                  Meet the student directors guiding creative strategy, productions, and guild operations.
-                </p>
               </div>
 
-              {/* Dynamic Officer Spotlight Card */}
+              {/* Dynamic Officer Spotlight: Full-Bleed Floating Layout (No Boxy Card) */}
               {officersLoading ? (
-                <div className="p-8 rounded-2xl bg-white/[0.02] border border-white/10 text-center text-xs text-slate-400">
+                <div className="p-8 text-center text-xs text-slate-400">
                   <div className="h-6 w-6 animate-spin rounded-full border-2 border-red-500/30 border-t-red-500 mx-auto mb-2" />
                   Loading Council Directory...
                 </div>
@@ -523,20 +511,23 @@ export default function Home() {
                 <div
                   onMouseEnter={() => setIsCarouselPaused(true)}
                   onMouseLeave={() => setIsCarouselPaused(false)}
-                  className="p-6 rounded-3xl bg-white/[0.03] border border-white/15 flex flex-col md:flex-row items-center gap-6 shadow-2xl"
+                  className="flex flex-col md:flex-row items-center md:items-start gap-8 lg:gap-12 py-2"
                 >
-                  <div className="relative h-28 w-28 md:h-32 md:w-32 rounded-2xl overflow-hidden shrink-0 border border-white/20">
+                  {/* Officer Portrait: Clean edge border */}
+                  <div className="relative h-64 w-52 sm:h-72 sm:w-60 md:h-80 md:w-64 rounded-2xl overflow-hidden shrink-0 border border-white/20">
                     <img
                       src={currentOfficer.image}
                       alt={currentOfficer.name}
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = currentOfficer.fallbackImage;
                       }}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover filter contrast-105"
                     />
                   </div>
-                  <div className="flex-1 text-center md:text-left space-y-2">
-                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+
+                  {/* Floating Details */}
+                  <div className="flex-1 text-center md:text-left space-y-4">
+                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
                       <span className="px-3 py-1 rounded-full bg-red-600/20 border border-red-500/30 text-red-300 text-[11px] font-bold uppercase tracking-wider">
                         {currentOfficer.role}
                       </span>
@@ -544,41 +535,46 @@ export default function Home() {
                         {currentOfficer.yearLevel}
                       </span>
                     </div>
-                    <h3 className="font-display text-2xl md:text-3xl font-black text-white uppercase tracking-tight">
+
+                    {/* Massive 48px+ Oswald Font for Officer Name */}
+                    <h3 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black text-white uppercase tracking-tight">
                       {currentOfficer.name}
                     </h3>
-                    <p className="text-xs md:text-sm text-slate-300 line-clamp-2 max-w-2xl leading-relaxed">
+
+                    <p className="font-sans text-sm sm:text-base text-slate-300 line-clamp-3 max-w-2xl leading-relaxed font-light">
                       {currentOfficer.bio}
                     </p>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <button
-                      onClick={() =>
-                        setActiveOfficerIdx((prev) =>
-                          prev === 0 ? featuredOfficers.length - 1 : prev - 1
-                        )
-                      }
-                      className="p-3 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-xs text-slate-200 transition cursor-pointer"
-                      aria-label="Previous officer"
-                    >
-                      &larr;
-                    </button>
-                    <button
-                      onClick={() =>
-                        setActiveOfficerIdx((prev) => (prev + 1) % featuredOfficers.length)
-                      }
-                      className="p-3 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-xs text-slate-200 transition cursor-pointer"
-                      aria-label="Next officer"
-                    >
-                      &rarr;
-                    </button>
+
+                    {/* Nav Arrows */}
+                    <div className="flex items-center justify-center md:justify-start gap-3 pt-2">
+                      <button
+                        onClick={() =>
+                          setActiveOfficerIdx((prev) =>
+                            prev === 0 ? featuredOfficers.length - 1 : prev - 1
+                          )
+                        }
+                        className="p-3 rounded-full border border-white/20 hover:border-red-500/60 hover:bg-white/5 text-slate-200 transition cursor-pointer"
+                        aria-label="Previous officer"
+                      >
+                        &larr;
+                      </button>
+                      <button
+                        onClick={() =>
+                          setActiveOfficerIdx((prev) => (prev + 1) % featuredOfficers.length)
+                        }
+                        className="p-3 rounded-full border border-white/20 hover:border-red-500/60 hover:bg-white/5 text-slate-200 transition cursor-pointer"
+                        aria-label="Next officer"
+                      >
+                        &rarr;
+                      </button>
+                    </div>
                   </div>
                 </div>
               ) : null}
 
               {/* Council Avatars Tray */}
               {featuredOfficers.length > 1 && (
-                <div className="flex items-center gap-2 overflow-x-auto py-1">
+                <div className="flex items-center gap-2 overflow-x-auto py-2">
                   <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500 mr-2">
                     COUNCIL:
                   </span>
@@ -586,7 +582,7 @@ export default function Home() {
                     <button
                       key={person.id}
                       onClick={() => setActiveOfficerIdx(idx)}
-                      className={`relative h-10 w-10 rounded-xl overflow-hidden border transition-all cursor-pointer ${
+                      className={`relative h-11 w-11 rounded-xl overflow-hidden border transition-all cursor-pointer ${
                         activeOfficerIdx === idx
                           ? 'border-red-500 scale-105 shadow-[0_0_12px_rgba(239,68,68,0.5)]'
                           : 'border-white/20 opacity-60 hover:opacity-100'
@@ -607,23 +603,25 @@ export default function Home() {
               )}
             </div>
 
-            {/* Quick Navigation CTAs */}
-            <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-white/[0.06]">
-              <Link
-                href="/portfolio"
-                className="px-6 py-3 rounded-full bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold text-xs uppercase tracking-widest hover:brightness-110 shadow-lg shadow-red-600/30 transition-all cursor-pointer"
-              >
-                View Guild Portfolios &rarr;
-              </Link>
-              <Link
-                href="/events"
-                className="px-6 py-3 rounded-full border border-white/20 bg-white/5 text-slate-200 font-semibold text-xs uppercase tracking-widest hover:bg-white/10 transition-all cursor-pointer"
-              >
-                Upcoming Events
-              </Link>
-              <span className="ml-auto text-xs font-mono text-slate-500">
-                END OF STACK // SCROLL FOR FOOTER ↓
-              </span>
+            {/* Quick Navigation CTAs (No "END OF STACK" text) */}
+            <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-white/[0.06]">
+              <div className="flex flex-wrap items-center gap-4">
+                <Link
+                  href="/portfolio"
+                  className="px-6 py-3 rounded-full bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold text-xs uppercase tracking-widest hover:brightness-110 shadow-lg shadow-red-600/30 transition-all cursor-pointer"
+                >
+                  View Guild Portfolios &rarr;
+                </Link>
+                <Link
+                  href="/events"
+                  className="px-6 py-3 rounded-full border border-white/20 bg-white/5 text-slate-200 font-semibold text-xs uppercase tracking-widest hover:bg-white/10 transition-all cursor-pointer"
+                >
+                  Upcoming Events
+                </Link>
+              </div>
+              <div className="text-xs font-mono text-slate-500">
+                STUDENT EXECUTIVE COUNCIL
+              </div>
             </div>
           </div>
         </section>
