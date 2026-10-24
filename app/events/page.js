@@ -1,94 +1,42 @@
-// app/events/page.js
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '@/lib/AuthContext';
+import { useToast } from '@/components/Toast';
 import EventCarousel from '@/components/EventCarousel';
 import { useBodyScrollLock } from '@/lib/useBodyScrollLock';
 import ModalPortal from '@/components/ModalPortal';
 import AccessDenied from '@/components/AccessDenied';
+import {
+  Calendar,
+  MapPin,
+  Users,
+  Plus,
+  Edit2,
+  Trash2,
+  Search,
+  X,
+  CheckCircle,
+  Copy,
+  Check,
+  Clock,
+  Sparkles,
+} from 'lucide-react';
 
-// CITEMAS Aesthetic Colors & Theme helpers
 const CITEMAS_RED = '#DC2626';
-const CITEMAS_DARK_RED = '#7F1D1D';
 const CITEMAS_CREAM = '#FDFBF7';
 const CITEMAS_GOLD = '#F59E0B';
 const MUTED = 'rgba(253,251,247,0.75)';
 
-// Floating Spatial Glass Panel Component (Enhanced Depth & Glow)
-function SpatialGlassPanel({ children, className = '', depth = 'mid' }) {
-  const depthStyles = {
-    back: 'translate-z-0 shadow-xl',
-    mid: 'hover:-translate-y-1.5 hover:shadow-[0_30px_70px_-15px_rgba(220,38,38,0.15)]',
-    front: 'hover:-translate-y-2.5 hover:shadow-[0_40px_80px_-15px_rgba(220,38,38,0.25)]',
-  };
-
-  return (
-    <div
-      className={`relative rounded-[32px] p-7 transition-all duration-500 ease-out transform-gpu ${depthStyles[depth]} ${className}`}
-      style={{
-        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0.02) 100%)',
-        backdropFilter: 'blur(32px) saturate(200%)',
-        WebkitBackdropFilter: 'blur(32px) saturate(200%)',
-        border: '1px solid rgba(255, 255, 255, 0.22)',
-        boxShadow: `
-          0 25px 60px rgba(0, 0, 0, 0.6),
-          0 0 50px rgba(220, 38, 38, 0.12),
-          inset 0 1px 2px rgba(255, 255, 255, 0.4),
-          inset 0 0 20px rgba(255, 255, 255, 0.05)
-        `,
-      }}
-    >
-      <div
-        className="pointer-events-none absolute -top-12 -left-12 h-40 w-40 rounded-full opacity-25 blur-3xl transition-all duration-700 group-hover:opacity-40"
-        style={{ background: CITEMAS_RED }}
-      />
-      <div className="relative z-10">{children}</div>
-    </div>
-  );
-}
-
-// Spatial Glass Button Component
-function SpatialButton({ children, onClick, type = 'button', variant = 'primary', disabled = false, className = '' }) {
-  const isPrimary = variant === 'primary';
-  const isDanger = variant === 'danger';
-
-  let bgGradient = isPrimary
-    ? `linear-gradient(135deg, ${CITEMAS_RED} 0%, ${CITEMAS_DARK_RED} 100%)`
-    : isDanger
-    ? 'linear-gradient(135deg, rgba(220, 38, 38, 0.4) 0%, rgba(127, 29, 29, 0.6) 100%)'
-    : 'rgba(255, 255, 255, 0.08)';
-
-  return (
-    <button
-      type={type}
-      onClick={onClick}
-      disabled={disabled}
-      className={`group relative inline-flex items-center justify-center px-6 py-3 text-xs font-black uppercase tracking-widest rounded-full transition-all duration-300 ${
-        disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 active:scale-95'
-      } ${className}`}
-      style={{
-        background: bgGradient,
-        color: CITEMAS_CREAM,
-        backdropFilter: 'blur(16px)',
-        border: isPrimary ? '1px solid rgba(255, 255, 255, 0.35)' : '1px solid rgba(255, 255, 255, 0.15)',
-        boxShadow: isPrimary
-          ? '0 15px 35px -5px rgba(220, 38, 38, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.5)'
-          : '0 10px 25px -5px rgba(0, 0, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.2)',
-      }}
-    >
-      <span className="relative z-10 drop-shadow-sm">{children}</span>
-    </button>
-  );
-}
-
 export default function EventsPage() {
   const { user, token, loading } = useAuth();
+  const { showToast } = useToast();
   const [events, setEvents] = useState([]);
   const [fetchError, setFetchError] = useState('');
 
   // Active Tab State: 'upcoming' | 'previous'
   const [activeTab, setActiveTab] = useState('upcoming');
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Modal State for Creation Form
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -121,8 +69,19 @@ export default function EventsPage() {
   const [editError, setEditError] = useState('');
   const [uploadingEdit, setUploadingEdit] = useState(false);
 
+  // Attendees modal state
+  const [viewingAttendeesEvent, setViewingAttendeesEvent] = useState(null);
+  const [attendeeSearch, setAttendeeSearch] = useState('');
+  const [copiedEmails, setCopiedEmails] = useState(false);
+
+  // Delete confirmation
+  const [deletingEventId, setDeletingEventId] = useState(null);
+  const [actioningRsvpId, setActioningRsvpId] = useState(null);
+
   useBodyScrollLock(isCreateModalOpen);
   useBodyScrollLock(Boolean(editingEvent));
+  useBodyScrollLock(Boolean(viewingAttendeesEvent));
+  useBodyScrollLock(Boolean(deletingEventId));
 
   const canManageRoles = ['officer', 'teacher', 'adviser', 'super_admin'];
   const canCreate = user && canManageRoles.includes(user.role);
@@ -137,8 +96,9 @@ export default function EventsPage() {
         setFetchError(data.error || 'Failed to load events');
         return;
       }
-      setEvents(data);
-    } catch (err) {
+      setEvents(Array.isArray(data) ? data : []);
+      setFetchError('');
+    } catch {
       setFetchError('Could not connect to the server');
     }
   }
@@ -151,78 +111,72 @@ export default function EventsPage() {
     setForm({ title: '', description: '', date: '', location: '', capacity: '', image: '', images: [], highlights: '' });
   }, [isCreateModalOpen, createMode]);
 
-  // Cloudinary Upload Widget Helper for Creation
-  async function handleCloudinaryUploadCreate(e) {
-    const files = Array.from(e.target.files || []);
+  // Authenticated Image Upload Helper
+  async function uploadImageFiles(files, setUploadingState, updateFormCallback) {
     if (!files.length) return;
-
-    setUploadingCreate(true);
+    setUploadingState(true);
     const uploadedUrls = [];
 
     for (const file of files) {
       const dataObj = new FormData();
       dataObj.append('file', file);
-      dataObj.append('upload_preset', 'citemas_preset');
 
       try {
-        const res = await fetch('https://api.cloudinary.com/v1_1/dvh7zcfwv/image/upload', {
+        const res = await fetch('/api/portfolio/upload', {
           method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
           body: dataObj,
         });
         const data = await res.json();
-        if (data.secure_url) {
-          uploadedUrls.push(data.secure_url);
+        if (data.url) {
+          uploadedUrls.push(data.url);
+        } else {
+          // Fallback if unsigned preset exists
+          const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'yapvq22n';
+          const fallbackData = new FormData();
+          fallbackData.append('file', file);
+          fallbackData.append('upload_preset', 'citemas_preset');
+          const fbRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+            method: 'POST',
+            body: fallbackData,
+          });
+          const fbJson = await fbRes.json();
+          if (fbJson.secure_url) uploadedUrls.push(fbJson.secure_url);
         }
       } catch (err) {
-        console.error(err);
+        console.error('Image upload failed:', err);
       }
     }
 
     if (uploadedUrls.length > 0) {
-      setForm((prev) => ({
-        ...prev,
-        image: prev.image || uploadedUrls[0],
-        images: [...prev.images, ...uploadedUrls],
-      }));
+      updateFormCallback(uploadedUrls);
+      showToast(`${uploadedUrls.length} image(s) uploaded successfully`, 'success');
+    } else {
+      showToast('Image upload failed. Please try a smaller image (max 10MB).', 'error');
     }
-    setUploadingCreate(false);
+    setUploadingState(false);
   }
 
-  // Cloudinary Upload Widget Helper for Editing
-  async function handleCloudinaryUploadEdit(e) {
+  function handleImageUploadCreate(e) {
     const files = Array.from(e.target.files || []);
-    if (!files.length) return;
+    uploadImageFiles(files, setUploadingCreate, (urls) => {
+      setForm((prev) => ({
+        ...prev,
+        image: prev.image || urls[0],
+        images: [...prev.images, ...urls],
+      }));
+    });
+  }
 
-    setUploadingEdit(true);
-    const uploadedUrls = [];
-
-    for (const file of files) {
-      const dataObj = new FormData();
-      dataObj.append('file', file);
-      dataObj.append('upload_preset', 'citemas_preset');
-
-      try {
-        const res = await fetch('https://api.cloudinary.com/v1_1/dvh7zcfwv/image/upload', {
-          method: 'POST',
-          body: dataObj,
-        });
-        const data = await res.json();
-        if (data.secure_url) {
-          uploadedUrls.push(data.secure_url);
-        }
-      } catch (err) {
-        console.error(err);
-      }
-    }
-
-    if (uploadedUrls.length > 0) {
+  function handleImageUploadEdit(e) {
+    const files = Array.from(e.target.files || []);
+    uploadImageFiles(files, setUploadingEdit, (urls) => {
       setEditForm((prev) => ({
         ...prev,
-        image: prev.image || uploadedUrls[0],
-        images: [...prev.images, ...uploadedUrls],
+        image: prev.image || urls[0],
+        images: [...prev.images, ...urls],
       }));
-    }
-    setUploadingEdit(false);
+    });
   }
 
   async function handleCreate(e) {
@@ -245,19 +199,20 @@ export default function EventsPage() {
       const data = await res.json();
       if (!res.ok) {
         setFormError(data.error || 'Failed to create event');
+        showToast(data.error || 'Failed to create event', 'error');
         return;
       }
       setForm({ title: '', description: '', date: '', location: '', capacity: '', image: '', images: [], highlights: '' });
       setIsCreateModalOpen(false);
+      showToast(createMode === 'past' ? 'Event archive created' : 'Event published successfully', 'success');
       loadEvents();
-    } catch (err) {
+    } catch {
       setFormError('Could not connect to the server');
+      showToast('Could not connect to the server', 'error');
     }
   }
 
   async function handleDelete(eventId) {
-    if (!confirm('Are you sure you want to delete this event?')) return;
-
     try {
       const res = await fetch(`/api/events/${eventId}`, {
         method: 'DELETE',
@@ -265,12 +220,14 @@ export default function EventsPage() {
       });
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || 'Failed to delete event');
+        showToast(data.error || 'Failed to delete event', 'error');
         return;
       }
+      setDeletingEventId(null);
+      showToast('Event removed successfully', 'success');
       loadEvents();
-    } catch (err) {
-      alert('Could not connect to the server');
+    } catch {
+      showToast('Could not connect to the server', 'error');
     }
   }
 
@@ -316,33 +273,67 @@ export default function EventsPage() {
       const data = await res.json();
       if (!res.ok) {
         setEditError(data.error || 'Failed to update event');
+        showToast(data.error || 'Failed to update event', 'error');
         return;
       }
       setEditingEvent(null);
+      showToast('Event updated successfully', 'success');
       loadEvents();
-    } catch (err) {
+    } catch {
       setEditError('Could not connect to the server');
+      showToast('Could not connect to the server', 'error');
     }
   }
 
   async function handleRsvp(eventId, isRegistered) {
     try {
+      setActioningRsvpId(eventId);
       const res = await fetch(`/api/events/${eventId}/rsvp`, {
         method: isRegistered ? 'DELETE' : 'POST',
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
       if (!res.ok) {
-        alert(data.error || 'RSVP action failed');
+        showToast(data.error || 'RSVP action failed', 'error');
         return;
       }
+      showToast(isRegistered ? 'RSVP cancelled' : 'Registered for event!', 'success');
       loadEvents();
-    } catch (err) {
-      alert('Could not connect to the server');
+    } catch {
+      showToast('Could not connect to the server', 'error');
+    } finally {
+      setActioningRsvpId(null);
     }
   }
 
-  if (loading) return <div className="p-12 text-center text-slate-300">Loading spatial modules...</div>;
+  function handleCopyAttendeeEmails(attendees) {
+    const emails = attendees
+      .map((att) => (typeof att.user === 'object' ? att.user?.email : ''))
+      .filter(Boolean)
+      .join(', ');
+
+    if (!emails) {
+      showToast('No attendee emails to copy', 'info');
+      return;
+    }
+
+    navigator.clipboard.writeText(emails);
+    setCopiedEmails(true);
+    showToast(`${attendees.length} attendee emails copied to clipboard`, 'success');
+    setTimeout(() => setCopiedEmails(false), 2000);
+  }
+
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#070305] text-[#FEF2F2]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-red-600 border-t-transparent" />
+          <p className="text-sm font-medium tracking-wider text-red-200/70">Loading events directory...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!user) {
     return (
       <div className="min-h-screen bg-transparent px-4 py-12">
@@ -358,77 +349,123 @@ export default function EventsPage() {
   const now = new Date();
   const upcomingEvents = events.filter((ev) => new Date(ev.date) >= now);
   const previousEvents = events.filter((ev) => new Date(ev.date) < now);
-  const displayedEvents = activeTab === 'upcoming' ? upcomingEvents : previousEvents;
+
+  const displayedEvents = (activeTab === 'upcoming' ? upcomingEvents : previousEvents).filter((ev) => {
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    return (
+      ev.title?.toLowerCase().includes(q) ||
+      ev.location?.toLowerCase().includes(q) ||
+      ev.description?.toLowerCase().includes(q)
+    );
+  });
 
   return (
-    <div className="relative mx-auto max-w-7xl px-6 py-12 text-slate-100 space-y-10">
-      
+    <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 text-slate-100 space-y-8 font-sans selection:bg-red-500 selection:text-white">
+      {/* Background Ambient Glows */}
+      <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-red-900/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-10 left-10 w-[400px] h-[400px] bg-orange-950/15 rounded-full blur-[140px] pointer-events-none" />
+
       {/* Header Container */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 border-b border-white/10 pb-8">
+      <div className="relative z-10 rounded-[28px] border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-2xl flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         <div className="space-y-2">
           <span
-            className="px-4 py-1.5 text-[10px] font-black uppercase tracking-widest rounded-full border border-white/20 inline-block backdrop-blur-md"
+            className="px-3.5 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border border-white/20 inline-block backdrop-blur-md"
             style={{ background: 'rgba(255,255,255,0.05)', color: CITEMAS_GOLD }}
           >
             Directory Hub
           </span>
-          <h1 className="text-4xl font-black tracking-tight" style={{ color: CITEMAS_CREAM }}>
-            <span className="bg-gradient-to-r from-red-500 via-amber-400 to-red-600 bg-clip-text text-transparent drop-shadow-sm">CITEMAS</span> Events & Archives
+          <h1 className="text-3xl sm:text-4xl font-black tracking-tight" style={{ color: CITEMAS_CREAM }}>
+            <span className="bg-gradient-to-r from-red-500 via-rose-400 to-orange-400 bg-clip-text text-transparent drop-shadow-sm">
+              CITEMAS
+            </span>{' '}
+            Events & Exhibits
           </h1>
-          <p className="text-sm font-medium" style={{ color: MUTED }}>
-            Explore immersive media workshops, digital exhibits, past event history, and technical showcases.
+          <p className="text-xs sm:text-sm font-light max-w-2xl leading-relaxed text-slate-400">
+            Explore multimedia workshops, tech showcases, gallery exhibits, and past event history across the creative campus community.
           </p>
         </div>
 
         {/* Action Controls & Tab Switcher */}
-        <div className="flex flex-wrap items-center gap-4">
+        <div className="flex flex-wrap items-center gap-3">
           {/* Tab Navigation Switches */}
-          <div
-            className="flex p-1 rounded-full border border-white/15 backdrop-blur-xl"
-            style={{ background: 'rgba(0,0,0,0.35)' }}
-          >
+          <div className="flex p-1 rounded-2xl border border-white/15 bg-black/40 backdrop-blur-xl">
             <button
               onClick={() => setActiveTab('upcoming')}
-              className={`px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider transition-all ${
+              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                 activeTab === 'upcoming'
-                  ? 'bg-gradient-to-r from-red-600 to-red-800 text-white shadow-lg shadow-red-900/40'
-                  : 'text-slate-300 hover:text-white'
+                  ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-lg shadow-red-950/60'
+                  : 'text-slate-400 hover:text-white'
               }`}
             >
               Upcoming ({upcomingEvents.length})
             </button>
             <button
               onClick={() => setActiveTab('previous')}
-              className={`px-5 py-2.5 rounded-full text-xs font-black uppercase tracking-wider transition-all ${
+              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                 activeTab === 'previous'
-                  ? 'bg-gradient-to-r from-red-600 to-red-800 text-white shadow-lg shadow-red-900/40'
-                  : 'text-slate-300 hover:text-white'
+                  ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-lg shadow-red-950/60'
+                  : 'text-slate-400 hover:text-white'
               }`}
             >
-              Past Event History ({previousEvents.length})
+              Past Archives ({previousEvents.length})
             </button>
           </div>
 
           {/* Add Event Button for Authorized Staff */}
           {canCreate && (
-            <SpatialButton onClick={() => setIsCreateModalOpen(true)} variant="primary">
-              + Post Event / History
-            </SpatialButton>
+            <button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="rounded-2xl bg-gradient-to-r from-red-600 via-red-600 to-orange-600 px-5 py-3 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-red-950/60 border border-white/10 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer flex items-center gap-2"
+            >
+              <Plus size={15} />
+              <span>Post Event / Archive</span>
+            </button>
           )}
         </div>
       </div>
 
-      {fetchError && <p className="text-red-400 font-semibold">{fetchError}</p>}
+      {/* Search Toolbar */}
+      <div className="relative z-10 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-3 backdrop-blur-xl">
+        <Search size={16} className="text-slate-500 ml-2 shrink-0" />
+        <input
+          type="text"
+          placeholder={`Search ${activeTab === 'upcoming' ? 'upcoming events' : 'past archives'} by title, venue, or keyword...`}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full bg-transparent text-xs text-white placeholder:text-slate-500 outline-none"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            className="text-xs text-slate-400 hover:text-white px-2 cursor-pointer"
+          >
+            Clear
+          </button>
+        )}
+      </div>
+
+      {fetchError && (
+        <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-xs font-semibold text-red-300">
+          {fetchError}
+        </div>
+      )}
 
       {/* Events Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {displayedEvents.length === 0 && (
           <div className="col-span-full py-16 text-center">
-            <SpatialGlassPanel depth="back" className="max-w-md mx-auto py-10">
-              <p className="text-3xl mb-2">📂</p>
-              <p className="font-extrabold text-lg text-slate-200">No {activeTab} events available</p>
-              <p className="text-xs text-slate-400 mt-1">Check back later or explore other archives.</p>
-            </SpatialGlassPanel>
+            <div className="max-w-md mx-auto p-10 rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-xl">
+              <Calendar size={36} className="mx-auto mb-3 text-slate-600" />
+              <p className="font-extrabold text-base text-slate-200">
+                {searchQuery ? 'No matching events found' : `No ${activeTab} events available`}
+              </p>
+              <p className="text-xs text-slate-400 mt-1">
+                {searchQuery
+                  ? 'Try modifying your search keywords.'
+                  : 'Check back later or switch tabs to view past event archives.'}
+              </p>
+            </div>
           </div>
         )}
 
@@ -445,99 +482,299 @@ export default function EventsPage() {
             ? event.images
             : event.image ? [event.image] : [];
 
+          // Capacity calculation
+          const capacityRatio = event.capacity ? Math.min(100, Math.round((event.attendeeCount / event.capacity) * 100)) : 0;
+          const isNearlyFull = event.capacity && capacityRatio >= 80 && !isFull;
+
           return (
-            <SpatialGlassPanel key={event._id} depth="front" className="flex flex-col justify-between space-y-6 group">
+            <div
+              key={event._id}
+              className="rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-6 shadow-xl backdrop-blur-xl flex flex-col justify-between space-y-5 hover:border-white/20 transition-all duration-300"
+            >
               <div className="space-y-4">
                 {/* Event Image / Multi-image Carousel */}
                 {activeTab === 'previous' || allImages.length > 1 ? (
                   <EventCarousel images={allImages} title={event.title} />
                 ) : (
-                  <div className="h-48 w-full rounded-2xl overflow-hidden bg-black/50 border border-white/15 relative shadow-inner">
+                  <div className="h-44 w-full rounded-2xl overflow-hidden bg-black/60 border border-white/10 relative shadow-inner">
                     {event.image ? (
-                      <img src={event.image} alt={event.title} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                      <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-red-950/80 to-black text-4xl">
-                        🏛️
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-red-950/60 to-black text-3xl">
+                        🎨
                       </div>
                     )}
-                    <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest bg-black/70 text-amber-300 backdrop-blur-md border border-white/20 shadow-md">
+                    <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-black/75 text-amber-300 backdrop-blur-md border border-white/15">
                       {activeTab === 'upcoming' ? 'Scheduled' : 'Past Archive'}
                     </div>
                   </div>
                 )}
 
+                {/* Title & Officer Quick Actions */}
                 <div className="flex justify-between items-start gap-2">
-                  <h3 className="font-black text-lg tracking-tight line-clamp-1" style={{ color: CITEMAS_CREAM }}>
+                  <h3 className="font-black text-lg tracking-tight text-white line-clamp-1">
                     {event.title}
                   </h3>
                   {canManageEvent && (
-                    <div className="flex items-center gap-2 shrink-0 text-xs font-bold">
-                      <button onClick={() => startEdit(event)} className="text-amber-400 hover:text-amber-300 transition-colors">
-                        Edit
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        onClick={() => startEdit(event)}
+                        title="Edit event"
+                        className="p-1.5 rounded-lg border border-white/10 bg-white/[0.03] text-amber-400 hover:text-amber-300 hover:bg-white/10 transition cursor-pointer"
+                      >
+                        <Edit2 size={13} />
                       </button>
-                      <button onClick={() => handleDelete(event._id)} className="text-red-400 hover:text-red-300 transition-colors">
-                        Delete
+                      <button
+                        onClick={() => setDeletingEventId(event._id)}
+                        title="Delete event"
+                        className="p-1.5 rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 hover:text-red-300 hover:bg-red-500/20 transition cursor-pointer"
+                      >
+                        <Trash2 size={13} />
                       </button>
                     </div>
                   )}
                 </div>
 
-                <div className="text-xs space-y-1 font-medium" style={{ color: MUTED }}>
-                  <p>📅 {activeTab === 'previous' || event.isPast ? new Date(event.date).toLocaleDateString() : new Date(event.date).toLocaleString()}</p>
-                  <p>📍 {event.location}</p>
+                {/* Metadata */}
+                <div className="text-xs space-y-1.5 text-slate-400 font-medium">
+                  <div className="flex items-center gap-2">
+                    <Calendar size={13} className="text-red-400 shrink-0" />
+                    <span>
+                      {activeTab === 'previous' || event.isPast
+                        ? new Date(event.date).toLocaleDateString()
+                        : new Date(event.date).toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MapPin size={13} className="text-amber-400 shrink-0" />
+                    <span className="truncate">{event.location}</span>
+                  </div>
                 </div>
 
                 <p className="text-xs text-slate-300 line-clamp-3 leading-relaxed">{event.description}</p>
 
                 {event.highlights && (
-                  <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10 text-xs text-amber-200/90 leading-relaxed font-light">
+                  <div className="p-3 rounded-2xl bg-white/[0.02] border border-white/10 text-xs text-amber-200/90 leading-relaxed font-light">
                     <span className="font-bold text-amber-400 uppercase text-[10px] block mb-0.5">Highlights</span>
                     {event.highlights}
                   </div>
                 )}
+
+                {/* Capacity Progress Bar */}
+                {event.capacity ? (
+                  <div className="space-y-1.5 pt-1">
+                    <div className="flex justify-between text-[11px] font-bold">
+                      <span className="text-slate-400">Reserved Seats</span>
+                      <span className={isFull ? 'text-red-400' : isNearlyFull ? 'text-amber-400' : 'text-slate-300'}>
+                        {event.attendeeCount} / {event.capacity} ({capacityRatio}%)
+                      </span>
+                    </div>
+                    <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full transition-all duration-500 rounded-full ${
+                          isFull
+                            ? 'bg-red-500'
+                            : isNearlyFull
+                            ? 'bg-amber-400'
+                            : 'bg-emerald-500'
+                        }`}
+                        style={{ width: `${capacityRatio}%` }}
+                      />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-[11px] text-slate-400 font-medium">
+                    Seats: <span className="text-white font-bold">{event.attendeeCount} confirmed</span> • Open Capacity
+                  </div>
+                )}
               </div>
 
-              {/* Bottom Card Footer with RSVP / Attendee details */}
-              <div className="pt-4 border-t border-white/10 flex items-center justify-between">
-                <span className="text-[11px] font-bold text-slate-300 uppercase tracking-wide">
-                  Seats: {event.attendeeCount} {event.capacity ? `/ ${event.capacity}` : '(Open)'}
-                </span>
+              {/* Bottom Card Footer with RSVP / Guest list view */}
+              <div className="pt-4 border-t border-white/10 flex items-center justify-between gap-2">
+                {/* Officers / Creators can inspect guest list */}
+                {canManageEvent && (
+                  <button
+                    onClick={() => setViewingAttendeesEvent(event)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 bg-white/[0.04] text-[11px] font-bold text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
+                  >
+                    <Users size={12} />
+                    <span>Guest List ({event.attendeeCount})</span>
+                  </button>
+                )}
 
+                {/* Member RSVP Button */}
                 {activeTab === 'upcoming' && (
                   <button
                     onClick={() => handleRsvp(event._id, isRegistered)}
-                    disabled={!isRegistered && isFull}
-                    className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all ${
+                    disabled={actioningRsvpId === event._id || (!isRegistered && isFull)}
+                    className={`ml-auto px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                       isRegistered
                         ? 'bg-red-500/20 text-red-300 border border-red-500/40 hover:bg-red-500/30'
                         : isFull
                         ? 'bg-white/10 text-slate-500 cursor-not-allowed border border-white/10'
-                        : 'bg-emerald-600/80 text-white border border-emerald-400/30 hover:bg-emerald-600 shadow-lg'
+                        : 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-md shadow-emerald-950/50'
                     }`}
                   >
-                    {isRegistered ? 'Cancel RSVP' : isFull ? 'Full Slot' : 'RSVP Now'}
+                    {actioningRsvpId === event._id
+                      ? '...'
+                      : isRegistered
+                      ? 'Cancel RSVP'
+                      : isFull
+                      ? 'At Capacity'
+                      : 'RSVP Now'}
                   </button>
                 )}
               </div>
-            </SpatialGlassPanel>
+            </div>
           );
         })}
       </div>
 
+      {/* ATTENDEE ROSTER MODAL (For Officers & Creators) */}
+      <ModalPortal isOpen={Boolean(viewingAttendeesEvent)} onClose={() => setViewingAttendeesEvent(null)}>
+        <div className="relative w-full max-w-xl rounded-3xl p-6 sm:p-8 space-y-5 text-slate-100 border border-white/20 bg-gradient-to-b from-[#140609] to-[#070305] shadow-2xl backdrop-blur-2xl overflow-hidden max-h-[85vh] flex flex-col">
+          <div className="flex justify-between items-start border-b border-white/10 pb-4">
+            <div>
+              <div className="text-[10px] font-black uppercase tracking-widest text-amber-400">Guest Roster</div>
+              <h2 className="text-xl font-black text-white mt-0.5">{viewingAttendeesEvent?.title}</h2>
+              <p className="text-xs text-slate-400 mt-1">
+                {viewingAttendeesEvent?.attendees?.length || 0} registered attendees{' '}
+                {viewingAttendeesEvent?.capacity ? `/ ${viewingAttendeesEvent.capacity} capacity limit` : ''}
+              </p>
+            </div>
+            <button
+              onClick={() => setViewingAttendeesEvent(null)}
+              className="text-slate-400 hover:text-white p-1 text-base cursor-pointer"
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Quick Copy / Filter Toolbar */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5">
+            <div className="relative flex-1">
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+              <input
+                type="text"
+                placeholder="Filter attendees by name or email..."
+                value={attendeeSearch}
+                onChange={(e) => setAttendeeSearch(e.target.value)}
+                className="w-full rounded-xl border border-white/10 bg-black/40 pl-9 pr-3 py-2 text-xs text-white placeholder:text-slate-500 outline-none focus:border-red-500"
+              />
+            </div>
+            <button
+              onClick={() => handleCopyAttendeeEmails(viewingAttendeesEvent?.attendees || [])}
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl border border-white/10 bg-white/[0.04] text-xs font-bold text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer shrink-0"
+            >
+              {copiedEmails ? <Check size={13} className="text-emerald-400" /> : <Copy size={13} />}
+              <span>{copiedEmails ? 'Emails Copied' : 'Copy All Emails'}</span>
+            </button>
+          </div>
+
+          {/* Attendee Table */}
+          <div className="flex-1 overflow-y-auto rounded-2xl border border-white/10 bg-black/30">
+            {(() => {
+              const attendees = (viewingAttendeesEvent?.attendees || []).filter((att) => {
+                if (!attendeeSearch.trim()) return true;
+                const userObj = typeof att.user === 'object' ? att.user : null;
+                const name = `${userObj?.firstName || ''} ${userObj?.lastName || ''}`.toLowerCase();
+                const email = (userObj?.email || '').toLowerCase();
+                const q = attendeeSearch.toLowerCase();
+                return name.includes(q) || email.includes(q);
+              });
+
+              if (attendees.length === 0) {
+                return (
+                  <div className="p-8 text-center text-xs text-slate-500">
+                    No attendees registered for this event yet.
+                  </div>
+                );
+              }
+
+              return (
+                <table className="w-full text-left text-xs">
+                  <thead className="border-b border-white/10 bg-white/[0.02] text-[10px] font-black uppercase tracking-wider text-slate-400">
+                    <tr>
+                      <th className="px-4 py-3">Attendee</th>
+                      <th className="px-4 py-3">Student ID</th>
+                      <th className="px-4 py-3">RSVP Time</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-white/5">
+                    {attendees.map((att, idx) => {
+                      const userObj = typeof att.user === 'object' ? att.user : null;
+                      return (
+                        <tr key={idx} className="hover:bg-white/[0.02]">
+                          <td className="px-4 py-2.5">
+                            <div className="font-bold text-white">
+                              {userObj ? `${userObj.firstName} ${userObj.lastName}` : 'Registered Member'}
+                            </div>
+                            <div className="text-[11px] text-slate-400">{userObj?.email || 'Confidential'}</div>
+                          </td>
+                          <td className="px-4 py-2.5 font-mono text-[11px] text-slate-300">
+                            {userObj?.studentId || '—'}
+                          </td>
+                          <td className="px-4 py-2.5 text-[11px] text-slate-500">
+                            {att.registeredAt ? new Date(att.registeredAt).toLocaleString() : '—'}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              );
+            })()}
+          </div>
+
+          <div className="flex justify-end pt-2">
+            <button
+              onClick={() => setViewingAttendeesEvent(null)}
+              className="px-5 py-2.5 rounded-xl border border-white/15 bg-white/[0.05] text-xs font-bold text-white hover:bg-white/10 transition cursor-pointer"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      </ModalPortal>
+
+      {/* DELETE CONFIRMATION MODAL */}
+      <ModalPortal isOpen={Boolean(deletingEventId)} onClose={() => setDeletingEventId(null)}>
+        <div className="relative w-full max-w-sm rounded-3xl p-6 space-y-4 text-slate-100 border border-red-500/30 bg-gradient-to-b from-[#1c080b] to-[#070305] shadow-2xl backdrop-blur-2xl">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-red-500/20 text-red-400">
+              <Trash2 size={20} />
+            </div>
+            <div>
+              <h3 className="font-bold text-white">Confirm Removal</h3>
+              <p className="text-xs text-slate-400">This will permanently delete this event and its RSVP roster.</p>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 pt-2">
+            <button
+              onClick={() => setDeletingEventId(null)}
+              className="px-4 py-2 rounded-xl border border-white/10 text-xs font-medium text-slate-300 hover:text-white hover:bg-white/5 transition cursor-pointer"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => handleDelete(deletingEventId)}
+              className="px-4 py-2 rounded-xl bg-red-600 text-xs font-black uppercase tracking-wider text-white hover:bg-red-500 transition cursor-pointer shadow-lg shadow-red-950/50"
+            >
+              Delete Event
+            </button>
+          </div>
+        </div>
+      </ModalPortal>
+
       {/* CREATE EVENT / HISTORY MODAL */}
       <ModalPortal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)}>
-        <div
-          className="relative w-full max-w-lg rounded-2xl p-8 space-y-6 text-slate-100 border border-white/25 shadow-[0_0_100px_rgba(220,38,38,0.3)] overflow-hidden max-h-[90vh] overflow-y-auto"
-          style={{
-            background: 'radial-gradient(circle at 50% 10%, rgba(127, 29, 29, 0.45) 0%, rgba(10, 4, 4, 0.95) 90%)',
-            backdropFilter: 'blur(40px) saturate(200%)',
-          }}
-        >
+        <div className="relative w-full max-w-lg rounded-3xl p-8 space-y-6 text-slate-100 border border-white/20 bg-gradient-to-b from-[#18060a] to-[#070305] shadow-2xl backdrop-blur-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
           <div className="flex justify-between items-center border-b border-white/10 pb-4">
             <h2 className="text-xl font-black uppercase tracking-wider text-amber-300">Create Event / Archive</h2>
             <button
               onClick={() => setIsCreateModalOpen(false)}
-              className="text-slate-400 hover:text-white font-bold text-lg"
+              className="text-slate-400 hover:text-white font-bold text-lg cursor-pointer"
             >
               ✕
             </button>
@@ -551,7 +788,7 @@ export default function EventsPage() {
                 setCreateMode('upcoming');
                 setForm((prev) => ({ ...prev, date: '' }));
               }}
-              className={`flex-1 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+              className={`flex-1 px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer ${
                 createMode === 'upcoming'
                   ? 'bg-red-600/30 border border-red-500/50 text-red-300'
                   : 'border border-white/10 text-slate-400 hover:text-white hover:bg-white/5'
@@ -565,7 +802,7 @@ export default function EventsPage() {
                 setCreateMode('past');
                 setForm((prev) => ({ ...prev, date: '' }));
               }}
-              className={`flex-1 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+              className={`flex-1 px-4 py-2.5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all cursor-pointer ${
                 createMode === 'past'
                   ? 'bg-amber-500/30 border border-amber-500/50 text-amber-300'
                   : 'border border-white/10 text-slate-400 hover:text-white hover:bg-white/5'
@@ -579,13 +816,15 @@ export default function EventsPage() {
 
           <form onSubmit={handleCreate} className="space-y-4">
             <div>
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">{createMode === 'upcoming' ? 'EVENT TITLE' : 'EVENT NAME'}</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">
+                {createMode === 'upcoming' ? 'EVENT TITLE' : 'EVENT NAME'}
+              </label>
               <input
-                placeholder="Event Name"
+                placeholder="Event Title"
                 value={form.title}
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
                 required
-                className="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 shadow-inner"
+                className="w-full bg-black/50 border border-white/15 rounded-2xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 shadow-inner"
               />
             </div>
 
@@ -597,19 +836,21 @@ export default function EventsPage() {
                 onChange={(e) => setForm({ ...form, description: e.target.value })}
                 required
                 rows="3"
-                className="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 shadow-inner"
+                className="w-full bg-black/50 border border-white/15 rounded-2xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 shadow-inner"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">{createMode === 'upcoming' ? 'DATE & TIME ' : 'EVENT DATE'}</label>
+                <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">
+                  {createMode === 'upcoming' ? 'DATE & TIME' : 'EVENT DATE'}
+                </label>
                 <input
                   type={createMode === 'upcoming' ? 'datetime-local' : 'date'}
                   value={form.date}
                   onChange={(e) => setForm({ ...form, date: e.target.value })}
                   required
-                  className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-red-500 shadow-inner"
+                  className="w-full bg-black/50 border border-white/15 rounded-2xl px-3 py-3 text-xs text-white focus:outline-none focus:border-red-500 shadow-inner"
                 />
               </div>
               {createMode === 'upcoming' && (
@@ -621,55 +862,61 @@ export default function EventsPage() {
                     placeholder="Unlimited"
                     value={form.capacity}
                     onChange={(e) => setForm({ ...form, capacity: e.target.value })}
-                    className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 shadow-inner"
+                    className="w-full bg-black/50 border border-white/15 rounded-2xl px-3 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 shadow-inner"
                   />
                 </div>
               )}
             </div>
 
             <div>
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">{createMode === 'upcoming' ? 'VENUE OR LINK' : 'WHERE IT HAPPENED'}</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">
+                {createMode === 'upcoming' ? 'VENUE OR LINK' : 'WHERE IT HAPPENED'}
+              </label>
               <input
-                placeholder="Venue or Link"
+                placeholder="e.g. CITE Lab 3 or Virtual Meet"
                 value={form.location}
                 onChange={(e) => setForm({ ...form, location: e.target.value })}
                 required
-                className="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 shadow-inner"
+                className="w-full bg-black/50 border border-white/15 rounded-2xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 shadow-inner"
               />
             </div>
 
             <div>
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">{createMode === 'upcoming' ? 'EVENT HIGHLIGHTS (OPTIONAL)' : 'HIGHLIGHTS / SUMMARY (what happened, who won, key moments)'}</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">
+                {createMode === 'upcoming' ? 'EVENT HIGHLIGHTS (OPTIONAL)' : 'HIGHLIGHTS / SUMMARY (key moments, winners)'}
+              </label>
               <textarea
-                placeholder={createMode === 'upcoming' ? 'Key takeaways, agenda, speakers...' : 'Key takeaways, winning teams, summary...'}
+                placeholder={createMode === 'upcoming' ? 'Key takeaways, agenda, speakers...' : 'Summary of what happened...'}
                 value={form.highlights}
                 onChange={(e) => setForm({ ...form, highlights: e.target.value })}
                 rows="2"
-                className="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 shadow-inner"
+                className="w-full bg-black/50 border border-white/15 rounded-2xl px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-red-500 shadow-inner"
               />
             </div>
 
-            {/* Multi-Image Cloudinary Uploader */}
+            {/* Multi-Image Uploader */}
             <div>
-              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">{createMode === 'past' ? 'GALLERY IMAGES (multiple for carousel)' : 'EVENT HERO IMAGE'}</label>
+              <label className="text-[10px] font-black uppercase tracking-widest text-slate-300 block mb-1">
+                {createMode === 'past' ? 'GALLERY IMAGES (multi-image carousel)' : 'EVENT HERO IMAGE'}
+              </label>
               <input
                 type="file"
                 accept="image/*"
                 multiple
-                onChange={handleCloudinaryUploadCreate}
-                className="w-full text-xs text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:bg-red-600 file:text-white hover:file:bg-red-700 bg-black/50 border border-white/15 rounded-xl px-3 py-2"
+                onChange={handleImageUploadCreate}
+                className="w-full text-xs text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:bg-red-600 file:text-white hover:file:bg-red-700 bg-black/50 border border-white/15 rounded-2xl px-3 py-2 cursor-pointer"
               />
-              {uploadingCreate && <p className="text-amber-400 text-[10px] mt-1">Uploading image(s)...</p>}
-              
+              {uploadingCreate && <p className="text-amber-400 text-[10px] mt-1 animate-pulse">Uploading image(s)...</p>}
+
               {form.images.length > 0 && (
                 <div className="mt-3 grid grid-cols-4 gap-2">
                   {form.images.map((url, i) => (
-                    <div key={i} className="relative group rounded-lg overflow-hidden h-16 border border-white/20">
+                    <div key={i} className="relative group rounded-xl overflow-hidden h-16 border border-white/20">
                       <img src={url} alt={`Uploaded ${i}`} className="w-full h-full object-cover" />
                       <button
                         type="button"
                         onClick={() => setForm((p) => ({ ...p, images: p.images.filter((_, idx) => idx !== i) }))}
-                        className="absolute top-1 right-1 bg-black/80 text-red-400 text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold"
+                        className="absolute top-1 right-1 bg-black/80 text-red-400 text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold cursor-pointer"
                       >
                         ✕
                       </button>
@@ -680,12 +927,19 @@ export default function EventsPage() {
             </div>
 
             <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
-              <SpatialButton type="button" variant="secondary" onClick={() => setIsCreateModalOpen(false)}>
+              <button
+                type="button"
+                onClick={() => setIsCreateModalOpen(false)}
+                className="px-5 py-3 rounded-2xl border border-white/15 text-xs font-bold text-slate-300 hover:text-white transition cursor-pointer"
+              >
                 Cancel
-              </SpatialButton>
-              <SpatialButton type="submit" variant="primary">
-                {createMode === 'upcoming' ? 'PUBLISH EVENT' : 'ARCHIVE EVENT'}
-              </SpatialButton>
+              </button>
+              <button
+                type="submit"
+                className="px-6 py-3 rounded-2xl bg-gradient-to-r from-red-600 to-orange-600 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-red-950/50 hover:brightness-110 active:scale-95 transition cursor-pointer"
+              >
+                {createMode === 'upcoming' ? 'Publish Event' : 'Archive Event'}
+              </button>
             </div>
           </form>
         </div>
@@ -693,18 +947,12 @@ export default function EventsPage() {
 
       {/* EDIT EVENT MODAL */}
       <ModalPortal isOpen={Boolean(editingEvent)} onClose={() => setEditingEvent(null)}>
-        <div
-          className="relative w-full max-w-lg rounded-2xl p-8 space-y-6 text-slate-100 border border-white/25 shadow-[0_0_100px_rgba(245,158,11,0.25)] overflow-hidden max-h-[90vh] overflow-y-auto"
-          style={{
-            background: 'radial-gradient(circle at 50% 10%, rgba(245, 158, 11, 0.35) 0%, rgba(10, 4, 4, 0.95) 90%)',
-            backdropFilter: 'blur(40px) saturate(200%)',
-          }}
-        >
+        <div className="relative w-full max-w-lg rounded-3xl p-8 space-y-6 text-slate-100 border border-white/20 bg-gradient-to-b from-[#180a04] to-[#070305] shadow-2xl backdrop-blur-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
           <div className="flex justify-between items-center border-b border-white/10 pb-4">
             <h2 className="text-xl font-black uppercase tracking-wider text-amber-300">Edit Event Module</h2>
             <button
               onClick={() => setEditingEvent(null)}
-              className="text-slate-400 hover:text-white font-bold text-lg"
+              className="text-slate-400 hover:text-white font-bold text-lg cursor-pointer"
             >
               ✕
             </button>
@@ -719,7 +967,7 @@ export default function EventsPage() {
                 value={editForm.title}
                 onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
                 required
-                className="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500 shadow-inner"
+                className="w-full bg-black/50 border border-white/15 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 shadow-inner"
               />
             </div>
 
@@ -730,7 +978,7 @@ export default function EventsPage() {
                 onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
                 required
                 rows="3"
-                className="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500 shadow-inner"
+                className="w-full bg-black/50 border border-white/15 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 shadow-inner"
               />
             </div>
 
@@ -744,7 +992,7 @@ export default function EventsPage() {
                   value={editForm.date}
                   onChange={(e) => setEditForm({ ...editForm, date: e.target.value })}
                   required
-                  className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-amber-500 shadow-inner"
+                  className="w-full bg-black/50 border border-white/15 rounded-2xl px-3 py-3 text-xs text-white focus:outline-none focus:border-amber-500 shadow-inner"
                 />
               </div>
               <div>
@@ -755,7 +1003,7 @@ export default function EventsPage() {
                   placeholder="Unlimited"
                   value={editForm.capacity}
                   onChange={(e) => setEditForm({ ...editForm, capacity: e.target.value })}
-                  className="w-full bg-black/50 border border-white/15 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500 shadow-inner"
+                  className="w-full bg-black/50 border border-white/15 rounded-2xl px-3 py-3 text-sm text-white focus:outline-none focus:border-amber-500 shadow-inner"
                 />
               </div>
             </div>
@@ -766,7 +1014,7 @@ export default function EventsPage() {
                 value={editForm.location}
                 onChange={(e) => setEditForm({ ...editForm, location: e.target.value })}
                 required
-                className="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500 shadow-inner"
+                className="w-full bg-black/50 border border-white/15 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 shadow-inner"
               />
             </div>
 
@@ -776,7 +1024,7 @@ export default function EventsPage() {
                 value={editForm.highlights}
                 onChange={(e) => setEditForm({ ...editForm, highlights: e.target.value })}
                 rows="2"
-                className="w-full bg-black/50 border border-white/15 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500 shadow-inner"
+                className="w-full bg-black/50 border border-white/15 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:border-amber-500 shadow-inner"
               />
             </div>
 
@@ -787,20 +1035,20 @@ export default function EventsPage() {
                 type="file"
                 accept="image/*"
                 multiple
-                onChange={handleCloudinaryUploadEdit}
-                className="w-full text-xs text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:bg-amber-600 file:text-white hover:file:bg-amber-700 bg-black/50 border border-white/15 rounded-xl px-3 py-2"
+                onChange={handleImageUploadEdit}
+                className="w-full text-xs text-slate-300 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-black file:uppercase file:bg-amber-600 file:text-white hover:file:bg-amber-700 bg-black/50 border border-white/15 rounded-2xl px-3 py-2 cursor-pointer"
               />
-              {uploadingEdit && <p className="text-amber-400 text-[10px] mt-1">Uploading image(s)...</p>}
-              
+              {uploadingEdit && <p className="text-amber-400 text-[10px] mt-1 animate-pulse">Uploading image(s)...</p>}
+
               {editForm.images.length > 0 && (
                 <div className="mt-3 grid grid-cols-4 gap-2">
                   {editForm.images.map((url, i) => (
-                    <div key={i} className="relative group rounded-lg overflow-hidden h-16 border border-white/20">
+                    <div key={i} className="relative group rounded-xl overflow-hidden h-16 border border-white/20">
                       <img src={url} alt={`Uploaded ${i}`} className="w-full h-full object-cover" />
                       <button
                         type="button"
                         onClick={() => setEditForm((p) => ({ ...p, images: p.images.filter((_, idx) => idx !== i) }))}
-                        className="absolute top-1 right-1 bg-black/80 text-red-400 text-xs rounded-full w-4 h-4 flex items-center justify-center font-bold"
+                        className="absolute top-1 right-1 bg-black/80 text-red-400 text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold cursor-pointer"
                       >
                         ✕
                       </button>
@@ -811,12 +1059,19 @@ export default function EventsPage() {
             </div>
 
             <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
-              <SpatialButton type="button" variant="secondary" onClick={() => setEditingEvent(null)}>
+              <button
+                type="button"
+                onClick={() => setEditingEvent(null)}
+                className="px-5 py-3 rounded-2xl border border-white/15 text-xs font-bold text-slate-300 hover:text-white transition cursor-pointer"
+              >
                 Cancel
-              </SpatialButton>
-              <SpatialButton type="submit" variant="primary">
+              </button>
+              <button
+                type="submit"
+                className="px-6 py-3 rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-amber-950/50 hover:brightness-110 active:scale-95 transition cursor-pointer"
+              >
                 Save Changes
-              </SpatialButton>
+              </button>
             </div>
           </form>
         </div>

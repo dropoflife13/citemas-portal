@@ -20,14 +20,26 @@ export async function GET(req) {
   try {
     await connectDB();
 
+    const isStaff = CAN_MANAGE.includes(currentUser.role);
     const events = await Event.find()
       .sort({ date: 1 })
-      .populate('createdBy', 'firstName lastName');
+      .populate('createdBy', 'firstName lastName')
+      .populate('attendees.user', 'firstName lastName email studentId');
 
-    const formattedEvents = events.map((event) => ({
-      ...event.toObject(),
-      attendeeCount: event.attendees?.length || 0,
-    }));
+    const formattedEvents = events.map((event) => {
+      const obj = event.toObject();
+      const isCreator = String(event.createdBy?._id || event.createdBy) === String(currentUser.id);
+      return {
+        ...obj,
+        attendeeCount: event.attendees?.length || 0,
+        attendees: (isStaff || isCreator)
+          ? obj.attendees
+          : (obj.attendees || []).map((att) => ({
+              user: typeof att.user === 'object' ? att.user?._id : att.user,
+              registeredAt: att.registeredAt,
+            })),
+      };
+    });
 
     return NextResponse.json(formattedEvents, {
       status: 200,
