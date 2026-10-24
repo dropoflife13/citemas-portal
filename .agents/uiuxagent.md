@@ -24,6 +24,14 @@
 - **UX-11** Copy-to-clipboard: Clipboard API with selection fallback for insecure contexts; success via toast (UX-08) and button label swap with `aria-live`; never auto-copy; secrets are never rendered for copying.
 - **UX-12** Sync surfaces: persistent connectivity indicator; pending/synced/flagged/rejected badges render the states defined in IR-04 (never redefined here); flagged/rejected items show the reason and next step.
 - **UX-13** Baseline: WCAG 2.2 AA, complete keyboard path, `lang` attribute, no color-only meaning, usable at 320 px on low-end Android.
+- **UX-14** Layout (Anti-Slop): Do not use generic, symmetrical "3-column card grids" (the AI default). Use an asymmetrical editorial grid (e.g., 12-column). Major sections should span full width (`100vw`) to create cinematic bands. Use sticky stacking (`position: sticky; top: 0`) for sequential scroll storytelling on marketing/landing pages.
+- **UX-15** Empty States: Never render dead space or empty rounded rectangles when there is no data. Fill the space with a deliberate editorial design element (e.g., massive faded typography, a faint grid overlay, or a geometric pattern) that maintains the visual hierarchy. If using an illustration, it must be custom SVG, not generic clip-art.
+- **UX-16** Typography (Hierarchy): Force extreme contrast between headings and body. Headlines must use the distinct Display font defined in `DESIGN_BRIEF.md` (usually tight tracking `-0.04em`), while body text uses a clean sans-serif. Never use the same font/weight for both.
+- **UX-17** Surfaces & Depth: Do not use generic drop shadows for depth. Depth must be created through layering, background color shifts (e.g., `#000` on `#111`), and 1px borders (e.g., `rgba(255,255,255,0.1)`). Glassmorphism (backdrop-blur) is allowed only if defined in the brief.
+- **UX-18** Signature Motion: All interactive elements (buttons, cards) must have a spring-based hover state (e.g., `scale(1.02)` with a `cubic-bezier(0.33, 1, 0.68, 1)` ease). Scroll reveals must use a subtle fade-and-slide up (opacity `0 → 1`, Y `24px → 0`).
+- **UX-19** Image Treatment: Hero, portfolio, and feature images must bleed edge-to-edge or be contained in creative frames (e.g., chamfered corners, bracket masks, or custom SVG clips). Never put a plain rectangular image inside a generic rounded box.
+- **UX-20** Data & Stats Display: Do not use standard SaaS dashboard metric cards. Render statistics using massive numbers (e.g., 48px+ display font) with tiny uppercase micro-labels. Use creative framing like "Bracket Panels" (four L-shaped corner borders) rather than a full box.
+- **UX-21** Heavy Asset Fallbacks: On mobile (`< 768px`) or under `prefers-reduced-motion`, complex sticky scroll animations must disable and revert to standard vertical flow. Heavy WebGL/3D canvases must be replaced with static, high-quality poster images to preserve battery and performance.
 
 ## 4. Required Checks (Checklist)
 - [ ] Theme: no flash on load, tokens only, contrast verified in both themes (UX-01)
@@ -35,6 +43,14 @@
 - [ ] Copy works on the fallback path and gives feedback (UX-11)
 - [ ] Offline, pending, flagged, rejected visible at 320 px (UX-12, 13)
 - [ ] Automated a11y scan shows zero serious/critical violations (UX-13)
+- [ ] No generic card grids; asymmetrical editorial layout used (UX-14)
+- [ ] Empty states use typography/graphics, not dead space (UX-15)
+- [ ] Display fonts used for headlines; stark contrast with body text (UX-16)
+- [ ] No generic drop shadows; depth via 1px borders or layering (UX-17)
+- [ ] Spring hover states and scroll reveals verified (UX-18)
+- [ ] Images use edge-to-edge or creative masking, not plain boxes (UX-19)
+- [ ] Stats use massive typography and creative framing (UX-20)
+- [ ] Mobile disables sticky/3D elements gracefully (UX-21)
 
 ## 5. Gate vs Insight Mode
 - **Gate** (default on PR, merge, "review"): evaluate every rule in §3. Output `GATE: PASS` or `GATE: FAIL <ID> <file:line> <required fix>`. Any FAIL blocks. Waivers only per PM-12.
@@ -45,4 +61,3 @@
 - Public pages, search entry, FAQ markup → `growthagent.md`.
 - Client-side surfaces (XSS in toasts/modals, clipboard, SW cache) → `securityagent.md`.
 - Flow gaps found during build → `productmanageragent.md`; state-model gaps → `integrationagent.md`.
-
