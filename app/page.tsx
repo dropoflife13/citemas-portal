@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
-import ScrollSpine from '@/components/ScrollSpine';
 
 type OfficerRecord = {
   _id: string;
@@ -281,9 +280,6 @@ export default function Home() {
         />
       </div>
 
-      {/* Data Spine Progress Indicator (Right) */}
-      <ScrollSpine />
-
       {/* ═══════════════════════════════════════════════════
           STICKY STACK WRAPPER (400vh total height for 4 cards)
           ═══════════════════════════════════════════════════ */}
@@ -294,7 +290,7 @@ export default function Home() {
           id="hero"
           onMouseMove={handleHeroMouseMove}
           onMouseLeave={handleHeroMouseLeave}
-          className="sticky top-0 min-h-screen h-screen w-full flex flex-col justify-between px-6 sm:px-12 md:px-16 lg:px-24 pt-20 pb-16 overflow-hidden relative"
+          className="sticky top-0 min-h-screen h-screen w-full flex flex-col justify-between px-6 sm:px-12 md:px-16 lg:px-24 pt-6 pb-16 overflow-hidden relative"
           style={{
             transform: `scale(${1 - cardProgress[0] * 0.08})`,
             filter: `brightness(${1 - cardProgress[0] * 0.45})`,

@@ -25,13 +25,33 @@ export default function Navbar() {
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [container, setContainer] = useState(null);
-  const [scrolled, setScrolled] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useBodyScrollLock(isDrawerOpen);
 
-  // Track scroll so the landing-page header can fade from invisible to glass
+  // Dynamic Scroll-Aware Header: hide on scroll down, reveal on scroll up, blur past 50px
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    let lastScrollY = typeof window !== 'undefined' ? window.scrollY : 0;
+
+    const onScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      // Blur trigger (> 50px)
+      setIsScrolled(currentScrollY > 50);
+
+      // Scroll direction & visibility
+      if (currentScrollY <= 15) {
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY && currentScrollY > 75) {
+        setIsVisible(false); // scrolling down
+      } else if (currentScrollY < lastScrollY) {
+        setIsVisible(true); // scrolling up
+      }
+
+      lastScrollY = currentScrollY;
+    };
+
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
@@ -72,13 +92,6 @@ export default function Navbar() {
   const drawerLinkClass =
     'flex items-center py-2.5 px-3 rounded-xl text-sm font-bold uppercase tracking-wider text-white/80 hover:text-white hover:bg-white/[0.06] transition-all';
 
-  // Landing page: invisible at the top, glass once scrolled. Other pages: solid dark bar.
-  const navSurface = isHome
-    ? scrolled
-      ? 'bg-[#070305]/60 backdrop-blur-2xl border-white/[0.05]'
-      : 'bg-transparent border-transparent'
-    : 'bg-[#070305] border-white/[0.05]';
-
   const centerLinks = user
     ? [
         { href: '/dashboard', label: 'Dashboard' },
@@ -97,7 +110,13 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`sticky top-0 z-50 border-b text-[12px] font-semibold uppercase tracking-widest transition-[background-color,border-color,backdrop-filter] duration-500 ${navSurface}`}
+      className={`fixed top-0 left-0 w-full z-50 text-[12px] font-semibold uppercase tracking-widest transition-transform duration-300 ${
+        isVisible || isDrawerOpen ? 'translate-y-0' : '-translate-y-full'
+      } ${
+        isScrolled
+          ? 'backdrop-blur-xl bg-[#090a0b]/80 border-b border-white/10'
+          : 'bg-transparent border-b border-transparent'
+      }`}
     >
       <div className="grid w-full grid-cols-[auto_1fr_auto] items-center gap-8 px-8 py-4 md:px-12">
         {/* Left — Logo Brand */}

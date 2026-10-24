@@ -6,6 +6,7 @@ import ConditionalFooter from "@/components/ConditionalFooter";
 import Background from "@/components/background"; 
 import { AuthProvider } from "@/lib/AuthContext"; // <-- 1. Import your AuthProvider
 import { ToastProvider } from "@/components/Toast";
+import ScrollSpine from "@/components/ScrollSpine";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,11 +38,14 @@ export default function RootLayout({
           <ToastProvider>
             <Background />
 
-            <div className="relative z-10">
-              <Navbar />
-            </div>
+            {/* Dynamic Scroll-Aware Header */}
+            <Navbar />
 
-            <main className="relative z-10 flex-1 flex flex-col">{children}</main>
+            {/* Global Scroll Progress Spine */}
+            <ScrollSpine />
+
+            {/* Main Content with pt-20 top offset for floating header & pb-24 footer buffer */}
+            <main className="relative z-10 flex-1 flex flex-col pt-20 pb-24">{children}</main>
 
             <ConditionalFooter />
           </ToastProvider>

@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 export default function Footer() {
   return (
-    <footer className="mt-auto border-t border-white/10 bg-[#070305] text-slate-100 relative z-20 overflow-hidden">
+    <footer className="mt-auto border-t border-white/10 bg-[#070305] text-slate-100 relative z-10 overflow-hidden">
       {/* Ambient background glow */}
       <div className="absolute top-0 right-1/4 w-[500px] h-[300px] bg-red-600/10 rounded-full blur-[140px] pointer-events-none" />
 
