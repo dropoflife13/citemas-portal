@@ -11,9 +11,7 @@ export default function Footer() {
       <div className="mx-auto grid max-w-6xl gap-8 px-6 md:grid-cols-4">
         <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg text-xs font-black" style={{ background: 'linear-gradient(135deg, #d92929 0%, #7a1111 100%)', color: CITEMAS_CREAM }}>
-              C
-            </div>
+            <div className="relative flex h-8 w-8 items-center justify-center"><img src="/logo.png" alt="CITEMAS Logo" className="h-full w-full object-contain filter drop-shadow-[0_2px_8px_rgba(217,41,41,0.4)]" /></div>
             <span className="text-sm font-black tracking-[-0.04em]" style={{ color: CITEMAS_CREAM, fontFamily: 'Fraunces, Georgia, serif' }}>
               CITEMAS
             </span>

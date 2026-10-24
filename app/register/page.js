@@ -109,7 +109,7 @@ export default function RegisterPage() {
 
       <div className="relative z-10 mx-auto w-full max-w-2xl rounded-3xl border border-white/10 bg-white/[0.02] p-8 shadow-2xl backdrop-blur-2xl sm:p-12">
         <div className="mb-8 flex items-center space-x-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-tr from-red-600 to-orange-500 font-black text-white shadow-lg shadow-red-600/30">C</div>
+          <div className="relative flex h-10 w-10 items-center justify-center"><img src="/logo.png" alt="CITEMAS Logo" className="h-full w-full object-contain filter drop-shadow-[0_4px_12px_rgba(217,41,41,0.5)]" /></div>
           <div className="flex flex-col">
             <span className="text-sm font-extrabold tracking-wider text-white">CITEMAS</span>
             <span className="text-[9px] font-semibold uppercase tracking-widest text-red-400">Studio Registry</span>

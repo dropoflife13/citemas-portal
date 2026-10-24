@@ -95,9 +95,7 @@ export default function LoginPage() {
         <div className="w-full max-w-md relative z-10">
           {/* Mobile Logo Branding */}
           <div className="flex lg:hidden items-center space-x-3 mb-10">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-red-600 to-orange-500 flex items-center justify-center font-black text-white shadow-lg shadow-red-600/30">
-              C
-            </div>
+            <div className="w-10 h-10 relative flex items-center justify-center"><img src="/logo.png" alt="CITEMAS Logo" className="h-full w-full object-contain filter drop-shadow-[0_4px_12px_rgba(217,41,41,0.5)]" /></div>
             <span className="font-extrabold text-lg tracking-wider text-white">CITEMAS</span>
           </div>
 

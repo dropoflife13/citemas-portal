@@ -69,11 +69,12 @@ export default function Navbar() {
           href="/"
           className="flex items-center gap-3.5 group transition-transform duration-150 active:scale-95"
         >
-          <div
-            className="flex h-10 w-10 items-center justify-center rounded-xl font-black text-lg shadow-[0_8px_24px_rgba(217,41,41,0.45)] transition-all duration-200 group-hover:scale-105 group-hover:brightness-110"
-            style={{ background: 'linear-gradient(135deg, #d92929 0%, #7a1111 100%)', color: CITEMAS_CREAM }}
-          >
-            C
+          <div className="relative flex h-10 w-10 items-center justify-center transition-all duration-200 group-hover:scale-105">
+            <img
+              src="/logo.png"
+              alt="CITEMAS Logo"
+              className="h-full w-full object-contain filter drop-shadow-[0_4px_12px_rgba(217,41,41,0.5)]"
+            />
           </div>
           <div>
             <span
@@ -243,11 +244,12 @@ export default function Navbar() {
               {/* Drawer Header */}
               <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
                 <div className="flex items-center gap-2.5">
-                  <div
-                    className="flex h-8 w-8 items-center justify-center rounded-lg font-black text-sm shadow-[0_4px_12px_rgba(217,41,41,0.4)]"
-                    style={{ background: 'linear-gradient(135deg, #d92929 0%, #7a1111 100%)', color: CITEMAS_CREAM }}
-                  >
-                    C
+                  <div className="relative flex h-8 w-8 items-center justify-center">
+                    <img
+                      src="/logo.png"
+                      alt="CITEMAS Logo"
+                      className="h-full w-full object-contain filter drop-shadow-[0_4px_10px_rgba(217,41,41,0.5)]"
+                    />
                   </div>
                   <span className="font-black text-lg tracking-tight" style={{ fontFamily: 'Fraunces, Georgia, serif' }}>
                     CITEMAS
