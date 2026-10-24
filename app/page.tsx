@@ -203,16 +203,25 @@ export default function Home() {
             )}
           </div>
 
-          <div className="mt-8 flex items-center justify-center gap-2 text-[11px] text-slate-500">
-            <span>Drag 3D emblem to rotate</span>
-            <span>•</span>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-xs">
+            <button
+              onClick={() => router.push('/experience')}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-red-600/30 via-orange-600/30 to-red-600/30 border border-red-500/40 text-red-300 hover:text-white hover:border-red-500 font-bold tracking-wide transition-all shadow-[0_0_20px_rgba(220,38,38,0.25)] hover:shadow-[0_0_30px_rgba(220,38,38,0.5)] cursor-pointer group"
+            >
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
+              <span>Explore 3D Cinematic Experience</span>
+              <span className="transition-transform group-hover:translate-x-1">&rarr;</span>
+            </button>
+            <span className="text-slate-600 hidden sm:inline">•</span>
+            <span className="text-slate-500 text-[11px]">Drag 3D emblem to rotate</span>
+            <span className="text-slate-600 hidden sm:inline">•</span>
             <a
               href="/citemas-logo-3d.html"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-red-400 hover:text-red-300 underline underline-offset-4 transition"
+              className="text-slate-400 hover:text-red-300 text-[11px] underline underline-offset-4 transition"
             >
-              Open 3D Viewer / Download .glb for Blender
+              Blender .glb export
             </a>
           </div>
         </section>

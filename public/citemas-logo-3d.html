@@ -21,11 +21,14 @@
   #hint{left:50%;transform:translateX(-50%);pointer-events:none}
   #dl{right:14px;background:#ffffff14;border:1px solid #ffffff33;border-radius:999px;padding:6px 14px;cursor:pointer;color:#fff;font:inherit;font-size:12px}
   #dl:focus-visible{outline:2px solid #ff4a52;outline-offset:2px}
-  body.embed #hint,body.embed #dl{display:none}
+  #exp{position:fixed;top:14px;left:14px;background:#dc2626;color:#fff;border-radius:999px;padding:8px 18px;text-decoration:none;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;box-shadow:0 4px 16px rgba(220,38,38,0.5);transition:transform 0.2s}
+  #exp:hover{transform:scale(1.05);background:#ef4444}
+  body.embed #hint,body.embed #dl,body.embed #exp{display:none}
 </style>
 </head>
 <body>
 <div id="stage"></div>
+<a id="exp" href="/experience">✨ Enter 3D Cinematic Showcase &rarr;</a>
 <div id="hint">Drag to rotate</div>
 <button id="dl" type="button">Download .glb</button>
 
