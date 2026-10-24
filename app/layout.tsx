@@ -41,7 +41,7 @@ export default function RootLayout({
               <Navbar />
             </div>
 
-            <main className="relative z-10 flex-grow">{children}</main>
+            <main className="relative z-10 flex-1 flex flex-col">{children}</main>
 
             <ConditionalFooter />
           </ToastProvider>

@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Calendar, History, Users, Image as ImageIcon, MapPin } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, History, Users, Image as ImageIcon, MapPin, Sparkles } from 'lucide-react';
+import BracketPanel from './BracketPanel';
+import LivePing from './LivePing';
 
 const gradients = [
   'radial-gradient(circle at 50% 20%, rgba(220, 38, 38, 0.45) 0%, rgba(127, 29, 29, 0.25) 50%, rgba(10, 4, 4, 0.98) 90%)',
@@ -80,25 +82,72 @@ export default function EventsSpatialShowcase({ token, isHero = true }) {
   }
 
   if (pastEvents.length === 0) {
-    if (isHero) {
-      return (
-        <div className="rounded-[28px] border border-white/[0.08] bg-[#000000] p-12 text-center text-[#86868b] text-sm">
-          No event history yet. Past events will appear here once archived.
+    const comingSoonCard = (
+      <div
+        className="relative w-full h-[460px] rounded-[28px] overflow-hidden bg-[#090a0b] border border-white/[0.08] p-7 flex flex-col justify-between shadow-2xl"
+        style={{
+          boxShadow: '0 30px 70px -10px rgba(0, 0, 0, 0.9), 0 0 40px rgba(220, 38, 38, 0.12)',
+        }}
+      >
+        {/* Halftone / Technical Grid Background Overlay */}
+        <div className="absolute inset-0 bg-grid-faint opacity-60 pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(220,38,38,0.15),transparent_60%)] pointer-events-none" />
+
+        {/* Four Precise L-shaped Corner Brackets */}
+        <div className="absolute top-4 left-4 text-white/30 text-[10px] font-mono">+ 01_ARCHIVE</div>
+        <div className="absolute top-4 right-4 text-white/30 text-[10px] font-mono">SECTOR_B // 2026</div>
+
+        {/* Header Telemetry Row */}
+        <div className="relative z-10 flex items-center justify-between shrink-0 h-9">
+          <LivePing color="bg-[#02d2e3]" pingColor="bg-[#02d2e3]" label="TELEMETRY // ARCHIVES ACTIVE" />
+          <div className="px-3 py-1 rounded-full text-[10px] font-mono uppercase tracking-widest text-white/60 border border-white/10 bg-white/[0.04]">
+            SEASON_2026
+          </div>
         </div>
-      );
+
+        {/* Central Editorial Stage with Giant Typography & Reticle */}
+        <div className="relative z-10 my-auto text-center space-y-4">
+          <div className="relative mx-auto flex h-28 w-28 items-center justify-center rounded-[28px] bg-[#000000] border border-white/15 shadow-2xl">
+            <Sparkles size={36} className="text-[#02d2e3] animate-pulse" />
+            {/* Crosshair reticle ticks */}
+            <div className="absolute top-2 left-1/2 -translate-x-1/2 w-3 h-[1px] bg-white/40" />
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 w-3 h-[1px] bg-white/40" />
+            <div className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-[1px] bg-white/40" />
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 h-3 w-[1px] bg-white/40" />
+          </div>
+
+          <div className="space-y-1">
+            <p className="text-[10px] font-space font-bold uppercase tracking-[0.28em] text-[#02d2e3]">
+              EVENT RECAP PROTOCOL
+            </p>
+            <h3 className="font-display font-bold uppercase text-3xl sm:text-4xl tracking-[-0.04em] text-white">
+              ARCHIVES STAGING
+            </h3>
+            <p className="text-xs font-space text-[#86868b] max-w-sm mx-auto leading-relaxed">
+              Exhibition sprints, film screenings, and design summits are currently underway. High-fidelity recaps will populate here automatically.
+            </p>
+          </div>
+        </div>
+
+        {/* Footer Meta Row */}
+        <div className="relative z-10 flex items-center justify-between pt-3 border-t border-white/[0.08] text-[10px] font-space font-semibold uppercase tracking-wider text-[#86868b]">
+          <span>PHINMA CITEMAS GUILD</span>
+          <span className="text-[#02d2e3]">STATUS: PRE-EXHIBIT</span>
+        </div>
+      </div>
+    );
+
+    if (isHero) {
+      return comingSoonCard;
     }
+
     return (
       <section className="mx-auto max-w-7xl border-t border-white/10 px-6 py-20 sm:px-8">
         <div className="mb-12 text-center">
-          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-red-300">Archives</p>
-          <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] text-[#F8F2EC] sm:text-4xl">Past Events</h2>
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-[#86868b]">
-            A look back at what CITEMAS has done.
-          </p>
+          <p className="text-[10px] font-space font-bold uppercase tracking-[0.28em] text-[#DC2626]">Archives</p>
+          <h2 className="mt-3 font-display font-bold uppercase text-3xl sm:text-4xl tracking-[-0.04em] text-white">Past Events</h2>
         </div>
-        <div className="rounded-[28px] border border-white/[0.08] bg-[#000000] p-12 text-center text-[#86868b]">
-          No event history yet. Past events will appear here once they are archived.
-        </div>
+        {comingSoonCard}
       </section>
     );
   }
