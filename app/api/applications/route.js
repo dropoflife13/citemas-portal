@@ -23,7 +23,8 @@ export async function GET(req) {
 
   await connectDB();
   const applications = await Application.find()
-    .populate('applicant', 'firstName lastName email role')
+    .populate('applicant', 'firstName lastName email role studentId yearLevel department avatar')
+    .populate('reviewedBy', 'firstName lastName role')
     .sort({ createdAt: -1 });
   return NextResponse.json(applications);
 }

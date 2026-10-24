@@ -85,6 +85,10 @@ export async function PATCH(req, { params }) {
       },
     });
 
+    await application.populate([
+      { path: 'applicant', select: 'firstName lastName email role studentId yearLevel department avatar' },
+      { path: 'reviewedBy', select: 'firstName lastName role' },
+    ]);
     return NextResponse.json(application);
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 400 });
