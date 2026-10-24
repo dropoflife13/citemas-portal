@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/AuthContext';
-import * as THREE from 'three';
 
 type OfficerRecord = {
   _id: string;
@@ -33,8 +32,21 @@ export default function Home() {
   const isLoggedIn = Boolean(user);
   const router = useRouter();
 
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const stackContainerRef = useRef<HTMLDivElement | null>(null);
+
+  // Mouse Parallax for 3D Centerpiece
+  const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
+
+  const handleHeroMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 2; // -1 to 1
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * 2; // -1 to 1
+    setMouseOffset({ x, y });
+  };
+
+  const handleHeroMouseLeave = () => {
+    setMouseOffset({ x: 0, y: 0 });
+  };
 
   // Officers State
   const [officers, setOfficers] = useState<OfficerRecord[]>([]);
@@ -123,11 +135,8 @@ export default function Home() {
       const progress = Math.max(0, Math.min(3, (scrolled / totalScrollable) * 3));
 
       // Calculate receding progress for each individual card
-      // Card 0 recedes between 0 and 1
       const p0 = Math.max(0, Math.min(1, progress - 0));
-      // Card 1 recedes between 1 and 2
       const p1 = Math.max(0, Math.min(1, progress - 1));
-      // Card 2 recedes between 2 and 3
       const p2 = Math.max(0, Math.min(1, progress - 2));
       const p3 = 0; // Final card doesn't recede
 
@@ -140,191 +149,100 @@ export default function Home() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // --- Three.js WebGL Scene (Backdrop) ---
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    let animId: number;
-    const sizes = { width: window.innerWidth, height: window.innerHeight };
-    const scene = new THREE.Scene();
-
-    const camera = new THREE.PerspectiveCamera(45, sizes.width / sizes.height, 0.1, 100);
-    camera.position.set(0, 0, 4.2);
-    scene.add(camera);
-
-    let renderer: THREE.WebGLRenderer;
-    try {
-      renderer = new THREE.WebGLRenderer({
-        canvas,
-        antialias: true,
-        alpha: false,
-        powerPreference: 'high-performance',
-      });
-    } catch {
-      return;
-    }
-
-    renderer.setSize(sizes.width, sizes.height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.05;
-
-    // Ambient & Point Lighting
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-    scene.add(ambientLight);
-
-    const redLight = new THREE.PointLight(0xdc2626, 4.5, 12);
-    redLight.position.set(3, 2, 2);
-    scene.add(redLight);
-
-    const warmLight = new THREE.PointLight(0xf97316, 2.5, 10);
-    warmLight.position.set(-3, -1, 1);
-    scene.add(warmLight);
-
-    // Procedural CITEMAS 3D Logo Blades
-    const logoGroup = new THREE.Group();
-    const bladeCount = 7;
-    const bladeGeometry = new THREE.TorusGeometry(1.0, 0.18, 16, 32, Math.PI * 0.42);
-    const bladeMaterial = new THREE.MeshStandardMaterial({
-      color: 0x8b0000,
-      metalness: 0.85,
-      roughness: 0.22,
-      emissive: 0x3d0000,
-      emissiveIntensity: 0.4,
-    });
-
-    for (let i = 0; i < bladeCount; i++) {
-      const blade = new THREE.Mesh(bladeGeometry, bladeMaterial);
-      const angle = (i / bladeCount) * Math.PI * 2;
-      blade.rotation.z = angle;
-      blade.rotation.x = 0.35;
-      blade.scale.setScalar(0.7 + i * 0.05);
-      logoGroup.add(blade);
-    }
-
-    const coreMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(0.35, 32, 32),
-      new THREE.MeshStandardMaterial({
-        color: 0xdc2626,
-        metalness: 0.9,
-        roughness: 0.15,
-        emissive: 0xff1100,
-        emissiveIntensity: 0.8,
-      })
-    );
-    logoGroup.add(coreMesh);
-
-    const modelPivot = new THREE.Group();
-    modelPivot.add(logoGroup);
-    scene.add(modelPivot);
-
-    // Background Wave Shader
-    const shaderUniforms = {
-      uTime: { value: 0 },
-      uResolution: { value: new THREE.Vector2(sizes.width, sizes.height) },
-      uScroll: { value: 0 },
-    };
-
-    const bgMesh = new THREE.Mesh(
-      new THREE.PlaneGeometry(2, 2),
-      new THREE.ShaderMaterial({
-        vertexShader: `
-          varying vec2 vUv;
-          void main() {
-            vUv = uv;
-            gl_Position = vec4(position, 1.0);
-          }
-        `,
-        fragmentShader: `
-          uniform float uTime;
-          uniform vec2 uResolution;
-          uniform float uScroll;
-          varying vec2 vUv;
-
-          void main() {
-            vec2 uv = (gl_FragCoord.xy - 0.5 * uResolution.xy) / uResolution.y;
-            float t = uTime * 0.15 + uScroll * 1.5;
-            float dist = length(uv);
-            float waves = sin(dist * 6.0 - t) * 0.5 + 0.5;
-            
-            vec3 darkRed = vec3(0.08, 0.015, 0.02);
-            vec3 brightGlow = vec3(0.45, 0.05, 0.08);
-            vec3 bg = mix(darkRed, brightGlow, waves * smoothstep(1.2, 0.0, dist));
-            
-            gl_FragColor = vec4(bg * 0.45, 1.0);
-          }
-        `,
-        uniforms: shaderUniforms,
-        depthWrite: false,
-      })
-    );
-    const bgCamera = new THREE.Camera();
-    const bgScene = new THREE.Scene();
-    bgScene.add(bgMesh);
-
-    let scrollVal = 0;
-    const clock = new THREE.Clock();
-
-    const tick = () => {
-      animId = requestAnimationFrame(tick);
-      const elapsedTime = clock.getElapsedTime();
-
-      // Read scroll from container
-      const container = stackContainerRef.current;
-      if (container) {
-        const rect = container.getBoundingClientRect();
-        const total = rect.height - window.innerHeight;
-        const target = total > 0 ? Math.max(0, Math.min(1, -rect.top / total)) : 0;
-        scrollVal += (target - scrollVal) * 0.05;
-      }
-
-      shaderUniforms.uTime.value = elapsedTime;
-      shaderUniforms.uScroll.value = scrollVal;
-
-      // Orbit CITEMAS Emblem
-      logoGroup.rotation.z = elapsedTime * 0.15 + scrollVal * Math.PI;
-      logoGroup.rotation.y = Math.sin(elapsedTime * 0.25) * 0.3 + scrollVal * Math.PI * 1.5;
-      modelPivot.position.y = Math.sin(scrollVal * Math.PI) * 0.3;
-
-      renderer.autoClear = false;
-      renderer.clear();
-      renderer.render(bgScene, bgCamera);
-      renderer.render(scene, camera);
-    };
-
-    tick();
-
-    const handleResize = () => {
-      sizes.width = window.innerWidth;
-      sizes.height = window.innerHeight;
-      camera.aspect = sizes.width / sizes.height;
-      camera.updateProjectionMatrix();
-      renderer.setSize(sizes.width, sizes.height);
-      shaderUniforms.uResolution.value.set(sizes.width, sizes.height);
-    };
-
-    window.addEventListener('resize', handleResize);
-
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener('resize', handleResize);
-      renderer.dispose();
-    };
-  }, []);
-
   return (
-    <div className="relative bg-[#070305] text-[#FDFBF7]">
-      {/* Three.js Fixed Background Canvas */}
-      <canvas
-        ref={canvasRef}
-        className="fixed inset-0 pointer-events-none z-0 h-screen w-screen"
-      />
+    <div className="relative bg-[#070305] text-[#FDFBF7] overflow-x-hidden">
+      {/* ── CSS Animations for Starfield & 3D Centerpiece ── */}
+      <style jsx global>{`
+        @keyframes driftStars {
+          0% {
+            transform: translateY(0px) scale(1);
+          }
+          50% {
+            transform: translateY(-26px) scale(1.02);
+          }
+          100% {
+            transform: translateY(0px) scale(1);
+          }
+        }
 
-      {/* Grid Reticle Accents */}
-      <div className="fixed inset-0 pointer-events-none z-10 bg-grid-faint opacity-40" />
+        @keyframes driftStarsSlow {
+          0% {
+            transform: translateY(0px) scale(1);
+          }
+          50% {
+            transform: translateY(-14px) scale(1.01);
+          }
+          100% {
+            transform: translateY(0px) scale(1);
+          }
+        }
 
-      {/* Progress Indicators (Kimi / Refero Style) */}
+        @keyframes pulseGlow {
+          0%, 100% {
+            opacity: 0.45;
+            transform: translate(0, 0) scale(1);
+          }
+          50% {
+            opacity: 0.78;
+            transform: translate(0, 0) scale(1.18);
+          }
+        }
+
+        @keyframes floatModel {
+          0%, 100% {
+            transform: translateY(-10px) rotate(0deg);
+          }
+          50% {
+            transform: translateY(10px) rotate(1.8deg);
+          }
+        }
+
+        .starfield-layer-1 {
+          background-image:
+            radial-gradient(1.5px 1.5px at 30px 40px, #ffffff, rgba(0,0,0,0)),
+            radial-gradient(1px 1px at 80px 130px, rgba(255,255,255,0.7), rgba(0,0,0,0)),
+            radial-gradient(1.5px 1.5px at 150px 70px, #ffffff, rgba(0,0,0,0)),
+            radial-gradient(2px 2px at 230px 190px, #ffb3b8, rgba(0,0,0,0)),
+            radial-gradient(1.5px 1.5px at 310px 340px, #ffffff, rgba(0,0,0,0)),
+            radial-gradient(1px 1px at 400px 150px, rgba(255,255,255,0.8), rgba(0,0,0,0)),
+            radial-gradient(2px 2px at 490px 290px, #ffdcdc, rgba(0,0,0,0)),
+            radial-gradient(1.5px 1.5px at 580px 90px, #ffffff, rgba(0,0,0,0)),
+            radial-gradient(1px 1px at 680px 250px, rgba(255,255,255,0.6), rgba(0,0,0,0)),
+            radial-gradient(2px 2px at 780px 390px, #ffffff, rgba(0,0,0,0)),
+            radial-gradient(1.5px 1.5px at 890px 180px, #ffffff, rgba(0,0,0,0));
+          background-repeat: repeat;
+          background-size: 550px 550px;
+          animation: driftStars 16s ease-in-out infinite alternate;
+        }
+
+        .starfield-layer-2 {
+          background-image:
+            radial-gradient(1px 1px at 50px 95px, rgba(255,255,255,0.8), rgba(0,0,0,0)),
+            radial-gradient(1.5px 1.5px at 140px 240px, #ffffff, rgba(0,0,0,0)),
+            radial-gradient(1px 1px at 250px 105px, rgba(255,255,255,0.7), rgba(0,0,0,0)),
+            radial-gradient(2px 2px at 380px 350px, #ffcfd2, rgba(0,0,0,0)),
+            radial-gradient(1px 1px at 510px 180px, rgba(255,255,255,0.9), rgba(0,0,0,0)),
+            radial-gradient(1.5px 1.5px at 630px 430px, #ffffff, rgba(0,0,0,0)),
+            radial-gradient(1px 1px at 760px 120px, rgba(255,255,255,0.6), rgba(0,0,0,0)),
+            radial-gradient(2px 2px at 870px 300px, #ffffff, rgba(0,0,0,0));
+          background-repeat: repeat;
+          background-size: 700px 700px;
+          animation: driftStarsSlow 24s ease-in-out infinite alternate-reverse;
+        }
+
+        .animate-float-model {
+          animation: floatModel 6s ease-in-out infinite;
+          transform-origin: center center;
+        }
+      `}</style>
+
+      {/* Global Cinematic Starry Backdrop */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        <div className="absolute inset-0 starfield-layer-1 opacity-70" />
+        <div className="absolute inset-0 starfield-layer-2 opacity-45" />
+      </div>
+
+      {/* Progress Story Indicators */}
       <div className="fixed right-6 top-1/2 -translate-y-1/2 z-40 hidden md:flex flex-col gap-3">
         {[0, 1, 2, 3].map((idx) => (
           <div
@@ -341,48 +259,78 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════════
           STICKY STACK WRAPPER (400vh total height for 4 cards)
           ═══════════════════════════════════════════════════ */}
-      <div ref={stackContainerRef} className="relative z-20 h-[400vh]">
+      <div ref={stackContainerRef} className="relative z-10 h-[400vh]">
         
-        {/* ── CARD 1: CITEMAS STUDIO & VISION ── */}
-        <section className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden">
+        {/* ── CARD 1: CITEMAS STUDIO & VISION (BLEED EDGE-TO-EDGE) ── */}
+        <section
+          onMouseMove={handleHeroMouseMove}
+          onMouseLeave={handleHeroMouseLeave}
+          className="sticky top-0 h-screen w-full flex items-center px-6 sm:px-12 md:px-16 lg:px-24 overflow-hidden"
+          style={{
+            transform: `scale(${1 - cardProgress[0] * 0.08})`,
+            filter: `brightness(${1 - cardProgress[0] * 0.45})`,
+            transition: 'transform 0.1s ease-out, filter 0.1s ease-out',
+          }}
+        >
+          {/* Ambient Starfield & Glowing Blob Behind 3D Model (z-0) */}
+          <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+            {/* Cinematic Ruby-Crimson Glowing Blob Behind Model */}
+            <div
+              className="absolute right-[5%] lg:right-[12%] top-1/2 -translate-y-1/2 w-[380px] sm:w-[520px] lg:w-[680px] h-[380px] sm:h-[520px] lg:h-[680px] rounded-full pointer-events-none"
+              style={{
+                background: 'radial-gradient(circle, rgba(220, 38, 38, 0.45) 0%, rgba(139, 0, 0, 0.22) 40%, rgba(7, 3, 5, 0) 70%)',
+                filter: 'blur(80px)',
+                animation: 'pulseGlow 8s ease-in-out infinite alternate',
+              }}
+            />
+          </div>
+
+          {/* 3D Official CITEMAS Logo Centerpiece (z-10) */}
           <div
-            className="w-full max-w-7xl h-[86vh] rounded-3xl p-8 md:p-14 relative flex flex-col justify-between overflow-hidden transition-transform duration-75 border border-white/[0.08] backdrop-blur-md bg-black/40"
+            className="absolute right-[-10%] sm:right-[-5%] top-0 h-full w-full sm:w-[75vw] md:w-[65vw] lg:w-[60vw] min-w-[500px] md:min-w-[620px] lg:min-w-[700px] flex items-center justify-center pointer-events-auto z-10"
             style={{
-              transform: `scale(${1 - cardProgress[0] * 0.08})`,
-              filter: `brightness(${1 - cardProgress[0] * 0.45})`,
+              transform: `translate3d(${mouseOffset.x * 16}px, ${mouseOffset.y * 12}px, 0)`,
+              transition: 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
             }}
           >
-            {/* Top Telemetry Header */}
-            <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-slate-400 uppercase">
-              <span className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
-                <span>GUILD // 01 [VISION]</span>
-              </span>
-              <span>10°42&apos;N 122°34&apos;E • ILOILO</span>
+            <div className="w-full h-full flex items-center justify-center animate-float-model">
+              <iframe
+                src="/citemas-logo-3d.html?embed"
+                title="CITEMAS 3D Logo"
+                className="w-full h-full border-0 pointer-events-auto"
+                style={{ background: 'transparent' }}
+                allow="autoplay"
+              />
             </div>
+          </div>
 
-            {/* Massive Editorial Headline */}
-            <div className="my-auto max-w-3xl space-y-6">
-              <span className="text-xs uppercase tracking-[0.3em] font-bold text-red-500">
+          {/* Hero Typography & CTAs (z-20) */}
+          <div className="relative z-20 w-full max-w-2xl lg:max-w-3xl space-y-8 pointer-events-auto">
+            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 backdrop-blur-md">
+              <span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
+              <span className="text-[11px] font-mono tracking-widest text-slate-300 uppercase">
                 PHINMA University of Iloilo
               </span>
-              <h1 className="font-display text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-[-0.04em] leading-[0.88] text-white">
+            </div>
+
+            <div className="space-y-4">
+              <h1 className="font-display text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-[-0.04em] leading-[0.88] text-white drop-shadow-2xl">
                 CITEMAS<br />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-white">
                   STUDIO.
                 </span>
               </h1>
-              <p className="font-sans text-sm sm:text-base md:text-lg text-slate-300 max-w-xl leading-relaxed">
+              <p className="font-sans text-base sm:text-lg md:text-xl text-slate-300 max-w-xl leading-relaxed font-light">
                 Where vision meets execution. The premier creative and multimedia guild uniting digital visionaries, 3D sculptors, and traditional artisans.
               </p>
             </div>
 
-            {/* Bottom Actions */}
-            <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-white/[0.06]">
+            {/* Actions */}
+            <div className="flex flex-wrap items-center gap-4 pt-2">
               {isLoggedIn ? (
                 <Link
                   href="/dashboard"
-                  className="px-8 py-3.5 rounded-full bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold text-xs uppercase tracking-widest hover:brightness-110 shadow-lg shadow-red-600/30 transition-all cursor-pointer"
+                  className="px-8 py-4 rounded-full bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold text-xs uppercase tracking-widest hover:brightness-110 shadow-xl shadow-red-600/35 transition-all cursor-pointer"
                 >
                   Enter Studio Dashboard &rarr;
                 </Link>
@@ -390,21 +338,22 @@ export default function Home() {
                 <>
                   <Link
                     href="/register"
-                    className="px-8 py-3.5 rounded-full bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold text-xs uppercase tracking-widest hover:brightness-110 shadow-lg shadow-red-600/30 transition-all cursor-pointer"
+                    className="px-8 py-4 rounded-full bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold text-xs uppercase tracking-widest hover:brightness-110 shadow-xl shadow-red-600/35 transition-all cursor-pointer"
                   >
                     Join Guild
                   </Link>
                   <Link
                     href="/login"
-                    className="px-7 py-3.5 rounded-full border border-white/20 bg-white/5 text-white font-semibold text-xs uppercase tracking-widest hover:bg-white/10 transition-all cursor-pointer"
+                    className="px-8 py-4 rounded-full border border-white/20 bg-white/5 text-white font-semibold text-xs uppercase tracking-widest hover:bg-white/10 transition-all cursor-pointer"
                   >
                     Member Sign In
                   </Link>
                 </>
               )}
-              <span className="ml-auto text-xs font-mono text-slate-500 hidden sm:inline">
-                SCROLL TO EXPLORE ↓
-              </span>
+              <div className="flex items-center gap-2 text-xs font-mono text-slate-400 pl-2">
+                <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
+                <span>10°42&apos;N 122°34&apos;E</span>
+              </div>
             </div>
           </div>
         </section>
