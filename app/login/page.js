@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/AuthContext';
+import { Mail, Lock, Eye, EyeOff, Sparkles } from 'lucide-react';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -56,37 +57,72 @@ export default function LoginPage() {
       <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-center p-16 xl:p-20 bg-gradient-to-br from-transparent via-[#0d0407]/60 to-[#140509]/90 border-r border-white/[0.06]">
         {/* Center Content / Welcome Message */}
         <div className="relative z-10 max-w-lg my-auto">
-          <div className="inline-flex items-center space-x-2.5 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-medium mb-8 backdrop-blur-md shadow-inner">
+          {/* Official CITEMAS Logo & Brand Presentation */}
+          <div className="flex items-center space-x-4 mb-8">
+            <div className="relative flex h-14 w-14 items-center justify-center rounded-2xl border border-red-500/30 bg-gradient-to-br from-red-600/20 to-black/40 p-2.5 shadow-lg shadow-red-950/60 backdrop-blur-md">
+              <img
+                src="/logo.png"
+                alt="CITEMAS Official Logo"
+                className="h-full w-full object-contain filter drop-shadow-[0_4px_16px_rgba(220,38,38,0.6)]"
+              />
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xl font-black tracking-wider text-white">CITEMAS</span>
+              <span className="text-[10px] font-bold uppercase tracking-[0.25em] text-red-400">Creative Guild Portal</span>
+            </div>
+          </div>
+
+          <div className="inline-flex items-center space-x-2.5 px-4 py-1.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-medium mb-6 backdrop-blur-md shadow-inner">
             <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-sm shadow-red-500"></span>
             <span>Welcome back to your creative ecosystem</span>
           </div>
-          <h2 className="text-4xl xl:text-6xl font-black tracking-tight leading-[1.1] text-white mb-6">
+
+          <h2 className="text-4xl xl:text-5xl font-black tracking-tight leading-[1.15] text-white mb-6">
             Where Vision <br />
             <span className="bg-gradient-to-r from-red-500 via-rose-400 to-orange-400 bg-clip-text text-transparent">
               Meets Execution.
             </span>
           </h2>
-          <p className="text-slate-400 text-base font-light leading-relaxed">
-            Collaborate seamlessly on multimedia projects, track organization milestones, and build extraordinary work with your campus peers.
+
+          <p className="text-slate-400 text-sm font-light leading-relaxed mb-8 max-w-md">
+            Collaborate on multimedia projects, submit creative portfolios, register for workshops, and build extraordinary work with campus creators.
           </p>
+
+          {/* Quick Studio Features */}
+          <div className="space-y-3 max-w-md">
+            <div className="flex items-center space-x-3 p-3 rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-md text-xs text-slate-300">
+              <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-red-500/10 text-red-400 border border-red-500/20 font-bold">🎨</span>
+              <span>6 Multimedia disciplines & student portfolios</span>
+            </div>
+            <div className="flex items-center space-x-3 p-3 rounded-2xl border border-white/5 bg-white/[0.02] backdrop-blur-md text-xs text-slate-300">
+              <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-orange-500/10 text-orange-400 border border-orange-500/20 font-bold">⚡</span>
+              <span>Events, workshops, and creative exhibits</span>
+            </div>
+          </div>
         </div>
 
         {/* Bottom subtle indicator */}
         <div className="absolute bottom-12 left-16 xl:left-20 z-10 flex items-center space-x-3 text-xs text-slate-500">
-          <span>Secure AES Encrypted Gateway</span>
+          <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500" />
+          <span>Encrypted Gateway</span>
           <span>•</span>
-          <span>v2.6 Studio Edition</span>
+          <span>CITEMAS Portal v2.6</span>
         </div>
       </div>
 
-      {/* Right Side: Natural Form Layout */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-16 relative bg-gradient-to-bl from-transparent via-[#0b0305]/40 to-[#070305]">
-        <div className="w-full max-w-md relative z-10">
-          <div className="mb-8">
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-red-500">CITEMAS Authentication</span>
-            <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-white">Welcome Back</h1>
-            <p className="mt-1.5 text-xs text-slate-400">Students and advisers use the same secure sign-in.</p>
+      {/* Right Side: Elevated Form Layout */}
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 relative bg-gradient-to-bl from-transparent via-[#0b0305]/40 to-[#070305]">
+        <div className="w-full max-w-md relative z-10 rounded-3xl border border-white/10 bg-gradient-to-b from-white/[0.04] to-white/[0.01] p-8 sm:p-10 shadow-[0_30px_80px_rgba(0,0,0,0.7)] backdrop-blur-2xl">
+          <div className="mb-6 flex items-center justify-between">
+            <span className="text-[10px] font-black uppercase tracking-[0.25em] text-red-500">CITEMAS Sign In</span>
+            <Link href="/" className="text-xs text-slate-400 hover:text-white transition flex items-center gap-1 font-medium">
+              <span>←</span>
+              <span>Back Home</span>
+            </Link>
           </div>
+
+          <h1 className="text-3xl font-black tracking-tight text-white mb-1.5">Welcome Back</h1>
+          <p className="text-xs text-slate-400 mb-6">Students and advisers use the same secure sign-in.</p>
 
           {error && (
             <div className="mb-6 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3.5 text-xs font-medium text-red-200 backdrop-blur-md flex items-center space-x-2 animate-shake">
@@ -97,30 +133,32 @@ export default function LoginPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="mb-2 block text-xs font-bold uppercase tracking-wider text-slate-300">Email Address</label>
+              <label className="mb-1.5 block text-xs font-bold uppercase tracking-wider text-slate-300">Email Address</label>
               <div className="relative group">
+                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 group-focus-within:text-red-400 transition-colors" />
                 <input
                   name="email"
                   type="email"
-                  placeholder="name@phinmaed.com"
+                  placeholder="student@phinmaed.com"
                   value={form.email}
                   onChange={handleChange}
                   required
-                  className="w-full rounded-2xl border border-white/10 bg-white/[0.02] px-4.5 py-4 text-sm text-white outline-none transition-all duration-300 placeholder:text-slate-600 focus:border-red-500/80 focus:bg-white/[0.04] focus:ring-4 focus:ring-red-500/10 hover:border-white/20"
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.02] pl-11 pr-4.5 py-3.5 text-sm text-white outline-none transition-all duration-300 placeholder:text-slate-600 focus:border-red-500/80 focus:bg-white/[0.05] focus:ring-4 focus:ring-red-500/10 hover:border-white/20"
                 />
               </div>
             </div>
 
             <div>
-              <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center justify-between mb-1.5">
                 <label className="text-xs font-bold uppercase tracking-wider text-slate-300">Password</label>
                 <Link href="/forgot-password" className="text-xs text-red-400 hover:text-red-300 transition-colors font-medium">
                   Forgot password?
                 </Link>
               </div>
               <div className="relative group">
+                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500 group-focus-within:text-red-400 transition-colors" />
                 <input
                   name="password"
                   type={showPassword ? 'text' : 'password'}
@@ -128,24 +166,15 @@ export default function LoginPage() {
                   value={form.password}
                   onChange={handleChange}
                   required
-                  className="w-full rounded-2xl border border-white/10 bg-white/[0.02] px-4.5 py-4 pr-12 text-sm text-white outline-none transition-all duration-300 placeholder:text-slate-600 focus:border-red-500/80 focus:bg-white/[0.04] focus:ring-4 focus:ring-red-500/10 hover:border-white/20"
+                  className="w-full rounded-2xl border border-white/10 bg-white/[0.02] pl-11 pr-12 py-3.5 text-sm text-white outline-none transition-all duration-300 placeholder:text-slate-600 focus:border-red-500/80 focus:bg-white/[0.05] focus:ring-4 focus:ring-red-500/10 hover:border-white/20"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors p-1 focus:outline-none"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white transition-colors p-1"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                 >
-                  {showPassword ? (
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                    </svg>
-                  ) : (
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                    </svg>
-                  )}
+                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>
@@ -153,12 +182,12 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 rounded-2xl bg-gradient-to-r from-red-600 via-red-600 to-orange-600 py-4 text-xs font-bold uppercase tracking-[0.2em] text-white transition-all duration-300 hover:from-red-500 hover:to-orange-500 hover:shadow-lg hover:shadow-red-600/30 active:scale-[0.98] disabled:opacity-55 cursor-pointer shadow-md shadow-red-950/50"
+              className="w-full mt-2 rounded-2xl bg-gradient-to-r from-red-600 via-red-600 to-orange-600 py-3.5 text-xs font-black uppercase tracking-[0.2em] text-white transition-all duration-300 hover:from-red-500 hover:to-orange-500 hover:shadow-lg hover:shadow-red-600/40 hover:scale-[1.01] active:scale-[0.98] disabled:opacity-55 cursor-pointer shadow-md shadow-red-950/50"
             >
               {loading ? (
                 <span className="flex items-center justify-center space-x-2">
                   <span className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" />
-                  <span>Authenticating...</span>
+                  <span>Signing In...</span>
                 </span>
               ) : (
                 'Sign In to Studio'
@@ -166,10 +195,10 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="mt-8 text-center text-xs text-slate-400">
+          <p className="mt-6 text-center text-xs text-slate-400">
             Don’t have a studio account yet?{' '}
-            <Link href="/register" className="font-semibold text-red-400 hover:text-red-300 transition-colors underline underline-offset-4 decoration-red-500/30">
-              Register for access
+            <Link href="/register" className="font-bold text-red-400 hover:text-red-300 transition-colors underline underline-offset-4 decoration-red-500/40">
+              Register here
             </Link>
           </p>
         </div>

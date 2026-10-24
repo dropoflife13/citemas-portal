@@ -145,7 +145,7 @@ export default function Home() {
           </div>
 
           {/* 3D CITEMAS Interactive Logo */}
-          <div className="relative mx-auto -my-2 h-[260px] sm:h-[320px] md:h-[360px] w-full max-w-md pointer-events-auto select-none">
+          <div className="relative mx-auto my-4 h-[320px] sm:h-[380px] md:h-[440px] w-full max-w-xl pointer-events-auto select-none">
             <iframe
               src="/citemas-logo-3d.html?embed"
               className="w-full h-full border-0"
