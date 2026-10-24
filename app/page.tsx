@@ -290,7 +290,7 @@ export default function Home() {
           id="hero"
           onMouseMove={handleHeroMouseMove}
           onMouseLeave={handleHeroMouseLeave}
-          className="sticky top-0 min-h-screen h-screen w-full flex flex-col justify-between px-6 sm:px-12 md:px-16 lg:px-24 pt-6 pb-16 overflow-hidden relative"
+          className="sticky top-0 min-h-screen h-screen w-full flex flex-col justify-between px-6 sm:px-12 md:px-16 lg:px-24 pt-20 sm:pt-24 pb-20 sm:pb-24 overflow-hidden relative"
           style={{
             transform: `scale(${1 - cardProgress[0] * 0.08})`,
             filter: `brightness(${1 - cardProgress[0] * 0.45})`,
@@ -459,24 +459,6 @@ export default function Home() {
               <p className="font-sans text-base sm:text-lg md:text-xl text-slate-300 max-w-xl leading-relaxed font-light">
                 Where vision meets execution. The premier creative and multimedia organization uniting digital visionaries, 3D sculptors, and traditional artisans.
               </p>
-
-              {/* ── Marquee Scrolling Text Banner (Fades nicely at edges, directly underneath hero text) ── */}
-              <div
-                className="w-full max-w-xl overflow-hidden py-2.5 border-y border-white/10 bg-white/[0.02] backdrop-blur-sm"
-                style={{
-                  maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
-                  WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
-                }}
-              >
-                <div className="flex whitespace-nowrap min-w-full animate-marquee font-mono text-[11px] font-bold tracking-[0.25em] uppercase text-white/70">
-                  <span className="mx-4 flex items-center gap-3">
-                    DIGITAL ARTS <span className="text-red-500">•</span> 3D ANIMATION <span className="text-orange-400">•</span> VIDEOGRAPHY <span className="text-red-500">•</span> PHOTOGRAPHY <span className="text-orange-400">•</span> VOICE ACTING <span className="text-red-500">•</span> TRADITIONAL ARTS <span className="text-red-500">•</span>
-                  </span>
-                  <span className="mx-4 flex items-center gap-3">
-                    DIGITAL ARTS <span className="text-red-500">•</span> 3D ANIMATION <span className="text-orange-400">•</span> VIDEOGRAPHY <span className="text-red-500">•</span> PHOTOGRAPHY <span className="text-orange-400">•</span> VOICE ACTING <span className="text-red-500">•</span> TRADITIONAL ARTS <span className="text-red-500">•</span>
-                  </span>
-                </div>
-              </div>
             </div>
 
             {/* Action Buttons: Primary Pill CTA */}
@@ -499,6 +481,26 @@ export default function Home() {
               <div className="flex items-center gap-2 text-xs font-mono text-slate-400 pl-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
                 <span>10°42&apos;N 122°34&apos;E // ILOILO</span>
+              </div>
+            </div>
+          </div>
+
+          {/* ── FULL-WIDTH HORIZONTAL MARQUEE TICKER (Edge-to-edge across base of Hero) ── */}
+          <div className="absolute bottom-0 left-0 w-full z-30 border-t border-white/10 bg-[#090a0b]/95 backdrop-blur-md py-3 sm:py-3.5 overflow-hidden">
+            <div
+              className="w-full overflow-hidden"
+              style={{
+                maskImage: 'linear-gradient(to right, transparent, black 6%, black 94%, transparent)',
+                WebkitMaskImage: 'linear-gradient(to right, transparent, black 6%, black 94%, transparent)',
+              }}
+            >
+              <div className="flex whitespace-nowrap min-w-full animate-marquee font-mono text-[11px] sm:text-[12px] font-bold tracking-[0.28em] uppercase text-white/80">
+                <span className="mx-6 flex items-center gap-4">
+                  DIGITAL ARTS <span className="text-red-500">•</span> 3D ANIMATION <span className="text-orange-400">•</span> VIDEOGRAPHY <span className="text-red-500">•</span> PHOTOGRAPHY <span className="text-orange-400">•</span> VOICE ACTING <span className="text-red-500">•</span> TRADITIONAL ARTS <span className="text-red-500">•</span> CREATIVE CODING <span className="text-orange-400">•</span> SOUND DESIGN <span className="text-red-500">•</span>
+                </span>
+                <span className="mx-6 flex items-center gap-4">
+                  DIGITAL ARTS <span className="text-red-500">•</span> 3D ANIMATION <span className="text-orange-400">•</span> VIDEOGRAPHY <span className="text-red-500">•</span> PHOTOGRAPHY <span className="text-orange-400">•</span> VOICE ACTING <span className="text-red-500">•</span> TRADITIONAL ARTS <span className="text-red-500">•</span> CREATIVE CODING <span className="text-orange-400">•</span> SOUND DESIGN <span className="text-red-500">•</span>
+                </span>
               </div>
             </div>
           </div>
