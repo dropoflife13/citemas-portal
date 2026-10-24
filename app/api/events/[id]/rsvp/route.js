@@ -2,11 +2,12 @@ import mongoose from 'mongoose';
 import connectDB from '@/lib/mongodb';
 import Event from '@/models/Event';
 import { getUserFromRequest } from '@/lib/auth';
+import { logActivity } from '@/lib/logActivity';
 import { NextResponse } from 'next/server';
 
 // =====================================================
 // POST — RSVP to an event
-// Any authenticated user can RSVP
+// Any authenticated user can RSVP (subject to capacity & schedule)
 // =====================================================
 
 export async function POST(req, { params }) {
@@ -22,7 +23,6 @@ export async function POST(req, { params }) {
   try {
     const { id } = await params;
 
-    // Validate Event ID
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json(
         { error: 'Invalid event ID' },
@@ -33,7 +33,6 @@ export async function POST(req, { params }) {
     await connectDB();
 
     const event = await Event.findById(id);
-
     if (!event) {
       return NextResponse.json(
         { error: 'Event not found' },
@@ -41,15 +40,18 @@ export async function POST(req, { params }) {
       );
     }
 
-    // Ensure attendees array exists
-    if (!event.attendees) {
-      event.attendees = [];
+    // Business Invariant: Block registration for past or archived events
+    const isPastEvent = event.isPast || (event.date && new Date(event.date) < new Date());
+    if (isPastEvent) {
+      return NextResponse.json(
+        { error: 'Cannot register for past or archived events' },
+        { status: 400 }
+      );
     }
 
-    // Check if user already registered
-    const alreadyRegistered = event.attendees.some(
-      (attendee) =>
-        (attendee.user?._id || attendee.user || attendee).toString() === currentUser.id
+    // Check if already registered
+    const alreadyRegistered = (event.attendees || []).some(
+      (attendee) => (attendee.user?._id || attendee.user || attendee).toString() === currentUser.id
     );
 
     if (alreadyRegistered) {
@@ -59,34 +61,50 @@ export async function POST(req, { params }) {
       );
     }
 
-    // Check Event Capacity
-    const currentAttendeeCount = event.attendees.length;
+    // Atomic Concurrency (DB-05): Conditional findOneAndUpdate guarantees capacity limit cannot be exceeded
+    const updatedEvent = await Event.findOneAndUpdate(
+      {
+        _id: id,
+        $or: [
+          { capacity: null },
+          { $expr: { $lt: [{ $size: { $ifNull: ['$attendees', []] } }, '$capacity'] } },
+        ],
+        'attendees.user': { $ne: currentUser.id },
+      },
+      {
+        $push: {
+          attendees: {
+            user: currentUser.id,
+            registeredAt: new Date(),
+          },
+        },
+      },
+      { new: true }
+    );
 
-    if (
-      event.capacity !== null &&
-      event.capacity !== undefined &&
-      currentAttendeeCount >= event.capacity
-    ) {
+    if (!updatedEvent) {
       return NextResponse.json(
         { error: 'This event has reached its maximum capacity' },
         { status: 409 }
       );
     }
 
-    // Add User to Attendees
-    event.attendees.push({
-      user: currentUser.id,
-      registeredAt: new Date(),
+    await logActivity({
+      req,
+      actor: currentUser,
+      action: 'event.rsvp_created',
+      targetType: 'Event',
+      targetId: id,
+      targetName: event.title,
+      metadata: { attendeeCount: updatedEvent.attendees.length },
     });
-
-    await event.save();
 
     return NextResponse.json(
       {
         message: 'Successfully registered for the event',
-        eventId: event._id,
-        registeredCount: event.attendees.length,
-        capacity: event.capacity,
+        eventId: updatedEvent._id,
+        registeredCount: updatedEvent.attendees.length,
+        capacity: updatedEvent.capacity,
       },
       { status: 201 }
     );
@@ -129,7 +147,6 @@ export async function DELETE(req, { params }) {
     await connectDB();
 
     const event = await Event.findById(id);
-
     if (!event) {
       return NextResponse.json(
         { error: 'Event not found' },
@@ -137,35 +154,43 @@ export async function DELETE(req, { params }) {
       );
     }
 
-    if (!event.attendees) {
-      event.attendees = [];
-    }
-
-    const isRegistered = event.attendees.some(
-      (attendee) =>
-        (attendee.user?._id || attendee.user || attendee).toString() === currentUser.id
+    // Atomic Concurrency (DB-05): Pull user atomically
+    const updatedEvent = await Event.findOneAndUpdate(
+      {
+        _id: id,
+        'attendees.user': currentUser.id,
+      },
+      {
+        $pull: {
+          attendees: { user: currentUser.id },
+        },
+      },
+      { new: true }
     );
 
-    if (!isRegistered) {
+    if (!updatedEvent) {
       return NextResponse.json(
         { error: 'You are not registered for this event' },
         { status: 400 }
       );
     }
 
-    event.attendees = event.attendees.filter(
-      (attendee) =>
-        (attendee.user?._id || attendee.user || attendee).toString() !== currentUser.id
-    );
-
-    await event.save();
+    await logActivity({
+      req,
+      actor: currentUser,
+      action: 'event.rsvp_cancelled',
+      targetType: 'Event',
+      targetId: id,
+      targetName: event.title,
+      metadata: { attendeeCount: updatedEvent.attendees.length },
+    });
 
     return NextResponse.json(
       {
         message: 'RSVP cancelled successfully',
-        eventId: event._id,
-        registeredCount: event.attendees.length,
-        capacity: event.capacity,
+        eventId: updatedEvent._id,
+        registeredCount: updatedEvent.attendees.length,
+        capacity: updatedEvent.capacity,
       },
       { status: 200 }
     );

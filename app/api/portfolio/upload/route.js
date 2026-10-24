@@ -3,7 +3,7 @@ import { v2 as cloudinary } from 'cloudinary';
 import { getUserFromRequest } from '@/lib/auth';
 import { Readable } from 'stream';
 
-const CAN_UPLOAD = ['super_admin', 'teacher', 'adviser', 'officer', 'member'];
+const CAN_UPLOAD = ['super_admin', 'teacher', 'adviser', 'officer', 'member', 'alumni'];
 
 export async function POST(req) {
   try {
