@@ -362,24 +362,15 @@ export default function EventsPage() {
 
   return (
     <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 text-slate-100 space-y-8 font-sans selection:bg-red-500 selection:text-white">
-      {/* Background Ambient Glows */}
-      <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-red-900/10 rounded-full blur-[140px] pointer-events-none" />
-      <div className="absolute bottom-10 left-10 w-[400px] h-[400px] bg-orange-950/15 rounded-full blur-[140px] pointer-events-none" />
-
       {/* Header Container */}
-      <div className="relative z-10 rounded-[28px] border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-8 shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-2xl flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+      <div className="relative z-10 rounded-3xl border border-white/10 bg-[#090a0b]/80 p-8 shadow-2xl backdrop-blur-2xl flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         <div className="space-y-2">
-          <span
-            className="px-3.5 py-1 text-[10px] font-black uppercase tracking-widest rounded-full border border-white/20 inline-block backdrop-blur-md"
-            style={{ background: 'rgba(255,255,255,0.05)', color: CITEMAS_GOLD }}
-          >
-            Directory Hub
-          </span>
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight" style={{ color: CITEMAS_CREAM }}>
-            <span className="bg-gradient-to-r from-red-500 via-rose-400 to-orange-400 bg-clip-text text-transparent drop-shadow-sm">
-              CITEMAS
-            </span>{' '}
-            Events & Exhibits
+          <div className="inline-flex items-center gap-2 px-3 py-1 text-[10px] font-mono uppercase tracking-widest rounded-full border border-red-500/30 bg-red-500/10 text-red-300">
+            <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
+            DIRECTORY // EXHIBITS
+          </div>
+          <h1 className="font-display text-3xl sm:text-5xl font-black uppercase tracking-tight text-white">
+            <span className="text-red-500">CITEMAS</span> Events &amp; Exhibits.
           </h1>
           <p className="text-xs sm:text-sm font-light max-w-2xl leading-relaxed text-slate-400">
             Explore multimedia workshops, tech showcases, gallery exhibits, and past event history across the creative campus community.
@@ -389,12 +380,12 @@ export default function EventsPage() {
         {/* Action Controls & Tab Switcher */}
         <div className="flex flex-wrap items-center gap-3">
           {/* Tab Navigation Switches */}
-          <div className="flex p-1 rounded-2xl border border-white/15 bg-black/40 backdrop-blur-xl">
+          <div className="flex p-1 rounded-2xl border border-white/15 bg-black/60 backdrop-blur-xl">
             <button
               onClick={() => setActiveTab('upcoming')}
-              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+              className={`px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer ${
                 activeTab === 'upcoming'
-                  ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-lg shadow-red-950/60'
+                  ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-lg shadow-red-950/60 font-bold'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -402,9 +393,9 @@ export default function EventsPage() {
             </button>
             <button
               onClick={() => setActiveTab('previous')}
-              className={`px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
+              className={`px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer ${
                 activeTab === 'previous'
-                  ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-lg shadow-red-950/60'
+                  ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-lg shadow-red-950/60 font-bold'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
@@ -451,16 +442,16 @@ export default function EventsPage() {
         </div>
       )}
 
-      {/* Events Grid */}
-      <div className="relative z-10 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {/* Events Full-Bleed Cinematic Rows */}
+      <div className="relative z-10 space-y-4">
         {displayedEvents.length === 0 && (
-          <div className="col-span-full py-16 text-center">
-            <div className="max-w-md mx-auto p-10 rounded-3xl border border-white/10 bg-white/[0.02] backdrop-blur-xl">
-              <Calendar size={36} className="mx-auto mb-3 text-slate-600" />
-              <p className="font-extrabold text-base text-slate-200">
+          <div className="py-20 text-center">
+            <div className="max-w-md mx-auto p-12 rounded-3xl border border-white/10 bg-[#090a0b]/80 backdrop-blur-2xl">
+              <Calendar size={36} className="mx-auto mb-3 text-red-500/60" />
+              <p className="font-display text-2xl font-black uppercase tracking-tight text-white">
                 {searchQuery ? 'No matching events found' : `No ${activeTab} events available`}
               </p>
-              <p className="text-xs text-slate-400 mt-1">
+              <p className="text-xs text-slate-400 mt-2 font-mono">
                 {searchQuery
                   ? 'Try modifying your search keywords.'
                   : 'Check back later or switch tabs to view past event archives.'}
@@ -469,7 +460,7 @@ export default function EventsPage() {
           </div>
         )}
 
-        {displayedEvents.map((event) => {
+        {displayedEvents.map((event, idx) => {
           const isRegistered = event.attendees?.some(
             (att) => (att.user?._id || att.user || att) === user.id
           );
@@ -486,144 +477,165 @@ export default function EventsPage() {
           const capacityRatio = event.capacity ? Math.min(100, Math.round((event.attendeeCount / event.capacity) * 100)) : 0;
           const isNearlyFull = event.capacity && capacityRatio >= 80 && !isFull;
 
+          const eventDateObj = new Date(event.date);
+          const dateStr = !isNaN(eventDateObj.getTime())
+            ? eventDateObj.toISOString().slice(0, 10).replace(/-/g, '.')
+            : 'TBD';
+          const timeStr = !isNaN(eventDateObj.getTime())
+            ? eventDateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            : '';
+
           return (
             <div
               key={event._id}
-              className="rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-6 shadow-xl backdrop-blur-xl flex flex-col justify-between space-y-5 hover:border-white/20 transition-all duration-300"
+              className="rounded-3xl border border-white/10 bg-[#090a0b]/90 hover:border-red-500/40 p-6 sm:p-8 backdrop-blur-2xl transition-all duration-300 group"
             >
-              <div className="space-y-4">
-                {/* Event Image / Multi-image Carousel */}
-                {activeTab === 'previous' || allImages.length > 1 ? (
-                  <EventCarousel images={allImages} title={event.title} />
-                ) : (
-                  <div className="h-44 w-full rounded-2xl overflow-hidden bg-black/60 border border-white/10 relative shadow-inner">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                {/* Left Column: Date & Time in Technical Mono + Index */}
+                <div className="lg:col-span-3 space-y-3 border-b lg:border-b-0 lg:border-r border-white/10 pb-4 lg:pb-0 lg:pr-6">
+                  <div className="flex items-center justify-between text-[10px] font-mono tracking-widest uppercase text-slate-500">
+                    <span>EVENT // {String(idx + 1).padStart(2, '0')}</span>
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-white/5 border border-white/10 text-slate-300">
+                      {activeTab === 'upcoming' ? 'SCHEDULED' : 'ARCHIVED'}
+                    </span>
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="font-mono text-2xl sm:text-3xl font-black text-white group-hover:text-red-400 transition-colors">
+                      {dateStr}
+                    </div>
+                    {timeStr && (
+                      <div className="flex items-center gap-1.5 text-xs font-mono text-slate-400">
+                        <Clock size={12} className="text-red-400 shrink-0" />
+                        <span>{timeStr}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {event.location && (
+                    <div className="flex items-center gap-1.5 text-xs text-slate-400 font-mono truncate">
+                      <MapPin size={12} className="text-amber-400 shrink-0" />
+                      <span className="truncate">{event.location}</span>
+                    </div>
+                  )}
+
+                  {/* Thumbnail / Carousel trigger */}
+                  <div className="relative h-24 w-full rounded-2xl overflow-hidden border border-white/10 bg-black/60 mt-2">
                     {event.image ? (
-                      <img src={event.image} alt={event.title} className="w-full h-full object-cover" />
+                      <img src={event.image} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-red-950/60 to-black text-3xl">
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-red-950/40 to-black text-xl">
                         🎨
                       </div>
                     )}
-                    <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider bg-black/75 text-amber-300 backdrop-blur-md border border-white/15">
-                      {activeTab === 'upcoming' ? 'Scheduled' : 'Past Archive'}
-                    </div>
                   </div>
-                )}
+                </div>
 
-                {/* Title & Officer Quick Actions */}
-                <div className="flex justify-between items-start gap-2">
-                  <h3 className="font-black text-lg tracking-tight text-white line-clamp-1">
-                    {event.title}
-                  </h3>
+                {/* Center Column: Massive Title + Description + Highlights + Capacity */}
+                <div className="lg:col-span-6 space-y-3">
+                  <div className="space-y-1">
+                    <h3 className="font-display text-2xl sm:text-3xl lg:text-4xl font-black uppercase tracking-tight text-white group-hover:text-red-300 transition-colors">
+                      {event.title}
+                    </h3>
+                    <p className="font-sans text-xs sm:text-sm text-slate-300 leading-relaxed font-light line-clamp-2">
+                      {event.description}
+                    </p>
+                  </div>
+
+                  {event.highlights && (
+                    <div className="p-3 rounded-xl bg-white/[0.02] border border-white/10 text-xs text-amber-200/90 leading-relaxed font-light">
+                      <span className="font-bold text-amber-400 uppercase text-[9px] font-mono block mb-0.5">
+                        HIGHLIGHTS
+                      </span>
+                      {event.highlights}
+                    </div>
+                  )}
+
+                  {/* Capacity Bar */}
+                  {event.capacity ? (
+                    <div className="space-y-1.5 pt-1">
+                      <div className="flex justify-between text-[11px] font-mono">
+                        <span className="text-slate-400">RESERVED SEATS</span>
+                        <span className={isFull ? 'text-red-400 font-bold' : isNearlyFull ? 'text-amber-400 font-bold' : 'text-slate-300'}>
+                          {event.attendeeCount} / {event.capacity} ({capacityRatio}%)
+                        </span>
+                      </div>
+                      <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full transition-all duration-500 rounded-full ${
+                            isFull
+                              ? 'bg-red-500'
+                              : isNearlyFull
+                              ? 'bg-amber-400'
+                              : 'bg-emerald-500'
+                          }`}
+                          style={{ width: `${capacityRatio}%` }}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="text-[11px] text-slate-400 font-mono">
+                      CONFIRMED: <span className="text-white font-bold">{event.attendeeCount}</span> • OPEN CAPACITY
+                    </div>
+                  )}
+                </div>
+
+                {/* Right Column: Actions */}
+                <div className="lg:col-span-3 flex flex-row lg:flex-col items-center lg:items-end justify-between lg:justify-center gap-3 border-t lg:border-t-0 lg:border-l border-white/10 pt-4 lg:pt-0 lg:pl-6">
+                  {/* RSVP Button */}
+                  {activeTab === 'upcoming' && (
+                    <button
+                      onClick={() => handleRsvp(event._id, isRegistered)}
+                      disabled={actioningRsvpId === event._id || (!isRegistered && isFull)}
+                      className={`w-full sm:w-auto lg:w-full px-5 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all cursor-pointer ${
+                        isRegistered
+                          ? 'bg-red-500/20 text-red-300 border border-red-500/40 hover:bg-red-500/30'
+                          : isFull
+                          ? 'bg-white/10 text-slate-500 cursor-not-allowed border border-white/10'
+                          : 'bg-gradient-to-r from-red-600 to-orange-600 text-white hover:brightness-110 shadow-lg shadow-red-950/60'
+                      }`}
+                    >
+                      {actioningRsvpId === event._id
+                        ? '...'
+                        : isRegistered
+                        ? 'Cancel RSVP'
+                        : isFull
+                        ? 'At Capacity'
+                        : 'RSVP Now →'}
+                    </button>
+                  )}
+
+                  {/* Guest List Button */}
                   {canManageEvent && (
-                    <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      onClick={() => setViewingAttendeesEvent(event)}
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-full border border-white/15 bg-white/[0.04] text-[11px] font-mono uppercase tracking-wider text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer w-full"
+                    >
+                      <Users size={13} />
+                      <span>Guest List ({event.attendeeCount})</span>
+                    </button>
+                  )}
+
+                  {/* Edit / Delete Buttons */}
+                  {canManageEvent && (
+                    <div className="flex items-center gap-2">
                       <button
                         onClick={() => startEdit(event)}
                         title="Edit event"
-                        className="p-1.5 rounded-lg border border-white/10 bg-white/[0.03] text-amber-400 hover:text-amber-300 hover:bg-white/10 transition cursor-pointer"
+                        className="p-2.5 rounded-full border border-white/15 bg-white/[0.03] text-amber-400 hover:text-amber-300 hover:bg-white/10 transition cursor-pointer"
                       >
                         <Edit2 size={13} />
                       </button>
                       <button
                         onClick={() => setDeletingEventId(event._id)}
                         title="Delete event"
-                        className="p-1.5 rounded-lg border border-red-500/20 bg-red-500/10 text-red-400 hover:text-red-300 hover:bg-red-500/20 transition cursor-pointer"
+                        className="p-2.5 rounded-full border border-red-500/30 bg-red-500/10 text-red-400 hover:text-red-300 hover:bg-red-500/20 transition cursor-pointer"
                       >
                         <Trash2 size={13} />
                       </button>
                     </div>
                   )}
                 </div>
-
-                {/* Metadata */}
-                <div className="text-xs space-y-1.5 text-slate-400 font-medium">
-                  <div className="flex items-center gap-2">
-                    <Calendar size={13} className="text-red-400 shrink-0" />
-                    <span>
-                      {activeTab === 'previous' || event.isPast
-                        ? new Date(event.date).toLocaleDateString()
-                        : new Date(event.date).toLocaleString()}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin size={13} className="text-amber-400 shrink-0" />
-                    <span className="truncate">{event.location}</span>
-                  </div>
-                </div>
-
-                <p className="text-xs text-slate-300 line-clamp-3 leading-relaxed">{event.description}</p>
-
-                {event.highlights && (
-                  <div className="p-3 rounded-2xl bg-white/[0.02] border border-white/10 text-xs text-amber-200/90 leading-relaxed font-light">
-                    <span className="font-bold text-amber-400 uppercase text-[10px] block mb-0.5">Highlights</span>
-                    {event.highlights}
-                  </div>
-                )}
-
-                {/* Capacity Progress Bar */}
-                {event.capacity ? (
-                  <div className="space-y-1.5 pt-1">
-                    <div className="flex justify-between text-[11px] font-bold">
-                      <span className="text-slate-400">Reserved Seats</span>
-                      <span className={isFull ? 'text-red-400' : isNearlyFull ? 'text-amber-400' : 'text-slate-300'}>
-                        {event.attendeeCount} / {event.capacity} ({capacityRatio}%)
-                      </span>
-                    </div>
-                    <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full transition-all duration-500 rounded-full ${
-                          isFull
-                            ? 'bg-red-500'
-                            : isNearlyFull
-                            ? 'bg-amber-400'
-                            : 'bg-emerald-500'
-                        }`}
-                        style={{ width: `${capacityRatio}%` }}
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-[11px] text-slate-400 font-medium">
-                    Seats: <span className="text-white font-bold">{event.attendeeCount} confirmed</span> • Open Capacity
-                  </div>
-                )}
-              </div>
-
-              {/* Bottom Card Footer with RSVP / Guest list view */}
-              <div className="pt-4 border-t border-white/10 flex items-center justify-between gap-2">
-                {/* Officers / Creators can inspect guest list */}
-                {canManageEvent && (
-                  <button
-                    onClick={() => setViewingAttendeesEvent(event)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/10 bg-white/[0.04] text-[11px] font-bold text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
-                  >
-                    <Users size={12} />
-                    <span>Guest List ({event.attendeeCount})</span>
-                  </button>
-                )}
-
-                {/* Member RSVP Button */}
-                {activeTab === 'upcoming' && (
-                  <button
-                    onClick={() => handleRsvp(event._id, isRegistered)}
-                    disabled={actioningRsvpId === event._id || (!isRegistered && isFull)}
-                    className={`ml-auto px-4 py-2 rounded-xl text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
-                      isRegistered
-                        ? 'bg-red-500/20 text-red-300 border border-red-500/40 hover:bg-red-500/30'
-                        : isFull
-                        ? 'bg-white/10 text-slate-500 cursor-not-allowed border border-white/10'
-                        : 'bg-emerald-600 text-white hover:bg-emerald-500 shadow-md shadow-emerald-950/50'
-                    }`}
-                  >
-                    {actioningRsvpId === event._id
-                      ? '...'
-                      : isRegistered
-                      ? 'Cancel RSVP'
-                      : isFull
-                      ? 'At Capacity'
-                      : 'RSVP Now'}
-                  </button>
-                )}
               </div>
             </div>
           );

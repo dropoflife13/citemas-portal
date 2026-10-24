@@ -270,140 +270,205 @@ export default function UsersDirectoryPage() {
           </div>
         )}
 
-        {/* Users Grid */}
+        {/* Users Asymmetrical Editorial Grid */}
         {filteredUsers.length === 0 ? (
-          <div className="rounded-[32px] border border-white/10 bg-white/[0.02] p-12 text-center backdrop-blur-xl">
-            <Users size={32} className="mx-auto mb-3 text-white/30" />
-            <p className="text-lg font-bold text-[#FDFBF7]">No members found</p>
-            <p className="text-xs text-white/50 mt-1">Try adjusting your search criteria or role filters.</p>
+          <div className="rounded-3xl border border-white/10 bg-[#090a0b]/80 p-16 text-center backdrop-blur-2xl">
+            <Users size={36} className="mx-auto mb-3 text-red-500/50" />
+            <p className="font-display text-2xl font-black uppercase tracking-tight text-white">No members found</p>
+            <p className="text-xs text-slate-400 mt-2 font-mono">Try adjusting your search criteria or role filters.</p>
           </div>
         ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {filteredUsers.map((member) => (
-              <div
-                key={member._id || member.email}
-                className="group relative rounded-[28px] border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.02] p-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-2xl transition-all duration-300 hover:border-red-500/40 hover:-translate-y-1 flex flex-col justify-between"
-              >
-                <div>
-                  <div className="flex items-start justify-between gap-4 mb-5">
-                    <div className="relative h-16 w-16 overflow-hidden rounded-2xl border border-white/15 bg-[#1a0d0d] shadow-lg">
-                      <img
-                        src={member.avatar || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80'}
-                        alt={`${member.firstName} ${member.lastName}`}
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-
-                    <div className="flex flex-col items-end gap-1.5">
-                      <span className={`rounded-full border px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.18em] ${
-                        member.role === 'super_admin' || member.role === 'admin' 
-                          ? 'border-red-500/50 bg-red-500/20 text-red-300' 
-                          : member.role === 'officer' || member.isOfficer 
-                          ? 'border-amber-500/40 bg-amber-500/10 text-amber-300'
-                          : member.role === 'alumni'
-                          ? 'border-blue-500/40 bg-blue-500/10 text-blue-300'
-                          : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'
-                      }`}>
-                        {member.role === 'super_admin' ? 'Admin' : member.role === 'officer' || member.isOfficer ? 'Officer' : member.role === 'alumni' ? 'Alumni' : 'Member'}
+          <div className="space-y-6">
+            {/* Featured Member Spotlight (First Officer or Admin if available) */}
+            {filteredUsers.length > 0 && (
+              (() => {
+                const spotlight = filteredUsers.find((m) => m.role === 'officer' || m.role === 'super_admin' || m.isOfficer) || filteredUsers[0];
+                return (
+                  <div className="w-full rounded-3xl border border-white/10 bg-[#090a0b]/90 p-6 sm:p-8 backdrop-blur-2xl hover:border-red-500/40 transition-all duration-300 group">
+                    <div className="flex items-center justify-between text-[10px] font-mono tracking-widest text-slate-500 uppercase pb-4 border-b border-white/10">
+                      <span>COUNCIL // MEMBER SPOTLIGHT</span>
+                      <span className="flex items-center gap-1.5 text-cyan-400">
+                        <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                        ACTIVE GUILD
                       </span>
-                      {member.yearLevel && (
-                        <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[9px] font-black uppercase tracking-[0.18em] text-white/70">
-                          {member.yearLevel} Yr
-                        </span>
-                      )}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 items-center pt-6">
+                      <div className="md:col-span-4 flex justify-center md:justify-start">
+                        <div className="relative h-44 w-44 sm:h-52 sm:w-52 rounded-2xl overflow-hidden border border-white/20 shadow-xl group-hover:scale-102 transition-transform duration-500">
+                          <img
+                            src={spotlight.avatar || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80'}
+                            alt={`${spotlight.firstName} ${spotlight.lastName}`}
+                            className="h-full w-full object-cover filter contrast-105"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="md:col-span-8 space-y-3 text-center md:text-left">
+                        <div className="flex flex-wrap items-center justify-center md:justify-start gap-2.5">
+                          <span className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-red-300">
+                            {spotlight.role === 'super_admin' ? 'SUPER ADMIN' : spotlight.officerPosition ? spotlight.officerPosition.replace(/_/g, ' ') : spotlight.role}
+                          </span>
+                          {spotlight.yearLevel && (
+                            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] font-mono uppercase text-slate-300">
+                              {spotlight.yearLevel} Yr
+                            </span>
+                          )}
+                          <span className="text-xs font-mono text-cyan-300">
+                            // {spotlight.specialization ? spotlight.specialization.replace(/_/g, ' ') : 'General Media'}
+                          </span>
+                        </div>
+
+                        <h2 className="font-display text-3xl sm:text-5xl font-black uppercase tracking-tight text-white group-hover:text-red-400 transition-colors">
+                          {spotlight.firstName} {spotlight.lastName}
+                        </h2>
+
+                        <div className="text-xs font-mono text-slate-400 space-y-1">
+                          <div>{spotlight.department || 'PHINMA University of Iloilo'}</div>
+                          <div className="text-slate-500">{spotlight.email}</div>
+                        </div>
+
+                        {spotlight.bio && (
+                          <p className="font-sans text-xs sm:text-sm text-slate-300 italic max-w-xl leading-relaxed pt-1">
+                            &ldquo;{spotlight.bio}&rdquo;
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
+                );
+              })()
+            )}
 
-                  <div className="space-y-1 mb-4">
-                    <h3 className="text-lg font-black tracking-tight text-[#FDFBF7] group-hover:text-red-300 transition-colors">
-                      {member.firstName} {member.lastName}
-                    </h3>
-                    <p className="text-xs font-medium text-red-300/90 truncate">
-                      {member.specialization ? member.specialization.replace(/_/g, ' ') : 'General Creator'}
-                    </p>
-                  </div>
+            {/* Asymmetrical 2-Column Editorial Grid for Roster */}
+            <div className="grid gap-6 grid-cols-1 lg:grid-cols-2">
+              {filteredUsers.map((member) => (
+                <div
+                  key={member._id || member.email}
+                  className="group relative rounded-3xl border border-white/10 bg-[#090a0b]/85 hover:border-red-500/40 p-6 sm:p-7 backdrop-blur-2xl transition-all duration-300 flex flex-col justify-between"
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-5">
+                      <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl border border-white/15 bg-black/60 shadow-lg">
+                        <img
+                          src={member.avatar || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=300&q=80'}
+                          alt={`${member.firstName} ${member.lastName}`}
+                          className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                      </div>
 
-                  <div className="space-y-2 border-t border-white/10 pt-4 text-xs text-white/70">
-                    <div className="flex items-center gap-2 truncate">
-                      <BookOpen size={13} className="text-white/40 shrink-0" />
-                      <span className="truncate">{member.department || 'PHINMA University of Iloilo'}</span>
+                      <div className="flex-1 min-w-0 space-y-1.5">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className={`rounded-full border px-2.5 py-0.5 text-[9px] font-black uppercase tracking-wider ${
+                            member.role === 'super_admin' || member.role === 'admin' 
+                              ? 'border-red-500/50 bg-red-500/20 text-red-300' 
+                              : member.role === 'officer' || member.isOfficer 
+                              ? 'border-amber-500/40 bg-amber-500/10 text-amber-300'
+                              : member.role === 'alumni'
+                              ? 'border-blue-500/40 bg-blue-500/10 text-blue-300'
+                              : 'border-emerald-500/40 bg-emerald-500/10 text-emerald-300'
+                          }`}>
+                            {member.role === 'super_admin' ? 'Admin' : member.role === 'officer' || member.isOfficer ? 'Officer' : member.role === 'alumni' ? 'Alumni' : 'Member'}
+                          </span>
+                          {member.yearLevel && (
+                            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[9px] font-mono text-white/70">
+                              {member.yearLevel} Yr
+                            </span>
+                          )}
+                        </div>
+
+                        <h3 className="font-display text-2xl font-black uppercase tracking-tight text-white group-hover:text-red-300 transition-colors truncate">
+                          {member.firstName} {member.lastName}
+                        </h3>
+
+                        <p className="text-xs font-mono text-red-400/90 uppercase tracking-wider truncate">
+                          {member.specialization ? member.specialization.replace(/_/g, ' ') : 'General Creator'}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 truncate">
-                      <Mail size={13} className="text-white/40 shrink-0" />
-                      <span className="truncate">{member.email}</span>
+
+                    <div className="space-y-1.5 border-t border-white/10 pt-3 text-xs text-slate-400 font-mono">
+                      <div className="flex items-center gap-2 truncate">
+                        <BookOpen size={12} className="text-slate-500 shrink-0" />
+                        <span className="truncate">{member.department || 'PHINMA University of Iloilo'}</span>
+                      </div>
+                      <div className="flex items-center gap-2 truncate">
+                        <Mail size={12} className="text-slate-500 shrink-0" />
+                        <span className="truncate">{member.email}</span>
+                      </div>
                     </div>
+
+                    {member.bio && (
+                      <p className="text-xs font-light leading-relaxed text-slate-300 line-clamp-2 italic border-t border-white/5 pt-2">
+                        &ldquo;{member.bio}&rdquo;
+                      </p>
+                    )}
                   </div>
-                </div>
 
-                {canDeleteMembers && (
-                  <div className="mt-4">
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteMember(member)}
-                      className="w-full rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-red-300 transition hover:bg-red-500/20 hover:text-red-200"
-                    >
-                      <Trash2 size={12} className="mr-1.5 inline" />
-                      Delete Member
-                    </button>
-                  </div>
-                )}
-
-                {canManageMembers && (
-                  <div className="mt-5 border-t border-white/10 pt-4">
-                    <div className="space-y-2">
-                      <label className="block text-[9px] font-black uppercase tracking-[0.2em] text-[#FDFBF7]/60">
-                        Update role
-                      </label>
-
-                      <select
-                        value={roleDrafts[member._id]?.role || member.role || ''}
-                        onChange={(e) => handleRoleDraftChange(member._id, 'role', e.target.value)}
-                        className="w-full rounded-xl border border-white/10 bg-[#1a0d0d] px-3 py-2 text-xs text-white focus:border-red-500 focus:outline-none"
-                      >
-                        <option value="" disabled>Select role</option>
-                        <option value="member">Member</option>
-                        <option value="alumni">Alumni</option>
-                        <option value="officer">Officer</option>
-                        <option value="teacher">Teacher</option>
-                        <option value="super_admin">Admin</option>
-                      </select>
-
-                      {(roleDrafts[member._id]?.role || member.role) === 'officer' && (
-                        <select
-                          value={roleDrafts[member._id]?.officerPosition || member.officerPosition || 'president'}
-                          onChange={(e) => handleRoleDraftChange(member._id, 'officerPosition', e.target.value)}
-                          className="w-full rounded-xl border border-white/10 bg-[#1a0d0d] px-3 py-2 text-xs text-white focus:border-red-500 focus:outline-none"
-                        >
-                          <option value="president">President</option>
-                          <option value="vice_president">Vice President</option>
-                          <option value="secretary">Secretary</option>
-                          <option value="treasurer">Treasurer</option>
-                          <option value="pro">PRO</option>
-                          <option value="pio">PIO</option>
-                          <option value="events_director">Events Director</option>
-                          <option value="creative_director">Creative Director</option>
-                          <option value="year_level_representative">Year Level Representative</option>
-                        </select>
-                      )}
-
+                  <div className="pt-4 mt-2">
+                    {canDeleteMembers && (
                       <button
                         type="button"
-                        onClick={() => handleRoleUpdate(member)}
-                        className="w-full rounded-xl bg-gradient-to-r from-red-600 to-red-800 px-3 py-2 text-[10px] font-black uppercase tracking-[0.18em] text-white transition hover:opacity-90"
+                        onClick={() => handleDeleteMember(member)}
+                        className="w-full rounded-xl border border-red-500/30 bg-red-500/10 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-red-300 transition hover:bg-red-500/20 hover:text-red-200 cursor-pointer"
                       >
-                        Save Role
+                        <Trash2 size={12} className="mr-1.5 inline" />
+                        Delete Member
                       </button>
-                    </div>
-                  </div>
-                )}
+                    )}
 
-                {member.bio && (
-                  <p className="mt-4 text-xs font-light leading-relaxed text-white/60 line-clamp-2 border-t border-white/5 pt-3">
-                    &ldquo;{member.bio}&rdquo;
-                  </p>
-                )}
-              </div>
-            ))}
+                    {canManageMembers && (
+                      <div className="mt-3 border-t border-white/10 pt-3 space-y-2">
+                        <label className="block text-[9px] font-mono uppercase tracking-widest text-slate-400">
+                          Update Role Assignment
+                        </label>
+
+                        <div className="flex gap-2">
+                          <select
+                            value={roleDrafts[member._id]?.role || member.role || ''}
+                            onChange={(e) => handleRoleDraftChange(member._id, 'role', e.target.value)}
+                            className="flex-1 rounded-xl border border-white/10 bg-[#120505] px-3 py-2 text-xs text-white focus:border-red-500 focus:outline-none"
+                          >
+                            <option value="" disabled>Select role</option>
+                            <option value="member">Member</option>
+                            <option value="alumni">Alumni</option>
+                            <option value="officer">Officer</option>
+                            <option value="teacher">Teacher</option>
+                            <option value="super_admin">Admin</option>
+                          </select>
+
+                          {(roleDrafts[member._id]?.role || member.role) === 'officer' && (
+                            <select
+                              value={roleDrafts[member._id]?.officerPosition || member.officerPosition || 'president'}
+                              onChange={(e) => handleRoleDraftChange(member._id, 'officerPosition', e.target.value)}
+                              className="flex-1 rounded-xl border border-white/10 bg-[#120505] px-3 py-2 text-xs text-white focus:border-red-500 focus:outline-none"
+                            >
+                              <option value="president">President</option>
+                              <option value="vice_president">Vice President</option>
+                              <option value="secretary">Secretary</option>
+                              <option value="treasurer">Treasurer</option>
+                              <option value="pro">PRO</option>
+                              <option value="pio">PIO</option>
+                              <option value="events_director">Events Director</option>
+                              <option value="creative_director">Creative Director</option>
+                              <option value="year_level_representative">Year Level Representative</option>
+                            </select>
+                          )}
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleRoleUpdate(member)}
+                          className="w-full rounded-xl bg-gradient-to-r from-red-600 to-red-800 px-3 py-2 text-[10px] font-black uppercase tracking-widest text-white transition hover:opacity-90 cursor-pointer shadow-md"
+                        >
+                          Save Role
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
 

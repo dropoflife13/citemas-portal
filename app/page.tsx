@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 type OfficerRecord = {
   _id: string;
@@ -34,7 +35,7 @@ export default function Home() {
 
   const stackContainerRef = useRef<HTMLDivElement | null>(null);
 
-  // Mouse Parallax for 3D Centerpiece
+  // Mouse Parallax for 3D Centerpiece & Floating Assets
   const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
 
   const handleHeroMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -149,9 +150,19 @@ export default function Home() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  const scrollToCard = (index: number) => {
+    const container = stackContainerRef.current;
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    const scrollTop = window.scrollY + rect.top;
+    const totalScrollable = rect.height - window.innerHeight;
+    const targetScroll = scrollTop + (index / 3) * totalScrollable;
+    window.scrollTo({ top: targetScroll, behavior: 'smooth' });
+  };
+
   return (
     <div className="relative bg-[#070305] text-[#FDFBF7] overflow-x-hidden">
-      {/* ── CSS Animations for Starfield & 3D Centerpiece ── */}
+      {/* ── CSS Animations for Starfield, Marquee & 3D Centerpiece ── */}
       <style jsx global>{`
         @keyframes driftStars {
           0% {
@@ -197,6 +208,20 @@ export default function Home() {
           }
         }
 
+        @keyframes marquee {
+          0% {
+            transform: translateX(0%);
+          }
+          100% {
+            transform: translateX(-50%);
+          }
+        }
+
+        .animate-marquee {
+          display: inline-flex;
+          animation: marquee 25s linear infinite;
+        }
+
         .starfield-layer-1 {
           background-image:
             radial-gradient(1.5px 1.5px at 30px 40px, #ffffff, rgba(0,0,0,0)),
@@ -236,10 +261,22 @@ export default function Home() {
         }
       `}</style>
 
-      {/* Global Cinematic Starry Backdrop */}
+      {/* ── Global Dynamic Background: Starry Hero transitioning into Technical Grid ── */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute inset-0 starfield-layer-1 opacity-70" />
-        <div className="absolute inset-0 starfield-layer-2 opacity-45" />
+        {/* Starfield Layer (Prominent at hero, smoothly fades as user scrolls into stack) */}
+        <div
+          className="absolute inset-0 transition-opacity duration-300"
+          style={{ opacity: Math.max(0, 1 - cardProgress[0] * 1.5) }}
+        >
+          <div className="absolute inset-0 starfield-layer-1 opacity-70" />
+          <div className="absolute inset-0 starfield-layer-2 opacity-45" />
+        </div>
+
+        {/* Technical Blueprint Grid (Fades in smoothly past the hero section) */}
+        <div
+          className="absolute inset-0 transition-opacity duration-300 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px]"
+          style={{ opacity: Math.min(1, cardProgress[0] * 1.5) }}
+        />
       </div>
 
       {/* Progress Story Indicators */}
@@ -261,11 +298,11 @@ export default function Home() {
           ═══════════════════════════════════════════════════ */}
       <div ref={stackContainerRef} className="relative z-10 h-[400vh]">
         
-        {/* ── CARD 1: CITEMAS STUDIO & VISION (BLEED EDGE-TO-EDGE) ── */}
+        {/* ── CARD 1: CITEMAS STUDIO & HERO (ART CRAFT STYLE) ── */}
         <section
           onMouseMove={handleHeroMouseMove}
           onMouseLeave={handleHeroMouseLeave}
-          className="sticky top-0 h-screen w-full flex items-center px-6 sm:px-12 md:px-16 lg:px-24 overflow-hidden"
+          className="sticky top-0 h-screen w-full flex items-center px-6 sm:px-12 md:px-16 lg:px-24 overflow-hidden relative"
           style={{
             transform: `scale(${1 - cardProgress[0] * 0.08})`,
             filter: `brightness(${1 - cardProgress[0] * 0.45})`,
@@ -276,13 +313,130 @@ export default function Home() {
           <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
             {/* Cinematic Ruby-Crimson Glowing Blob Behind Model */}
             <div
-              className="absolute right-[5%] lg:right-[12%] top-1/2 -translate-y-1/2 w-[380px] sm:w-[520px] lg:w-[680px] h-[380px] sm:h-[520px] lg:h-[680px] rounded-full pointer-events-none"
+              className="absolute right-[5%] lg:right-[15%] top-1/2 -translate-y-1/2 w-[420px] sm:w-[560px] lg:w-[720px] h-[420px] sm:h-[560px] lg:h-[720px] rounded-full pointer-events-none"
               style={{
                 background: 'radial-gradient(circle, rgba(220, 38, 38, 0.45) 0%, rgba(139, 0, 0, 0.22) 40%, rgba(7, 3, 5, 0) 70%)',
-                filter: 'blur(80px)',
+                filter: 'blur(90px)',
                 animation: 'pulseGlow 8s ease-in-out infinite alternate',
               }}
             />
+          </div>
+
+          {/* Sweeping Neon Curved SVG Paths (Orbital Rings in Cyan, Purple, Green) (z-5) */}
+          <svg
+            className="absolute inset-0 w-full h-full pointer-events-none z-[5] overflow-visible"
+            viewBox="0 0 1440 900"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <defs>
+              <linearGradient id="orbitCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#00f0ff" stopOpacity="0.85" />
+                <stop offset="45%" stopColor="#3b82f6" stopOpacity="0.4" />
+                <stop offset="100%" stopColor="#02d2e3" stopOpacity="0" />
+              </linearGradient>
+              <linearGradient id="orbitPurple" x1="100%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#c084fc" stopOpacity="0.8" />
+                <stop offset="55%" stopColor="#ec4899" stopOpacity="0.3" />
+                <stop offset="100%" stopColor="#a855f7" stopOpacity="0" />
+              </linearGradient>
+              <linearGradient id="orbitGreen" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#10b981" stopOpacity="0.75" />
+                <stop offset="60%" stopColor="#06b6d4" stopOpacity="0.25" />
+                <stop offset="100%" stopColor="#10b981" stopOpacity="0" />
+              </linearGradient>
+              <filter id="neonGlow" x="-30%" y="-30%" width="160%" height="160%">
+                <feGaussianBlur stdDeviation="8" result="blur1" />
+                <feGaussianBlur stdDeviation="2" result="blur2" />
+                <feMerge>
+                  <feMergeNode in="blur1" />
+                  <feMergeNode in="blur2" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
+
+            {/* Neon Cyan Orbital Arc */}
+            <path
+              d="M-120,680 C180,820 620,720 880,440 C1140,160 1380,220 1620,80"
+              stroke="url(#orbitCyan)"
+              strokeWidth="2.5"
+              filter="url(#neonGlow)"
+            />
+
+            {/* Neon Purple Dashed Arc */}
+            <path
+              d="M120,-80 C320,180 520,440 840,480 C1180,520 1420,380 1620,600"
+              stroke="url(#orbitPurple)"
+              strokeWidth="2"
+              strokeDasharray="10 8"
+              filter="url(#neonGlow)"
+            />
+
+            {/* Neon Green Lower Arc */}
+            <path
+              d="M240,920 C420,620 720,540 1080,600 C1320,640 1480,780 1680,880"
+              stroke="url(#orbitGreen)"
+              strokeWidth="1.8"
+              filter="url(#neonGlow)"
+            />
+          </svg>
+
+          {/* Floating Assets Arranged in Elliptical Path (z-15) */}
+          <div className="absolute inset-0 pointer-events-none z-[15] hidden sm:block overflow-hidden">
+            {/* Floating Asset A: Top Right Orbit */}
+            <div
+              className="absolute right-[8%] lg:right-[14%] top-[14%] rotate-6 hover:rotate-0 hover:scale-110 transition-all duration-300 pointer-events-auto cursor-pointer"
+              style={{
+                transform: `translate3d(${mouseOffset.x * 24}px, ${mouseOffset.y * 18}px, 0) rotate(6deg)`,
+              }}
+            >
+              <div className="p-1 rounded-2xl bg-black/60 border border-white/20 backdrop-blur-md">
+                <div className="w-36 lg:w-44 h-24 lg:h-28 rounded-xl overflow-hidden relative">
+                  <img src="/orgpic.jpg" alt="Guild Sprint" className="w-full h-full object-cover filter contrast-110" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                  <span className="absolute bottom-1.5 left-2 text-[9px] font-mono tracking-widest uppercase text-cyan-300">
+                    01 // SPRINT
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Floating Asset B: Lower Right Orbit */}
+            <div
+              className="absolute right-[2%] lg:right-[6%] bottom-[18%] -rotate-12 hover:rotate-0 hover:scale-110 transition-all duration-300 pointer-events-auto cursor-pointer"
+              style={{
+                transform: `translate3d(${mouseOffset.x * -18}px, ${mouseOffset.y * -14}px, 0) rotate(-12deg)`,
+              }}
+            >
+              <div className="p-1 rounded-2xl bg-black/60 border border-white/20 backdrop-blur-md">
+                <div className="w-40 lg:w-48 h-28 lg:h-32 rounded-xl overflow-hidden relative">
+                  <img src="/orgpic2.jpg" alt="Exhibition Gallery" className="w-full h-full object-cover filter contrast-110" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                  <span className="absolute bottom-1.5 left-2 text-[9px] font-mono tracking-widest uppercase text-purple-300">
+                    02 // EXHIBITION
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Floating Asset C: Center-Left Accent Orbit */}
+            <div
+              className="absolute left-[38%] lg:left-[45%] top-[10%] rotate-3 hover:rotate-0 hover:scale-110 transition-all duration-300 pointer-events-auto cursor-pointer hidden md:block"
+              style={{
+                transform: `translate3d(${mouseOffset.x * 12}px, ${mouseOffset.y * 22}px, 0) rotate(3deg)`,
+              }}
+            >
+              <div className="p-1 rounded-2xl bg-black/60 border border-white/20 backdrop-blur-md">
+                <div className="w-32 lg:w-36 h-20 lg:h-24 rounded-xl overflow-hidden relative">
+                  <img src="/orgpic3.jpg" alt="Media Studio" className="w-full h-full object-cover filter contrast-110" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                  <span className="absolute bottom-1.5 left-2 text-[9px] font-mono tracking-widest uppercase text-emerald-300">
+                    03 // STUDIO
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* 3D Official CITEMAS Logo Centerpiece (z-10) */}
@@ -305,27 +459,33 @@ export default function Home() {
           </div>
 
           {/* Hero Typography & CTAs (z-20) */}
-          <div className="relative z-20 w-full max-w-2xl lg:max-w-3xl space-y-8 pointer-events-auto">
+          <div className="relative z-20 w-full max-w-2xl lg:max-w-3xl space-y-7 pointer-events-auto pb-14">
             <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 backdrop-blur-md">
               <span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
               <span className="text-[11px] font-mono tracking-widest text-slate-300 uppercase">
-                PHINMA University of Iloilo
+                PHINMA University of Iloilo • EST. 2014
               </span>
             </div>
 
             <div className="space-y-4">
-              <h1 className="font-display text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black uppercase tracking-[-0.04em] leading-[0.88] text-white drop-shadow-2xl">
-                CITEMAS<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-white">
-                  STUDIO.
+              <h1 className="font-display text-5xl sm:text-7xl md:text-8xl lg:text-[7.5rem] font-black uppercase tracking-tighter leading-[0.88] text-white drop-shadow-2xl">
+                CITEMAS{' '}
+                <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-white lowercase tracking-normal">
+                  studio
                 </span>
+                <br />
+                THE CONTROL THAT MERE{' '}
+                <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500 lowercase tracking-normal">
+                  words
+                </span>{' '}
+                CANNOT BUY.
               </h1>
               <p className="font-sans text-base sm:text-lg md:text-xl text-slate-300 max-w-xl leading-relaxed font-light">
                 Where vision meets execution. The premier creative and multimedia guild uniting digital visionaries, 3D sculptors, and traditional artisans.
               </p>
             </div>
 
-            {/* Actions */}
+            {/* Action Buttons */}
             <div className="flex flex-wrap items-center gap-4 pt-2">
               {isLoggedIn ? (
                 <Link
@@ -351,9 +511,21 @@ export default function Home() {
                 </>
               )}
               <div className="flex items-center gap-2 text-xs font-mono text-slate-400 pl-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-red-400" />
-                <span>10°42&apos;N 122°34&apos;E</span>
+                <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                <span>10°42&apos;N 122°34&apos;E // ILOILO</span>
               </div>
+            </div>
+          </div>
+
+          {/* 6. Fixed Bottom Marquee (z-30) */}
+          <div className="absolute bottom-0 left-0 right-0 h-12 border-t border-white/[0.08] bg-[#070305]/85 backdrop-blur-md overflow-hidden flex items-center z-30 pointer-events-none">
+            <div className="flex whitespace-nowrap animate-marquee font-mono text-[11px] font-bold tracking-[0.25em] uppercase text-white/60">
+              <span className="mx-6">
+                DIGITAL ARTS • 3D ANIMATION • VIDEOGRAPHY • PHOTOGRAPHY • VOICE ACTING • TRADITIONAL ARTS • DIGITAL ARTS • 3D ANIMATION • VIDEOGRAPHY • PHOTOGRAPHY • VOICE ACTING • TRADITIONAL ARTS • 
+              </span>
+              <span className="mx-6">
+                DIGITAL ARTS • 3D ANIMATION • VIDEOGRAPHY • PHOTOGRAPHY • VOICE ACTING • TRADITIONAL ARTS • DIGITAL ARTS • 3D ANIMATION • VIDEOGRAPHY • PHOTOGRAPHY • VOICE ACTING • TRADITIONAL ARTS • 
+              </span>
             </div>
           </div>
         </section>
@@ -434,44 +606,46 @@ export default function Home() {
               <span>CAMPUS IMPACT METRICS</span>
             </div>
 
-            {/* Grid Content */}
-            <div className="my-auto space-y-8">
-              <div className="max-w-2xl space-y-3">
-                <span className="text-xs uppercase tracking-[0.3em] font-bold text-red-500">
-                  Impact &amp; Production
-                </span>
-                <h2 className="font-display text-5xl sm:text-6xl md:text-7xl font-black uppercase tracking-[-0.03em] leading-[0.9] text-white">
-                  Molten Energy.
-                </h2>
-                <p className="font-sans text-sm md:text-base text-slate-300 leading-relaxed font-light">
-                  Dynamic student exhibitions, hands-on production sprints, and cross-departmental creative summits shaping the creative identity of PHINMA University of Iloilo.
-                </p>
-              </div>
+            {/* Content Header */}
+            <div className="max-w-2xl space-y-3 pt-2">
+              <span className="text-xs uppercase tracking-[0.3em] font-bold text-red-500">
+                Impact &amp; Production
+              </span>
+              <h2 className="font-display text-5xl sm:text-6xl md:text-7xl font-black uppercase tracking-[-0.03em] leading-[0.9] text-white">
+                Molten Energy.
+              </h2>
+              <p className="font-sans text-sm md:text-base text-slate-300 leading-relaxed font-light">
+                Dynamic student exhibitions, hands-on production sprints, and cross-departmental creative summits shaping the creative identity of PHINMA University of Iloilo.
+              </p>
+            </div>
 
-              {/* Instrument Panel Stat Cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                {[
-                  { value: '50+', label: 'Active Creators', desc: 'Tech & digital visionaries' },
-                  { value: '10+', label: 'Guild Exhibits', desc: 'Showcases and sprints' },
-                  { value: '50+', label: 'Projects Built', desc: 'Brand and digital media' },
-                  { value: '05+', label: 'Years Legacy', desc: 'Continuous student innovation' },
-                ].map((stat, i) => (
-                  <div
-                    key={i}
-                    className="p-6 sm:p-8 rounded-2xl bg-white/[0.02] border border-white/10 hover:border-red-500/40 transition-all space-y-2 relative"
-                  >
-                    <div className="font-display text-5xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-orange-400">
-                      {stat.value}
-                    </div>
-                    <div className="text-xs font-bold uppercase tracking-wider text-white">
-                      {stat.label}
-                    </div>
-                    <div className="text-[11px] text-slate-400 font-mono">
-                      {stat.desc}
-                    </div>
+            {/* Architectural Full-Bleed Telemetry Panel (No Generic Boxy Cards) */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-t border-b border-white/10 divide-y sm:divide-y-0 sm:divide-x divide-white/10 py-6 my-auto">
+              {[
+                { value: '50+', label: 'Active Creators', desc: 'Tech & digital visionaries', code: 'CH // 01', status: 'ACTIVE' },
+                { value: '10+', label: 'Guild Exhibits', desc: 'Showcases and sprints', code: 'CH // 02', status: 'SYNCHRONIZED' },
+                { value: '50+', label: 'Projects Built', desc: 'Brand and digital media', code: 'CH // 03', status: 'DEPLOYED' },
+                { value: '05+', label: 'Years Legacy', desc: 'Continuous student innovation', code: 'CH // 04', status: 'ESTABLISHED' },
+              ].map((stat, i) => (
+                <div key={i} className="px-6 py-6 group hover:bg-white/[0.02] transition-colors relative">
+                  <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 uppercase tracking-widest pb-3">
+                    <span>{stat.code}</span>
+                    <span className="flex items-center gap-1.5 text-cyan-400">
+                      <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                      {stat.status}
+                    </span>
                   </div>
-                ))}
-              </div>
+                  <div className="font-display text-6xl sm:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-white group-hover:scale-105 transition-transform duration-300 origin-left">
+                    {stat.value}
+                  </div>
+                  <div className="text-sm font-bold uppercase tracking-wider text-white mt-2">
+                    {stat.label}
+                  </div>
+                  <div className="text-xs text-slate-400 font-mono mt-1">
+                    {stat.desc}
+                  </div>
+                </div>
+              ))}
             </div>
 
             <div className="flex items-center justify-between text-xs font-mono text-slate-500 pt-4 border-t border-white/[0.06]">
@@ -481,7 +655,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── CARD 4: EXECUTIVE LEADERSHIP & HUB ── */}
+        {/* ── CARD 4: EXECUTIVE LEADERSHIP & HUB (50/50 EDITORIAL SPLIT) ── */}
         <section className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden">
           <div className="w-full max-w-7xl h-[86vh] rounded-3xl p-8 md:p-14 relative flex flex-col justify-between overflow-hidden border border-white/[0.08] backdrop-blur-2xl bg-[#090a0b]">
             {/* Header Telemetry */}
@@ -491,8 +665,8 @@ export default function Home() {
             </div>
 
             {/* Leadership Showcase */}
-            <div className="my-auto space-y-8">
-              <div className="space-y-2">
+            <div className="my-auto space-y-6">
+              <div className="space-y-1">
                 <span className="text-xs uppercase tracking-[0.3em] font-bold text-red-500">
                   Executive Roster
                 </span>
@@ -501,7 +675,7 @@ export default function Home() {
                 </h2>
               </div>
 
-              {/* Dynamic Officer Spotlight: Full-Bleed Floating Layout (No Boxy Card) */}
+              {/* Dynamic Officer Spotlight: 50/50 True Editorial Split (No Boxy Sub-Card) */}
               {officersLoading ? (
                 <div className="p-8 text-center text-xs text-slate-400">
                   <div className="h-6 w-6 animate-spin rounded-full border-2 border-red-500/30 border-t-red-500 mx-auto mb-2" />
@@ -511,99 +685,124 @@ export default function Home() {
                 <div
                   onMouseEnter={() => setIsCarouselPaused(true)}
                   onMouseLeave={() => setIsCarouselPaused(false)}
-                  className="flex flex-col md:flex-row items-center md:items-start gap-8 lg:gap-12 py-2"
+                  className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center py-2"
                 >
-                  {/* Officer Portrait: Clean edge border */}
-                  <div className="relative h-64 w-52 sm:h-72 sm:w-60 md:h-80 md:w-64 rounded-2xl overflow-hidden shrink-0 border border-white/20">
-                    <img
-                      src={currentOfficer.image}
-                      alt={currentOfficer.name}
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src = currentOfficer.fallbackImage;
-                      }}
-                      className="w-full h-full object-cover filter contrast-105"
-                    />
+                  {/* Left: 5 Cols - Tall Stylish Portrait */}
+                  <div className="lg:col-span-5 flex justify-center lg:justify-start">
+                    <div className="relative h-72 sm:h-80 md:h-[380px] w-60 sm:w-72 md:w-full max-w-sm rounded-3xl overflow-hidden border border-white/20 shadow-2xl group">
+                      <img
+                        src={currentOfficer.image}
+                        alt={currentOfficer.name}
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = currentOfficer.fallbackImage;
+                        }}
+                        className="w-full h-full object-cover filter contrast-105 group-hover:scale-105 transition-transform duration-700"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent" />
+                      <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+                        <span className="text-[10px] font-mono tracking-widest uppercase text-slate-300">
+                          ID: {currentOfficer.id ? String(currentOfficer.id).slice(-6).toUpperCase() : 'LEAD-01'}
+                        </span>
+                        <span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Floating Details */}
-                  <div className="flex-1 text-center md:text-left space-y-4">
-                    <div className="flex flex-wrap items-center justify-center md:justify-start gap-3">
-                      <span className="px-3 py-1 rounded-full bg-red-600/20 border border-red-500/30 text-red-300 text-[11px] font-bold uppercase tracking-wider">
+                  {/* Right: 7 Cols - Massive Bold Typography & Details */}
+                  <div className="lg:col-span-7 space-y-4 text-center lg:text-left">
+                    <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
+                      <span className="px-3.5 py-1.5 rounded-full bg-red-600/20 border border-red-500/40 text-red-300 text-xs font-black uppercase tracking-widest shadow-[0_0_15px_rgba(239,68,68,0.25)]">
                         {currentOfficer.role}
                       </span>
-                      <span className="text-xs text-slate-400 font-mono">
-                        {currentOfficer.yearLevel}
+                      <span className="text-xs text-slate-400 font-mono tracking-wider">
+                        // {currentOfficer.yearLevel}
                       </span>
                     </div>
 
-                    {/* Massive 48px+ Oswald Font for Officer Name */}
-                    <h3 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black text-white uppercase tracking-tight">
-                      {currentOfficer.name}
-                    </h3>
+                    <div>
+                      <h3 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black text-white uppercase tracking-tight leading-[0.9]">
+                        {currentOfficer.name}
+                      </h3>
+                      <p className="text-xs font-mono text-slate-400 uppercase tracking-widest mt-2">
+                        {currentOfficer.department}
+                      </p>
+                    </div>
 
-                    <p className="font-sans text-sm sm:text-base text-slate-300 line-clamp-3 max-w-2xl leading-relaxed font-light">
+                    <p className="font-sans text-sm sm:text-base text-slate-300 max-w-xl leading-relaxed font-light">
                       {currentOfficer.bio}
                     </p>
 
-                    {/* Nav Arrows */}
-                    <div className="flex items-center justify-center md:justify-start gap-3 pt-2">
-                      <button
-                        onClick={() =>
-                          setActiveOfficerIdx((prev) =>
-                            prev === 0 ? featuredOfficers.length - 1 : prev - 1
-                          )
-                        }
-                        className="p-3 rounded-full border border-white/20 hover:border-red-500/60 hover:bg-white/5 text-slate-200 transition cursor-pointer"
-                        aria-label="Previous officer"
-                      >
-                        &larr;
-                      </button>
-                      <button
-                        onClick={() =>
-                          setActiveOfficerIdx((prev) => (prev + 1) % featuredOfficers.length)
-                        }
-                        className="p-3 rounded-full border border-white/20 hover:border-red-500/60 hover:bg-white/5 text-slate-200 transition cursor-pointer"
-                        aria-label="Next officer"
-                      >
-                        &rarr;
-                      </button>
+                    {/* Navigation Controls: Clean Non-Clipping Prev/Next & Counter */}
+                    <div className="flex items-center justify-center lg:justify-start gap-4 pt-1">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() =>
+                            setActiveOfficerIdx((prev) =>
+                              prev === 0 ? featuredOfficers.length - 1 : prev - 1
+                            )
+                          }
+                          className="h-10 w-10 rounded-full border border-white/20 hover:border-red-500/60 hover:bg-red-600/10 text-white transition-all flex items-center justify-center cursor-pointer active:scale-95"
+                          aria-label="Previous officer"
+                        >
+                          &larr;
+                        </button>
+                        <button
+                          onClick={() =>
+                            setActiveOfficerIdx((prev) => (prev + 1) % featuredOfficers.length)
+                          }
+                          className="h-10 w-10 rounded-full border border-white/20 hover:border-red-500/60 hover:bg-red-600/10 text-white transition-all flex items-center justify-center cursor-pointer active:scale-95"
+                          aria-label="Next officer"
+                        >
+                          &rarr;
+                        </button>
+                      </div>
+
+                      <div className="text-xs font-mono text-slate-400 tracking-widest">
+                        <span className="text-white font-bold">
+                          {String(activeOfficerIdx + 1).padStart(2, '0')}
+                        </span>{' '}
+                        /{' '}
+                        <span>{String(featuredOfficers.length).padStart(2, '0')}</span>
+                      </div>
                     </div>
+
+                    {/* Council Avatars Tray */}
+                    {featuredOfficers.length > 1 && (
+                      <div className="pt-2">
+                        <div className="flex items-center justify-center lg:justify-start gap-2.5 overflow-x-auto py-1">
+                          <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500 mr-1 shrink-0">
+                            COUNCIL:
+                          </span>
+                          {featuredOfficers.map((person, idx) => (
+                            <button
+                              key={person.id}
+                              onClick={() => setActiveOfficerIdx(idx)}
+                              className={`relative h-11 w-11 rounded-xl overflow-hidden border transition-all cursor-pointer shrink-0 ${
+                                activeOfficerIdx === idx
+                                  ? 'border-red-500 scale-110 shadow-[0_0_16px_rgba(239,68,68,0.6)]'
+                                  : 'border-white/20 opacity-50 hover:opacity-100 hover:scale-105'
+                              }`}
+                              title={person.name}
+                            >
+                              <img
+                                src={person.image}
+                                alt={person.name}
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = person.fallbackImage;
+                                }}
+                                className="w-full h-full object-cover"
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               ) : null}
-
-              {/* Council Avatars Tray */}
-              {featuredOfficers.length > 1 && (
-                <div className="flex items-center gap-2 overflow-x-auto py-2">
-                  <span className="text-[10px] font-mono uppercase tracking-widest text-slate-500 mr-2">
-                    COUNCIL:
-                  </span>
-                  {featuredOfficers.map((person, idx) => (
-                    <button
-                      key={person.id}
-                      onClick={() => setActiveOfficerIdx(idx)}
-                      className={`relative h-11 w-11 rounded-xl overflow-hidden border transition-all cursor-pointer ${
-                        activeOfficerIdx === idx
-                          ? 'border-red-500 scale-105 shadow-[0_0_12px_rgba(239,68,68,0.5)]'
-                          : 'border-white/20 opacity-60 hover:opacity-100'
-                      }`}
-                      title={person.name}
-                    >
-                      <img
-                        src={person.image}
-                        alt={person.name}
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = person.fallbackImage;
-                        }}
-                        className="w-full h-full object-cover"
-                      />
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
 
-            {/* Quick Navigation CTAs (No "END OF STACK" text) */}
+            {/* Quick Navigation CTAs */}
             <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-white/[0.06]">
               <div className="flex flex-wrap items-center gap-4">
                 <Link
@@ -625,6 +824,56 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* ── DYNAMIC VERTICAL RULER & SIDE NAVIGATION (PHASE 3) ── */}
+        <div className="fixed right-4 sm:right-6 top-1/2 -translate-y-1/2 z-40 hidden md:flex flex-col items-center gap-3 pointer-events-auto">
+          <div className="text-[9px] font-mono tracking-widest text-slate-500 uppercase rotate-90 mb-4 origin-center">
+            RULER // 04
+          </div>
+
+          {[
+            { idx: 0, tick: '00', label: 'STUDIO' },
+            { idx: 1, tick: '01', label: 'CRAFT' },
+            { idx: 2, tick: '02', label: 'TELEMETRY' },
+            { idx: 3, tick: '03', label: 'LEADERSHIP' },
+          ].map((item) => {
+            const isActive = activeCardIndex === item.idx;
+            return (
+              <button
+                key={item.idx}
+                onClick={() => scrollToCard(item.idx)}
+                className="group relative flex items-center justify-center cursor-pointer transition-all duration-300 py-1"
+                title={item.label}
+              >
+                <span
+                  className={`font-mono text-[10px] tracking-wider transition-all duration-300 ${
+                    isActive
+                      ? 'text-red-500 font-black scale-125'
+                      : 'text-slate-600 hover:text-slate-300'
+                  }`}
+                >
+                  {item.tick}
+                </span>
+                <span
+                  className={`ml-2 h-[2px] transition-all duration-300 ${
+                    isActive
+                      ? 'w-5 bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]'
+                      : 'w-2 bg-white/20 group-hover:w-3 group-hover:bg-white/40'
+                  }`}
+                />
+                {/* Tooltip on hover */}
+                <span className="absolute right-full mr-3 hidden group-hover:block px-2.5 py-1 rounded bg-[#090a0b] border border-white/20 text-[9px] font-mono tracking-widest uppercase text-white whitespace-nowrap shadow-xl z-50">
+                  {item.tick} // {item.label}
+                </span>
+              </button>
+            );
+          })}
+
+          <div className="h-8 w-[1px] bg-gradient-to-b from-white/20 via-red-500/40 to-transparent mt-2" />
+          <div className="text-[9px] font-mono text-red-500/80 font-bold">
+            {String(Math.round((activeCardIndex / 3) * 100)).padStart(2, '0')}%
+          </div>
+        </div>
 
       </div>
     </div>

@@ -343,7 +343,7 @@ export default function PortfolioPage() {
                     <button
                       type="button"
                       onClick={() => setIsModalOpen(true)}
-                      className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-red-600 via-red-600 to-orange-600 px-6 py-3.5 text-xs font-black uppercase tracking-wider text-white shadow-lg shadow-red-950/60 transition-transform hover:scale-[1.02] active:scale-95 cursor-pointer"
+                      className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-red-600 via-red-600 to-orange-600 px-7 py-3.5 text-xs font-black uppercase tracking-widest text-white shadow-xl shadow-red-950/60 transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer"
                     >
                       <Plus size={15} />
                       <span>Submit Artwork</span>
@@ -352,7 +352,7 @@ export default function PortfolioPage() {
                     <button
                       type="button"
                       onClick={() => setIsAchievementModalOpen(true)}
-                      className="inline-flex items-center gap-2 rounded-2xl border border-amber-500/40 bg-amber-500/10 px-5 py-3.5 text-xs font-black uppercase tracking-wider text-amber-300 transition-all hover:bg-amber-500/20 active:scale-95 cursor-pointer"
+                      className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-6 py-3.5 text-xs font-black uppercase tracking-widest text-amber-300 transition-all duration-200 hover:bg-amber-500/20 hover:scale-105 active:scale-95 cursor-pointer"
                     >
                       <Award size={15} />
                       <span>Post Achievement</span>
@@ -412,8 +412,30 @@ export default function PortfolioPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="flex h-64 items-center justify-center rounded-2xl border border-dashed border-white/15 bg-black/30 text-xs text-slate-500">
-                    No featured work yet
+                  <div className="relative flex h-64 items-center justify-center rounded-2xl border border-white/10 bg-[#090a0b]/90 overflow-hidden shadow-inner">
+                    {/* Massive Faded Watermark */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
+                      <span className="font-display text-7xl sm:text-8xl font-black uppercase tracking-tighter text-white/[0.04]">
+                        PORTFOLIO
+                      </span>
+                    </div>
+                    {/* Faint Blueprint Grid Overlay */}
+                    <div
+                      className="absolute inset-0 pointer-events-none opacity-20"
+                      style={{
+                        backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+                        backgroundSize: '32px 32px',
+                      }}
+                    />
+                    <div className="relative z-10 text-center space-y-1 p-4">
+                      <Sparkles size={24} className="mx-auto text-amber-500/70 mb-2" />
+                      <div className="text-xs font-mono uppercase tracking-widest text-slate-300 font-bold">
+                        GUILD SPOTLIGHT READY
+                      </div>
+                      <div className="text-[11px] text-slate-500 font-mono">
+                        Member creative submissions will be featured here
+                      </div>
+                    </div>
                   </div>
                 )}
 

@@ -21,9 +21,9 @@ import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/Toast';
 
 const STATUS_STYLES = {
-  pending: 'bg-amber-500/10 text-amber-200 border border-amber-500/30',
-  approved: 'bg-emerald-500/10 text-emerald-200 border border-emerald-500/30',
-  rejected: 'bg-red-500/10 text-red-200 border border-red-500/30',
+  pending: 'bg-amber-500/10 text-amber-300 border border-amber-500/40 shadow-[0_0_12px_rgba(245,158,11,0.35)]',
+  approved: 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/40 shadow-[0_0_12px_rgba(16,185,129,0.35)]',
+  rejected: 'bg-rose-500/10 text-rose-300 border border-rose-500/40 shadow-[0_0_12px_rgba(244,63,94,0.35)]',
 };
 
 const SPECIALIZATION_LABELS = {
