@@ -139,9 +139,19 @@ export default function Home() {
       <div className="relative z-10 flex-1">
         {/* Hero Section with Student Welcome & Account Creation Prompt */}
         <section className="relative max-w-5xl mx-auto px-6 pt-24 pb-16 text-center">
-          <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-medium mb-8 backdrop-blur-md shadow-inner animate-pulse">
+          <div className="inline-flex items-center space-x-2 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-medium mb-4 backdrop-blur-md shadow-inner animate-pulse">
             <span className="w-2 h-2 rounded-full bg-red-500 shadow-sm shadow-red-500"></span>
             <span>Welcome, CITE & Multimedia Arts Studio </span>
+          </div>
+
+          {/* 3D CITEMAS Interactive Logo */}
+          <div className="relative mx-auto -my-2 h-[260px] sm:h-[320px] md:h-[360px] w-full max-w-md pointer-events-auto select-none">
+            <iframe
+              src="/citemas-logo-3d.html?embed"
+              className="w-full h-full border-0"
+              title="CITEMAS 3D Interactive Logo"
+              loading="eager"
+            />
           </div>
 
           <h1 className="text-5xl md:text-7xl font-black tracking-tight mb-6 leading-tight text-white">
@@ -181,6 +191,19 @@ export default function Home() {
                 </button>
               </>
             )}
+          </div>
+
+          <div className="mt-8 flex items-center justify-center gap-2 text-[11px] text-slate-500">
+            <span>Drag 3D emblem to rotate</span>
+            <span>•</span>
+            <a
+              href="/citemas-logo-3d.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-red-400 hover:text-red-300 underline underline-offset-4 transition"
+            >
+              Open 3D Viewer / Download .glb for Blender
+            </a>
           </div>
         </section>
 
