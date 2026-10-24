@@ -715,7 +715,7 @@ export default function Home() {
   }
 
   return (
-    <div className="relative w-full bg-[#070305] text-white selection:bg-red-500 selection:text-white" style={{ minHeight: '750vh' }}>
+    <div className="relative w-full bg-[#070305] text-white selection:bg-red-500 selection:text-white pb-32 md:pb-48" style={{ minHeight: '800vh' }}>
       {/* 3D Global Styles & Keyframes */}
       <style jsx global>{`
         @import url('https://fonts.googleapis.com/css2?family=Italiana&family=Outfit:wght@300;400;600&display=swap');
@@ -856,7 +856,7 @@ export default function Home() {
 
         /* Milestone 4: Elevated above footer */
         #slide-4 {
-          bottom: 20%;
+          bottom: 25%;
           left: calc(25% + 40px);
           max-width: 720px;
           width: calc(100% - 35%);
@@ -1030,7 +1030,7 @@ export default function Home() {
           }
           #slide-4 {
             left: 16px;
-            bottom: 24%;
+            bottom: 26%;
             width: calc(100vw - 32px);
             max-width: none;
           }

@@ -7,7 +7,7 @@ const MUTED = 'rgba(253,251,247,0.7)';
 export default function Footer() {
   return (
     <footer
-      className="mt-auto border-t border-white/[0.08] bg-gradient-to-t from-[#070305]/95 via-[#0c0407]/80 to-transparent backdrop-blur-2xl py-14 text-xs relative z-20 shadow-[0_-20px_50px_rgba(220,38,38,0.06)]"
+      className="mt-auto border-t border-white/[0.05] bg-gradient-to-t from-[#070305] via-[#070305]/80 to-transparent backdrop-blur-2xl py-14 text-xs relative z-20"
       style={{ color: MUTED }}
     >
       <div className="mx-auto grid max-w-6xl gap-8 px-6 md:grid-cols-4">

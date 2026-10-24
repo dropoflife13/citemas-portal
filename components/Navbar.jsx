@@ -11,7 +11,6 @@ import AdminNotificationBell from './AdminNotificationBell';
 // CITEMAS Palette
 const CITEMAS_RED = '#DC2626';
 const CITEMAS_CREAM = '#FDFBF7';
-const MUTED = 'rgba(253,251,247,0.85)';
 
 export default function Navbar() {
   const auth = useAuth();
@@ -25,8 +24,17 @@ export default function Navbar() {
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [container, setContainer] = useState(null);
+  const [scrolled, setScrolled] = useState(false);
 
   useBodyScrollLock(isDrawerOpen);
+
+  // Track scroll so the landing-page header can fade from invisible to glass
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   // Setup SSR-safe portal container
   useEffect(() => {
@@ -63,15 +71,38 @@ export default function Navbar() {
   const drawerLinkClass =
     'flex items-center py-2.5 px-3 rounded-xl text-sm font-bold uppercase tracking-wider text-white/80 hover:text-white hover:bg-white/[0.06] transition-all';
 
+  // Landing page: invisible at the top, glass once scrolled. Other pages: solid dark bar.
+  const navSurface = isHome
+    ? scrolled
+      ? 'bg-[#070305]/60 backdrop-blur-2xl border-white/[0.05]'
+      : 'bg-transparent border-transparent'
+    : 'bg-[#070305] border-white/[0.05]';
+
+  const centerLinks = user
+    ? [
+        { href: '/dashboard', label: 'Dashboard' },
+        { href: '/events', label: 'Events' },
+        { href: '/users', label: 'Members' },
+        { href: '/applications', label: 'Applications' },
+        { href: '/portfolio', label: 'Portfolio' },
+      ]
+    : [
+        { href: '/events', label: 'Events' },
+        { href: '/users', label: 'Members' },
+        { href: '/portfolio', label: 'Portfolio' },
+      ];
+
+  const centerLinkClass = 'text-white/70 transition-colors duration-200 hover:text-white';
+
   return (
-    <nav className={`sticky top-0 z-50 border-b border-white/[0.08] backdrop-blur-xl text-sm font-extrabold uppercase tracking-wider transition-colors duration-300 ${
-      isHome ? 'bg-[#070305]/70' : 'bg-[#110808]/85'
-    }`}>
-      <div className="w-full flex items-center justify-between pl-8 pr-12 md:pl-12 md:pr-16 py-4 md:py-5">
-        {/* Logo Brand */}
+    <nav
+      className={`sticky top-0 z-50 border-b text-[12px] font-semibold uppercase tracking-widest transition-[background-color,border-color,backdrop-filter] duration-500 ${navSurface}`}
+    >
+      <div className="grid w-full grid-cols-[auto_1fr_auto] items-center gap-8 px-8 py-4 md:px-12">
+        {/* Left — Logo Brand */}
         <Link
           href="/"
-          className="flex items-center gap-3.5 group transition-transform duration-150 active:scale-95 shrink-0"
+          className="group flex shrink-0 items-center gap-3.5 transition-transform duration-150 active:scale-95"
         >
           <div className="relative flex h-10 w-10 items-center justify-center transition-all duration-200 group-hover:scale-105">
             <img
@@ -80,108 +111,42 @@ export default function Navbar() {
               className="h-full w-full object-contain filter drop-shadow-[0_4px_12px_rgba(217,41,41,0.5)]"
             />
           </div>
-          <div>
-            <span
-              className="font-black tracking-[-0.06em] text-xl block leading-none transition-colors duration-200 group-hover:text-red-400"
-              style={{ color: CITEMAS_CREAM, fontFamily: 'Fraunces, Georgia, serif' }}
-            >
-              CITEMAS
-            </span>
-          </div>
+          <span
+            className="block text-xl font-black leading-none tracking-[-0.06em] transition-colors duration-200 group-hover:text-red-400"
+            style={{ color: CITEMAS_CREAM, fontFamily: 'Fraunces, Georgia, serif' }}
+          >
+            CITEMAS
+          </span>
         </Link>
 
-        {/* Milestone Navigation on Homepage */}
-        {isHome && (
-          <div className="hidden xl:flex items-center gap-3 text-[10px] font-black tracking-[0.2em] uppercase text-white/70 bg-white/[0.03] px-5 py-2 rounded-full border border-white/[0.08] backdrop-blur-md shadow-inner mx-auto">
-            <button
-              onClick={() => {
-                const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className="hover:text-red-400 transition-colors cursor-pointer"
-            >
-              Studio
-            </button>
-            <span className="w-1 h-1 rounded-full bg-white/20" />
-            <button
-              onClick={() => {
-                const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-                window.scrollTo({ top: maxScroll * 0.32, behavior: 'smooth' });
-              }}
-              className="hover:text-red-400 transition-colors cursor-pointer"
-            >
-              Craft
-            </button>
-            <span className="w-1 h-1 rounded-full bg-white/20" />
-            <button
-              onClick={() => {
-                const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-                window.scrollTo({ top: maxScroll * 0.58, behavior: 'smooth' });
-              }}
-              className="hover:text-red-400 transition-colors cursor-pointer"
-            >
-              Energy
-            </button>
-            <span className="w-1 h-1 rounded-full bg-white/20" />
-            <button
-              onClick={() => {
-                const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-                window.scrollTo({ top: maxScroll * 0.88, behavior: 'smooth' });
-              }}
-              className="hover:text-red-400 transition-colors cursor-pointer"
-            >
-              Leadership
-            </button>
-          </div>
-        )}
-
-        {/* Desktop Navigation Links (Screens ≥ 1024px) */}
-        <div className="hidden lg:flex items-center gap-6 md:gap-8 font-bold ml-auto" style={{ color: MUTED }}>
+        {/* Center — Primary navigation links (Screens ≥ 1024px) */}
+        <div className="hidden items-center justify-center gap-8 lg:flex xl:gap-10">
           {loading ? (
-            <div className="flex items-center gap-5 animate-pulse">
-              <div className="h-4 w-16 rounded-md bg-white/10" />
-              <div className="h-4 w-16 rounded-md bg-white/10" />
-              <div className="h-4 w-16 rounded-md bg-white/10" />
-              <div className="h-8 w-24 rounded-xl bg-white/10" />
+            <div className="flex animate-pulse items-center gap-8">
+              <div className="h-3 w-16 rounded-full bg-white/10" />
+              <div className="h-3 w-16 rounded-full bg-white/10" />
+              <div className="h-3 w-16 rounded-full bg-white/10" />
             </div>
+          ) : (
+            centerLinks.map((link) => (
+              <Link key={link.href} href={link.href} className={centerLinkClass}>
+                {link.label}
+              </Link>
+            ))
+          )}
+        </div>
+
+        {/* Right — Auth / profile actions (Screens ≥ 1024px) */}
+        <div className="hidden items-center justify-end gap-3 lg:flex">
+          {loading ? (
+            <div className="h-8 w-24 animate-pulse rounded-full bg-white/10" />
           ) : user ? (
             <>
-              <Link
-                href="/dashboard"
-                className="transition-all duration-150 hover:text-white hover:-translate-y-0.5 active:scale-95 active:translate-y-0"
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/events"
-                className="transition-all duration-150 hover:text-white hover:-translate-y-0.5 active:scale-95 active:translate-y-0"
-              >
-                Events
-              </Link>
-              <Link
-                href="/users"
-                className="transition-all duration-150 hover:text-white hover:-translate-y-0.5 active:scale-95 active:translate-y-0"
-              >
-                Members
-              </Link>
-              <Link
-                href="/applications"
-                className="transition-all duration-150 hover:text-white hover:-translate-y-0.5 active:scale-95 active:translate-y-0"
-              >
-                Applications
-              </Link>
-              <Link
-                href="/portfolio"
-                className="transition-all duration-150 hover:text-white hover:-translate-y-0.5 active:scale-95 active:translate-y-0"
-              >
-                Portfolio
-              </Link>
-
               {/* Admin link — only visible to super_admin */}
               {user.role === 'super_admin' && (
                 <Link
                   href="/admin"
-                  className="px-3 py-1.5 text-[11px] font-black rounded-lg border border-red-500/40 bg-red-500/10 text-red-200 transition-all duration-150 hover:border-red-400 hover:bg-red-500/20 hover:-translate-y-0.5 active:scale-95 active:translate-y-0"
+                  className="rounded-full border border-red-500/40 bg-red-500/10 px-3.5 py-1.5 text-[11px] font-black text-red-200 transition-all duration-150 hover:border-red-400 hover:bg-red-500/20 active:scale-95"
                 >
                   Admin
                 </Link>
@@ -193,12 +158,12 @@ export default function Navbar() {
               {/* User Profile Badge */}
               <Link
                 href="/profile"
-                className="px-4 py-2 ml-2 rounded-xl border border-white/10 bg-white/[0.04] text-white hover:bg-white/[0.08] hover:border-white/20 hover:scale-105 transition-all duration-150 active:scale-95 flex items-center gap-2 text-xs font-bold"
+                className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-[11px] font-semibold text-white transition-all duration-150 hover:border-white/20 hover:bg-white/[0.08] active:scale-95"
               >
                 <span>👤</span>
                 <span>{user.firstName}</span>
                 {user.role && (
-                  <span className="text-[10px] opacity-70 uppercase font-black">
+                  <span className="text-[10px] font-black uppercase opacity-70">
                     ({user.role === 'user' ? 'student' : user.role.replace('_', ' ')})
                   </span>
                 )}
@@ -207,7 +172,7 @@ export default function Navbar() {
               {/* Logout Button */}
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 text-xs font-bold rounded-xl border border-white/10 hover:border-red-500/50 hover:bg-red-600/20 text-red-400 hover:text-red-300 hover:scale-105 transition-all duration-150 active:scale-95"
+                className="rounded-full border border-white/10 px-4 py-2 text-[11px] font-semibold text-red-400 transition-all duration-150 hover:border-red-500/50 hover:bg-red-600/20 hover:text-red-300 active:scale-95"
               >
                 Log Out
               </button>
@@ -215,49 +180,28 @@ export default function Navbar() {
           ) : (
             <>
               <Link
-                href="/events"
-                className="transition-all duration-150 hover:text-white hover:-translate-y-0.5 active:scale-95 active:translate-y-0"
+                href="/login"
+                className="rounded-full px-4 py-2 text-[11px] font-semibold transition-colors duration-200 hover:text-white"
+                style={{ color: CITEMAS_CREAM }}
               >
-                Events
+                Log In
               </Link>
               <Link
-                href="/users"
-                className="transition-all duration-150 hover:text-white hover:-translate-y-0.5 active:scale-95 active:translate-y-0"
+                href="/register"
+                className="rounded-full px-5 py-2.5 text-[11px] font-bold transition-all duration-150 hover:brightness-110 active:scale-95"
+                style={{ background: CITEMAS_RED, color: CITEMAS_CREAM }}
               >
-                Members
+                Register
               </Link>
-              <Link
-                href="/portfolio"
-                className="transition-all duration-150 hover:text-white hover:-translate-y-0.5 active:scale-95 active:translate-y-0"
-              >
-                Portfolio
-              </Link>
-
-              <div className="flex items-center gap-4 ml-4">
-                <Link
-                  href="/login"
-                  className="px-4 py-2 text-xs font-bold transition-all duration-150 rounded-xl hover:text-white hover:scale-105 active:scale-95"
-                  style={{ color: CITEMAS_CREAM }}
-                >
-                  Log In
-                </Link>
-                <Link
-                  href="/register"
-                  className="px-5 py-2.5 text-xs font-extrabold rounded-xl transition-all duration-150 hover:scale-105 hover:brightness-110 shadow-md active:scale-95"
-                  style={{ background: CITEMAS_RED, color: CITEMAS_CREAM }}
-                >
-                  Register
-                </Link>
-              </div>
             </>
           )}
         </div>
 
         {/* Mobile Hamburger Button (Screens < 1024px) */}
-        <div className="flex lg:hidden items-center ml-auto">
+        <div className="col-start-3 flex items-center justify-self-end lg:hidden">
           <button
             onClick={() => setIsDrawerOpen(true)}
-            className="p-2 text-white/80 hover:text-white hover:bg-white/[0.08] rounded-xl transition-all duration-150 active:scale-95 flex items-center justify-center"
+            className="flex items-center justify-center rounded-xl p-2 text-white/80 transition-all duration-150 hover:bg-white/[0.08] hover:text-white active:scale-95"
             aria-label="Open navigation menu"
             aria-expanded={isDrawerOpen}
           >
@@ -267,7 +211,7 @@ export default function Navbar() {
               viewBox="0 0 24 24"
               strokeWidth="2"
               stroke="currentColor"
-              className="w-6 h-6"
+              className="h-6 w-6"
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
             </svg>

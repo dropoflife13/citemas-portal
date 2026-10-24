@@ -1,7 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Italiana&family=Outfit:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
 :root {
+  --apple-carbon: #111111;
+  --absolute-black: #000000;
+  --polar-white: #f5f5f7;
+  --apple-steel: #86868b;
   --paper: #0b0505;
   --paper-deep: #160909;
   --paper-glass: rgba(20, 12, 12, 0.72);
@@ -9,15 +13,19 @@
   --ink-muted: rgba(248, 242, 236, 0.72);
   --ink-faint: rgba(248, 242, 236, 0.46);
   --line: rgba(255, 255, 255, 0.08);
-  --accent: #d92929;
+  --accent: #dc2626;
   --accent-soft: #ef4444;
-  --accent-dim: rgba(217, 41, 41, 0.18);
+  --accent-dim: rgba(220, 38, 38, 0.18);
   --gold: #f5b24a;
-  --background: var(--paper);
-  --foreground: var(--ink);
+  --background: var(--apple-carbon);
+  --foreground: var(--polar-white);
 }
 
 @theme inline {
+  --color-apple-carbon: var(--apple-carbon);
+  --color-absolute-black: var(--absolute-black);
+  --color-polar-white: var(--polar-white);
+  --color-apple-steel: var(--apple-steel);
   --color-paper: var(--paper);
   --color-paper-deep: var(--paper-deep);
   --color-ink: var(--ink);
@@ -29,8 +37,9 @@
   --color-accent-dim: var(--accent-dim);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: "Inter", system-ui, sans-serif;
-  --font-serif: "Fraunces", Georgia, serif;
+  --font-sans: "Outfit", "Inter", system-ui, sans-serif;
+  --font-serif: "Italiana", "Fraunces", Georgia, serif;
+  --font-italiana: "Italiana", serif;
   --font-mono: "JetBrains Mono", monospace;
   --max-width-page: 80rem;
 }
@@ -87,41 +96,37 @@ nav {
 }
 
 /* ==========================================
-   CITEMAS Unified Component Styles (Tailwind v4)
+   CITEMAS Unified Component Styles (Apple / Laocoon System)
    ========================================== */
 
 .citemas-card {
-  background-color: rgba(31, 16, 16, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--line);
-  border-radius: 1rem;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.45);
+  background-color: #1a1a1c;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 1.5rem;
+  box-shadow: none;
 }
 
 .citemas-card-interactive {
-  background-color: rgba(31, 16, 16, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--line);
-  border-radius: 1rem;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.45);
-  transition: all 0.2s ease;
+  background-color: #1a1a1c;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 1.5rem;
+  box-shadow: none;
+  transition: all 0.25s ease;
 }
 
 .citemas-card-interactive:hover {
-  background-color: rgba(255, 255, 255, 0.04);
-  border-color: rgba(220, 38, 38, 0.45);
+  background-color: #222225;
+  border-color: rgba(220, 38, 38, 0.35);
   transform: translateY(-2px);
 }
 
 .citemas-modal {
-  background-color: rgba(17, 8, 8, 0.9);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  border-radius: 1.5rem;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
+  background-color: rgba(17, 17, 17, 0.95);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.75rem;
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.9);
 }
 
 /* Modern, visible scrollbar */
