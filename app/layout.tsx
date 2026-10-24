@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
+import ConditionalFooter from "@/components/ConditionalFooter";
 import Background from "@/components/background"; 
 import { AuthProvider } from "@/lib/AuthContext"; // <-- 1. Import your AuthProvider
 import { ToastProvider } from "@/components/Toast";
@@ -43,9 +43,7 @@ export default function RootLayout({
 
             <main className="relative z-10 flex-grow">{children}</main>
 
-            <div className="relative z-10">
-              <Footer />
-            </div>
+            <ConditionalFooter />
           </ToastProvider>
         </AuthProvider>
       </body>

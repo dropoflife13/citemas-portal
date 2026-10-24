@@ -29,6 +29,7 @@ function getInitialsAvatar(name: string): string {
 export default function Home() {
   const { user, loading: authLoading } = useAuth();
   const isLoggedIn = Boolean(user);
+  const [modelLoaded, setModelLoaded] = useState(false);
   const [activeIdx, setActiveIdx] = useState(0);
   const [officers, setOfficers] = useState<OfficerRecord[]>([]);
   const [officersLoading, setOfficersLoading] = useState(true);
@@ -145,12 +146,21 @@ export default function Home() {
           </div>
 
           {/* 3D CITEMAS Interactive Logo */}
-          <div className="relative mx-auto my-4 h-[320px] sm:h-[380px] md:h-[440px] w-full max-w-xl pointer-events-auto select-none">
+          <div className="relative mx-auto my-4 h-[320px] sm:h-[380px] md:h-[440px] w-full max-w-xl pointer-events-auto select-none bg-transparent">
+            {!modelLoaded && (
+              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-red-500/20 border-t-red-500" />
+              </div>
+            )}
             <iframe
               src="/citemas-logo-3d.html?embed"
-              className="w-full h-full border-0"
+              className={`w-full h-full border-0 bg-transparent transition-opacity duration-700 ${
+                modelLoaded ? 'opacity-100' : 'opacity-0'
+              }`}
               title="CITEMAS 3D Interactive Logo"
               loading="eager"
+              allowTransparency={true}
+              onLoad={() => setModelLoaded(true)}
             />
           </div>
 

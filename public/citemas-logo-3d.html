@@ -4,8 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CITEMAS 3D Logo</title>
+<script>
+  if (/[?&]embed/.test(location.search)) {
+    document.documentElement.classList.add('embed');
+  }
+</script>
 <style>
   html,body{margin:0;height:100%;overflow:hidden}
+  html.embed, html.embed body, body.embed{background:transparent !important}
   body{background:radial-gradient(ellipse at 50% 45%,#2a0d10,#060506 72%);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
   body.embed{background:transparent}
   #stage{position:fixed;inset:0}
@@ -39,7 +45,10 @@ if(embed)document.body.classList.add('embed');
 if(!THREE.GLTFExporter)dl.hidden=true;
 
 let renderer;
-try{renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});}
+try{
+  renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+  if(embed)renderer.setClearColor(0x000000,0);
+}
 catch(e){stage.textContent='WebGL is not available in this browser.';return;}
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 renderer.outputEncoding=THREE.sRGBEncoding;
