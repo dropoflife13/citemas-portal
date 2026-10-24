@@ -162,7 +162,7 @@ export default function Home() {
   };
 
   return (
-    <div className="relative bg-[#070305] text-[#FDFBF7] overflow-x-hidden">
+    <div className="relative -mt-16 md:-mt-20 bg-[#070305] text-[#FDFBF7] overflow-x-hidden">
       {/* ── CSS Animations for Starfield, Marquee & 3D Centerpiece ── */}
       <style jsx global>{`
         @keyframes driftStars {
@@ -290,7 +290,7 @@ export default function Home() {
           id="hero"
           onMouseMove={handleHeroMouseMove}
           onMouseLeave={handleHeroMouseLeave}
-          className="sticky top-0 min-h-screen h-screen w-full flex flex-col justify-between px-6 sm:px-12 md:px-16 lg:px-24 pt-6 pb-16 overflow-hidden relative"
+          className="sticky top-0 min-h-screen h-screen w-full flex flex-col justify-between px-6 sm:px-12 md:px-16 lg:px-24 pt-20 sm:pt-24 md:pt-28 pb-16 overflow-hidden relative"
           style={{
             transform: `scale(${1 - cardProgress[0] * 0.08})`,
             filter: `brightness(${1 - cardProgress[0] * 0.45})`,
@@ -510,7 +510,7 @@ export default function Home() {
         </section>
 
         {/* ── CARD 2: CRAFT & DISCIPLINES (EDITORIAL ROSTER) ── */}
-        <section id="specializations" className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden">
+        <section id="specializations" className="sticky top-0 h-screen w-full flex items-center justify-center pt-16 md:pt-20 p-6 md:p-12 overflow-hidden">
           <div
             className="w-full max-w-7xl h-[86vh] rounded-3xl p-8 md:p-14 relative flex flex-col justify-between overflow-hidden transition-transform duration-75 border border-white/[0.08] backdrop-blur-2xl bg-[#090a0b]/95"
             style={{
@@ -571,7 +571,7 @@ export default function Home() {
         </section>
 
         {/* ── CARD 3: MOLTEN ENERGY & INSTRUMENTS ── */}
-        <section id="telemetry" className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden">
+        <section id="telemetry" className="sticky top-0 h-screen w-full flex items-center justify-center pt-16 md:pt-20 p-6 md:p-12 overflow-hidden">
           <div
             className="w-full max-w-7xl h-[86vh] rounded-3xl p-8 md:p-14 relative flex flex-col justify-between overflow-hidden transition-transform duration-75 border border-white/[0.08] backdrop-blur-2xl bg-[#090a0b]/95"
             style={{
@@ -635,7 +635,7 @@ export default function Home() {
         </section>
 
         {/* ── CARD 4: EXECUTIVE LEADERSHIP & HUB (50/50 EDITORIAL SPLIT) ── */}
-        <section id="leadership" className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden">
+        <section id="leadership" className="sticky top-0 h-screen w-full flex items-center justify-center pt-16 md:pt-20 p-6 md:p-12 overflow-hidden">
           <div className="w-full max-w-7xl h-[86vh] rounded-3xl p-8 md:p-14 relative flex flex-col justify-between overflow-hidden border border-white/[0.08] backdrop-blur-2xl bg-[#090a0b]">
             {/* Header Telemetry */}
             <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-slate-400 uppercase">

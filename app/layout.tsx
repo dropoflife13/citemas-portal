@@ -38,14 +38,14 @@ export default function RootLayout({
           <ToastProvider>
             <Background />
 
-            {/* Header in normal document flow */}
+            {/* Header follows down the page wherever the user scrolls */}
             <Navbar />
 
             {/* Global Scroll Progress Spine */}
             <ScrollSpine />
 
-            {/* Main Content with pb-24 footer buffer */}
-            <main className="relative z-10 flex-1 flex flex-col pb-24">{children}</main>
+            {/* Main Content with pt-16 md:pt-20 offset so content starts below the fixed navbar */}
+            <main className="relative z-10 flex-1 flex flex-col pt-16 md:pt-20 pb-24">{children}</main>
 
             <ConditionalFooter />
           </ToastProvider>

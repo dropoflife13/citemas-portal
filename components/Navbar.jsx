@@ -77,7 +77,7 @@ export default function Navbar() {
       ];
 
   return (
-    <nav className="w-full h-16 md:h-20 px-6 flex items-center justify-between border-b border-white/10 bg-white/5 backdrop-blur-md text-[12px] font-semibold uppercase tracking-widest">
+    <nav className="fixed top-0 left-0 w-full z-50 h-16 md:h-20 px-6 flex items-center justify-between border-b border-white/10 bg-[#090a0b]/85 backdrop-blur-md text-[12px] font-semibold uppercase tracking-widest transition-colors duration-200">
       {/* Left — Logo Brand */}
       <Link
         href="/"
