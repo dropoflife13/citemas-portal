@@ -434,8 +434,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Hero Typography & CTAs (z-20) - Elevated with pb-40 mb-40 to eliminate overlap */}
-          <div className="relative z-20 my-auto w-full max-w-2xl lg:max-w-3xl space-y-7 pointer-events-auto pb-40 mb-40">
+          {/* Hero Typography & CTAs (z-20) */}
+          <div className="relative z-20 my-auto w-full max-w-2xl lg:max-w-3xl space-y-6 pointer-events-auto pb-12">
             <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 backdrop-blur-md">
               <span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
               <span className="text-[11px] font-mono tracking-widest text-slate-300 uppercase">
@@ -459,13 +459,31 @@ export default function Home() {
               <p className="font-sans text-base sm:text-lg md:text-xl text-slate-300 max-w-xl leading-relaxed font-light">
                 Where vision meets execution. The premier creative and multimedia organization uniting digital visionaries, 3D sculptors, and traditional artisans.
               </p>
+
+              {/* ── Marquee Scrolling Text Banner (Fades nicely at edges, directly underneath hero text) ── */}
+              <div
+                className="w-full max-w-xl overflow-hidden py-2.5 border-y border-white/10 bg-white/[0.02] backdrop-blur-sm"
+                style={{
+                  maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
+                  WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
+                }}
+              >
+                <div className="flex whitespace-nowrap min-w-full animate-marquee font-mono text-[11px] font-bold tracking-[0.25em] uppercase text-white/70">
+                  <span className="mx-4 flex items-center gap-3">
+                    DIGITAL ARTS <span className="text-red-500">•</span> 3D ANIMATION <span className="text-orange-400">•</span> VIDEOGRAPHY <span className="text-red-500">•</span> PHOTOGRAPHY <span className="text-orange-400">•</span> VOICE ACTING <span className="text-red-500">•</span> TRADITIONAL ARTS <span className="text-red-500">•</span>
+                  </span>
+                  <span className="mx-4 flex items-center gap-3">
+                    DIGITAL ARTS <span className="text-red-500">•</span> 3D ANIMATION <span className="text-orange-400">•</span> VIDEOGRAPHY <span className="text-red-500">•</span> PHOTOGRAPHY <span className="text-orange-400">•</span> VOICE ACTING <span className="text-red-500">•</span> TRADITIONAL ARTS <span className="text-red-500">•</span>
+                  </span>
+                </div>
+              </div>
             </div>
 
-            {/* Action Buttons: Primary Pill CTA restored */}
-            <div className="flex flex-wrap items-center gap-4 pt-2">
+            {/* Action Buttons: Primary Pill CTA */}
+            <div className="flex flex-wrap items-center gap-4 pt-1">
               <Link
                 href="/dashboard"
-                className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest mt-8 transition-colors cursor-pointer shadow-xl shadow-red-600/30"
+                className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest transition-colors cursor-pointer shadow-xl shadow-red-600/30"
               >
                 <span>Enter Studio Dashboard</span>
                 <ArrowRight size={18} />
@@ -473,44 +491,24 @@ export default function Home() {
               {!isLoggedIn && (
                 <Link
                   href="/register"
-                  className="inline-flex items-center gap-2 border border-white/20 bg-white/5 hover:bg-white/10 text-white px-6 py-4 rounded-full font-semibold uppercase tracking-widest mt-8 transition-colors cursor-pointer text-xs"
+                  className="inline-flex items-center gap-2 border border-white/20 bg-white/5 hover:bg-white/10 text-white px-6 py-4 rounded-full font-semibold uppercase tracking-widest transition-colors cursor-pointer text-xs"
                 >
                   Join the Org
                 </Link>
               )}
-              <div className="flex items-center gap-2 text-xs font-mono text-slate-400 pl-2 mt-8">
+              <div className="flex items-center gap-2 text-xs font-mono text-slate-400 pl-2">
                 <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
                 <span>10°42&apos;N 122°34&apos;E // ILOILO</span>
               </div>
             </div>
           </div>
-
-          {/* 6. Fixed Bottom Marquee (z-50) */}
-          <div
-            className="absolute -bottom-[10px] left-0 w-full z-50 h-12 border-t border-white/10 bg-[#090a0b] overflow-hidden flex items-center pointer-events-none"
-            style={{
-              position: 'absolute',
-              bottom: '-10px',
-              left: 0,
-              width: '100%',
-              zIndex: 50,
-              background: '#090a0b',
-              borderTop: '1px solid rgba(255,255,255,0.1)',
-            }}
-          >
-            <div className="flex whitespace-nowrap animate-marquee font-mono text-[11px] font-bold tracking-[0.25em] uppercase text-white/60">
-              <span className="mx-6">
-                DIGITAL ARTS • 3D ANIMATION • VIDEOGRAPHY • PHOTOGRAPHY • VOICE ACTING • TRADITIONAL ARTS • DIGITAL ARTS • 3D ANIMATION • VIDEOGRAPHY • PHOTOGRAPHY • VOICE ACTING • TRADITIONAL ARTS • 
-              </span>
-              <span className="mx-6">
-                DIGITAL ARTS • 3D ANIMATION • VIDEOGRAPHY • PHOTOGRAPHY • VOICE ACTING • TRADITIONAL ARTS • DIGITAL ARTS • 3D ANIMATION • VIDEOGRAPHY • PHOTOGRAPHY • VOICE ACTING • TRADITIONAL ARTS • 
-              </span>
-            </div>
-          </div>
         </section>
 
+        {/* ── SECTION CUT: HERO TO TRACKS ── */}
+        <div className="w-full border-t border-white/10 relative z-20" />
+
         {/* ── CARD 2: CRAFT & DISCIPLINES (EDITORIAL ROSTER) ── */}
-        <section id="specializations" className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden">
+        <section id="specializations" className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden border-t border-white/10">
           <div
             className="w-full max-w-7xl h-[86vh] rounded-3xl p-8 md:p-14 relative flex flex-col justify-between overflow-hidden transition-transform duration-75 border border-white/[0.08] backdrop-blur-2xl bg-[#090a0b]/95"
             style={{
@@ -570,8 +568,11 @@ export default function Home() {
           </div>
         </section>
 
+        {/* ── SECTION CUT: TRACKS TO TELEMETRY ── */}
+        <div className="w-full border-t border-white/10 relative z-20" />
+
         {/* ── CARD 3: MOLTEN ENERGY & INSTRUMENTS ── */}
-        <section id="telemetry" className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden">
+        <section id="telemetry" className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden border-t border-white/10">
           <div
             className="w-full max-w-7xl h-[86vh] rounded-3xl p-8 md:p-14 relative flex flex-col justify-between overflow-hidden transition-transform duration-75 border border-white/[0.08] backdrop-blur-2xl bg-[#090a0b]/95"
             style={{
@@ -634,8 +635,11 @@ export default function Home() {
           </div>
         </section>
 
+        {/* ── SECTION CUT: TELEMETRY TO LEADERSHIP ── */}
+        <div className="w-full border-t border-white/10 relative z-20" />
+
         {/* ── CARD 4: EXECUTIVE LEADERSHIP & HUB (50/50 EDITORIAL SPLIT) ── */}
-        <section id="leadership" className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden">
+        <section id="leadership" className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden border-t border-white/10">
           <div className="w-full max-w-7xl h-[86vh] rounded-3xl p-8 md:p-14 relative flex flex-col justify-between overflow-hidden border border-white/[0.08] backdrop-blur-2xl bg-[#090a0b]">
             {/* Header Telemetry */}
             <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-slate-400 uppercase">
@@ -804,7 +808,8 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── DYNAMIC VERTICAL RULER & SIDE NAVIGATION (PHASE 3) ── */}
+        {/* ── SECTION CUT: STACK TO FOOTER ── */}
+        <div className="w-full border-t border-white/10 relative z-20" />
         <div className="fixed right-4 sm:right-6 top-1/2 -translate-y-1/2 z-40 hidden md:flex flex-col items-center gap-3 pointer-events-auto">
           <div className="text-[9px] font-mono tracking-widest text-slate-500 uppercase rotate-90 mb-4 origin-center">
             RULER // 04
