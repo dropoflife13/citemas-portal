@@ -2,7 +2,12 @@ require('dotenv').config({ path: '.env.local' });
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
-const rawUri = process.env.MONGODB_URI || "mongodb+srv://neilasis43_db_user:neilmardeasiS13@citemasportal.yfpngl9.mongodb.net/citemas?retryWrites=true&w=majority";
+const rawUri = process.env.MONGODB_URI;
+
+if (!rawUri) {
+  console.error('❌ MONGODB_URI is not defined in environment or .env.local');
+  process.exit(1);
+}
 
 const userSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
