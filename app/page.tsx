@@ -13,6 +13,9 @@ type OfficerRecord = {
   officerPosition?: string | null;
   displayPosition?: string;
   avatar?: string | null;
+  department?: string;
+  yearLevel?: string;
+  bio?: string;
 };
 
 function getInitialsAvatar(name: string): string {
@@ -25,7 +28,7 @@ function getInitialsAvatar(name: string): string {
   return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
 }
 
-// Pure React Character Splitter — avoids fragile innerHTML regex and JSX class leakage
+// Pure React Character Splitter — avoids fragile innerHTML regex and JSX scoping leaks
 function SplitHeading({ lines }: { lines: string[] }) {
   let counter = 0;
   return (
@@ -58,14 +61,14 @@ export default function Home() {
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Officers State
+  // Dynamic Officers State (pulled from MongoDB)
   const [officers, setOfficers] = useState<OfficerRecord[]>([]);
   const [officersLoading, setOfficersLoading] = useState(true);
   const [officersError, setOfficersError] = useState<string | null>(null);
   const [activeOfficerIdx, setActiveOfficerIdx] = useState(0);
   const [isCarouselPaused, setIsCarouselPaused] = useState(false);
 
-  // Fetch Officers
+  // Fetch Officers from API
   useEffect(() => {
     const controller = new AbortController();
     setOfficersLoading(true);
@@ -111,6 +114,9 @@ export default function Home() {
         role: formatPosition(person.officerPosition, person.displayPosition),
         image: person.avatar || getInitialsAvatar(name),
         fallbackImage: getInitialsAvatar(name),
+        department: person.department || 'College of Information Technology Education (CITE)',
+        yearLevel: person.yearLevel || 'Student Executive',
+        bio: person.bio || 'Leading strategic creative development and empowering student creators across campus.',
       };
     });
 
@@ -121,13 +127,13 @@ export default function Home() {
     );
   }, [featuredOfficers.length]);
 
-  // Auto-rotate officer carousel
+  // Auto-rotate officer carousel when not hovered
   useEffect(() => {
     if (!featuredOfficers.length || isCarouselPaused) return;
     const timer = setInterval(() => {
       if (document.hidden) return;
       setActiveOfficerIdx((prev) => (prev + 1) % featuredOfficers.length);
-    }, 4500);
+    }, 5000);
     return () => clearInterval(timer);
   }, [featuredOfficers.length, isCarouselPaused]);
 
@@ -178,10 +184,12 @@ export default function Home() {
     keyLight.shadow.bias = -0.001;
     scene.add(keyLight);
 
+    // Signature CITEMAS Crimson Rim Light
     const rimLight = new THREE.DirectionalLight('#ff2a40', 14.0);
     rimLight.position.set(-5, 3, -4);
     scene.add(rimLight);
 
+    // Warm Studio Fill Light
     const fillLight = new THREE.DirectionalLight('#fff1e0', 1.0);
     fillLight.position.set(-2, -4, 2);
     scene.add(fillLight);
@@ -698,11 +706,6 @@ export default function Home() {
     };
   }, []);
 
-  const scrollToMilestone = (targetRatio: number) => {
-    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
-    window.scrollTo({ top: maxScroll * targetRatio, behavior: 'smooth' });
-  };
-
   if (authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#070305] text-[#FDFBF7]">
@@ -769,43 +772,9 @@ export default function Home() {
           box-sizing: border-box;
         }
 
-        /* Floating Milestone Subnav */
-        .milestone-nav {
-          position: fixed;
-          top: 86px;
-          left: 50%;
-          transform: translateX(-50%);
-          z-index: 30;
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          padding: 8px 20px;
-          border-radius: 9999px;
-          background: rgba(17, 8, 8, 0.7);
-          border: 1px solid rgba(255, 255, 255, 0.12);
-          backdrop-blur: 16px;
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-        }
-
-        .milestone-btn {
-          background: transparent;
-          border: none;
-          color: rgba(255, 255, 255, 0.7);
-          font-size: 10px;
-          font-weight: 700;
-          letter-spacing: 2px;
-          text-transform: uppercase;
-          cursor: pointer;
-          transition: all 0.2s;
-        }
-        .milestone-btn:hover {
-          color: #ef4444;
-          transform: translateY(-1px);
-        }
-
         .slide {
           position: absolute;
-          bottom: 12%;
+          bottom: 15%;
           pointer-events: none;
         }
 
@@ -852,16 +821,16 @@ export default function Home() {
           border-radius: 24px;
           border: 1px solid rgba(255, 255, 255, 0.15);
         }
+        #slide-2-img.active {
+          clip-path: inset(0 0 0 0);
+          opacity: 1;
+        }
         #slide-2-img img {
           width: 100%;
           height: 100%;
           object-fit: cover;
           transform: scale(1.15);
           transition: transform 1.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        #slide-2-img.active {
-          clip-path: inset(0 0 0 0);
-          opacity: 1;
         }
         #slide-2-img.active img {
           transform: scale(1);
@@ -885,9 +854,11 @@ export default function Home() {
           white-space: nowrap;
         }
 
+        /* Milestone 4: Elevated above footer */
         #slide-4 {
+          bottom: 20%;
           left: calc(25% + 40px);
-          max-width: 650px;
+          max-width: 720px;
           width: calc(100% - 35%);
         }
 
@@ -917,6 +888,18 @@ export default function Home() {
         .slide.active .slide-desc {
           opacity: 1;
           transform: translateY(0);
+        }
+
+        /* Pop-up Items for Dynamic Scroll Reveals */
+        .pop-up-item {
+          opacity: 0;
+          transform: translateY(35px) scale(0.96);
+          transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+            transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .slide.active .pop-up-item {
+          opacity: 1;
+          transform: translateY(0) scale(1);
         }
 
         .char {
@@ -1047,6 +1030,7 @@ export default function Home() {
           }
           #slide-4 {
             left: 16px;
+            bottom: 24%;
             width: calc(100vw - 32px);
             max-width: none;
           }
@@ -1056,25 +1040,6 @@ export default function Home() {
       {/* Two-part Interactive Cursor */}
       <div className="cursor-inner" />
       <div className="cursor-outer" />
-
-      {/* Floating Milestone Bar */}
-      <div className="milestone-nav hidden md:flex">
-        <button onClick={() => scrollToMilestone(0.0)} className="milestone-btn">
-          Studio
-        </button>
-        <span className="w-1 h-1 rounded-full bg-white/20" />
-        <button onClick={() => scrollToMilestone(0.32)} className="milestone-btn">
-          Craft
-        </button>
-        <span className="w-1 h-1 rounded-full bg-white/20" />
-        <button onClick={() => scrollToMilestone(0.58)} className="milestone-btn">
-          Energy
-        </button>
-        <span className="w-1 h-1 rounded-full bg-white/20" />
-        <button onClick={() => scrollToMilestone(0.9)} className="milestone-btn">
-          Leadership
-        </button>
-      </div>
 
       {/* Cinematic Editorial Overlays */}
       <div className="cinematic-container">
@@ -1090,7 +1055,7 @@ export default function Home() {
               <p className="slide-desc">
                 Where vision meets execution. The premier creative and multimedia guild of PHINMA University of Iloilo, uniting digital visionaries and traditional artisans.
               </p>
-              <div className="pt-2 flex flex-wrap gap-3">
+              <div className="pt-2 flex flex-wrap gap-3 pop-up-item" style={{ transitionDelay: '0.25s' }}>
                 {isLoggedIn ? (
                   <button
                     onClick={() => router.push('/dashboard')}
@@ -1134,10 +1099,22 @@ export default function Home() {
             <p>
               Six dedicated creative disciplines spanning digital arts, animation, videography, photography, traditional illustration, and voice acting. Hone your voice, perfect your technique.
             </p>
+            {/* Pop-up Discipline Badges with Staggered Delays */}
             <div className="flex flex-wrap gap-2 pt-2">
-              {['Digital Arts', '3D Animation', 'Videography', 'Photography', 'Voice Acting', 'Traditional Arts'].map((spec) => (
-                <span key={spec} className="px-3 py-1 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 text-[11px] font-semibold">
-                  {spec}
+              {[
+                { name: 'Digital Arts', delay: '0.2s' },
+                { name: '3D Animation', delay: '0.25s' },
+                { name: 'Videography', delay: '0.3s' },
+                { name: 'Photography', delay: '0.35s' },
+                { name: 'Voice Acting', delay: '0.4s' },
+                { name: 'Traditional Arts', delay: '0.45s' },
+              ].map((spec) => (
+                <span
+                  key={spec.name}
+                  className="px-3.5 py-1.5 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-xs font-semibold pop-up-item shadow-sm hover:border-red-500/40 transition-colors"
+                  style={{ transitionDelay: spec.delay }}
+                >
+                  {spec.name}
                 </span>
               ))}
             </div>
@@ -1153,23 +1130,35 @@ export default function Home() {
             <p>
               Dynamic student exhibitions, hands-on production sprints, and cross-departmental creative summits. Experience collaborative projects that define campus culture.
             </p>
-            {/* Live Stats */}
+            {/* Pop-up Live Metric Cards */}
             <div className="grid grid-cols-2 gap-3 pt-2">
-              <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-md">
-                <div className="text-2xl font-black bg-gradient-to-r from-red-500 to-orange-400 bg-clip-text text-transparent">50+</div>
-                <div className="text-[10px] uppercase font-bold text-slate-300">Active Members</div>
+              <div
+                className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-md pop-up-item hover:border-red-500/30 transition-all"
+                style={{ transitionDelay: '0.15s' }}
+              >
+                <div className="text-2xl md:text-3xl font-black bg-gradient-to-r from-red-500 to-orange-400 bg-clip-text text-transparent">50+</div>
+                <div className="text-[10px] uppercase font-bold text-slate-300 tracking-wider">Active Members</div>
               </div>
-              <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-md">
-                <div className="text-2xl font-black bg-gradient-to-r from-red-500 to-orange-400 bg-clip-text text-transparent">10+</div>
-                <div className="text-[10px] uppercase font-bold text-slate-300">Events Hosted</div>
+              <div
+                className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-md pop-up-item hover:border-red-500/30 transition-all"
+                style={{ transitionDelay: '0.25s' }}
+              >
+                <div className="text-2xl md:text-3xl font-black bg-gradient-to-r from-red-500 to-orange-400 bg-clip-text text-transparent">10+</div>
+                <div className="text-[10px] uppercase font-bold text-slate-300 tracking-wider">Events Hosted</div>
               </div>
-              <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-md">
-                <div className="text-2xl font-black bg-gradient-to-r from-red-500 to-orange-400 bg-clip-text text-transparent">50+</div>
-                <div className="text-[10px] uppercase font-bold text-slate-300">Projects Built</div>
+              <div
+                className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-md pop-up-item hover:border-red-500/30 transition-all"
+                style={{ transitionDelay: '0.35s' }}
+              >
+                <div className="text-2xl md:text-3xl font-black bg-gradient-to-r from-red-500 to-orange-400 bg-clip-text text-transparent">50+</div>
+                <div className="text-[10px] uppercase font-bold text-slate-300 tracking-wider">Projects Built</div>
               </div>
-              <div className="p-3 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-md">
-                <div className="text-2xl font-black bg-gradient-to-r from-red-500 to-orange-400 bg-clip-text text-transparent">5+</div>
-                <div className="text-[10px] uppercase font-bold text-slate-300">Years Active</div>
+              <div
+                className="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-md pop-up-item hover:border-red-500/30 transition-all"
+                style={{ transitionDelay: '0.45s' }}
+              >
+                <div className="text-2xl md:text-3xl font-black bg-gradient-to-r from-red-500 to-orange-400 bg-clip-text text-transparent">5+</div>
+                <div className="text-[10px] uppercase font-bold text-slate-300 tracking-wider">Years Active</div>
               </div>
             </div>
           </div>
@@ -1182,67 +1171,110 @@ export default function Home() {
           </h2>
           <div className="slide-desc space-y-4">
             <p>
-              Meet the officers guiding creative development, campus exhibitions, and community empowerment.
+              Meet the student officers leading our creative disciplines, gallery exhibitions, and campus productions.
             </p>
 
-            {/* Officer Card */}
+            {/* DYNAMIC EXECUTIVE SHOWCASE — PULLING FROM DATABASE */}
             {officersLoading ? (
-              <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/10 text-center text-xs text-slate-400">
+              <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/10 text-center text-xs text-slate-400 pop-up-item">
+                <div className="h-5 w-5 animate-spin rounded-full border-2 border-red-500/30 border-t-red-500 mx-auto mb-2" />
                 Loading leadership roster...
               </div>
             ) : currentOfficer ? (
-              <div
-                onMouseEnter={() => setIsCarouselPaused(true)}
-                onMouseLeave={() => setIsCarouselPaused(false)}
-                className="p-4 sm:p-5 rounded-2xl bg-white/[0.03] border border-white/10 backdrop-blur-xl flex flex-col sm:flex-row items-center gap-4 shadow-xl"
-              >
-                <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-2xl overflow-hidden shrink-0 border border-white/15 shadow-md">
-                  <img
-                    src={currentOfficer.image}
-                    alt={currentOfficer.name}
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = currentOfficer.fallbackImage;
-                    }}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+              <div className="space-y-3">
+                {/* Featured Spotlight Card */}
+                <div
+                  onMouseEnter={() => setIsCarouselPaused(true)}
+                  onMouseLeave={() => setIsCarouselPaused(false)}
+                  className="p-4 sm:p-5 rounded-3xl bg-white/[0.03] border border-white/15 backdrop-blur-xl flex flex-col sm:flex-row items-center gap-4 shadow-2xl pop-up-item hover:border-red-500/40 transition-all"
+                  style={{ transitionDelay: '0.2s' }}
+                >
+                  <div className="relative h-20 w-20 sm:h-24 sm:w-24 rounded-2xl overflow-hidden shrink-0 border border-white/20 shadow-md">
+                    <img
+                      src={currentOfficer.image}
+                      alt={currentOfficer.name}
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = currentOfficer.fallbackImage;
+                      }}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                  </div>
+                  <div className="flex-1 text-center sm:text-left space-y-1">
+                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                      <span className="px-2.5 py-0.5 rounded-full bg-gradient-to-r from-red-600 to-orange-600 text-white text-[10px] font-black uppercase tracking-wider inline-block shadow-sm">
+                        {currentOfficer.role}
+                      </span>
+                      <span className="text-[10px] text-slate-400 font-medium">
+                        {currentOfficer.yearLevel}
+                      </span>
+                    </div>
+                    <h4 className="text-lg font-bold text-white tracking-tight">{currentOfficer.name}</h4>
+                    <p className="text-xs text-slate-400 line-clamp-2">
+                      {currentOfficer.bio}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <button
+                      onClick={() =>
+                        setActiveOfficerIdx((prev) =>
+                          prev === 0 ? featuredOfficers.length - 1 : prev - 1
+                        )
+                      }
+                      className="p-2.5 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-xs text-slate-300 hover:text-white transition cursor-pointer"
+                      aria-label="Previous officer"
+                    >
+                      &larr;
+                    </button>
+                    <button
+                      onClick={() =>
+                        setActiveOfficerIdx((prev) => (prev + 1) % featuredOfficers.length)
+                      }
+                      className="p-2.5 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-xs text-slate-300 hover:text-white transition cursor-pointer"
+                      aria-label="Next officer"
+                    >
+                      &rarr;
+                    </button>
+                  </div>
                 </div>
-                <div className="flex-1 text-center sm:text-left space-y-1">
-                  <span className="px-2.5 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-bold uppercase tracking-wider inline-block">
-                    {currentOfficer.role}
-                  </span>
-                  <h4 className="text-lg font-bold text-white">{currentOfficer.name}</h4>
-                  <p className="text-xs text-slate-400">
-                    Empowering student creators across campus with workshops and exhibitions.
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() =>
-                      setActiveOfficerIdx((prev) =>
-                        prev === 0 ? featuredOfficers.length - 1 : prev - 1
-                      )
-                    }
-                    className="p-2 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-xs text-slate-300 hover:text-white transition cursor-pointer"
-                    aria-label="Previous officer"
+
+                {/* Council Avatars Tray — One-click Officer Switcher */}
+                {featuredOfficers.length > 1 && (
+                  <div
+                    className="flex items-center justify-center sm:justify-start gap-2 overflow-x-auto py-1 pop-up-item"
+                    style={{ transitionDelay: '0.35s' }}
                   >
-                    &larr;
-                  </button>
-                  <button
-                    onClick={() =>
-                      setActiveOfficerIdx((prev) => (prev + 1) % featuredOfficers.length)
-                    }
-                    className="p-2 rounded-xl bg-white/5 hover:bg-white/15 border border-white/10 text-xs text-slate-300 hover:text-white transition cursor-pointer"
-                    aria-label="Next officer"
-                  >
-                    &rarr;
-                  </button>
-                </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 mr-1 hidden sm:inline">
+                      Council:
+                    </span>
+                    {featuredOfficers.map((person, idx) => (
+                      <button
+                        key={person.id || idx}
+                        onClick={() => setActiveOfficerIdx(idx)}
+                        className={`relative rounded-xl overflow-hidden transition-all cursor-pointer ${
+                          activeOfficerIdx === idx
+                            ? 'h-9 w-9 ring-2 ring-red-500 scale-105 shadow-md shadow-red-500/30'
+                            : 'h-8 w-8 opacity-60 hover:opacity-100 hover:scale-105'
+                        }`}
+                        title={`${person.name} (${person.role})`}
+                      >
+                        <img
+                          src={person.image}
+                          alt={person.name}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = person.fallbackImage;
+                          }}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             ) : null}
 
-            {/* Quick Actions */}
-            <div className="pt-2 flex flex-wrap gap-3">
+            {/* Quick Gateway Actions */}
+            <div className="pt-2 flex flex-wrap gap-3 pop-up-item" style={{ transitionDelay: '0.45s' }}>
               <button
                 onClick={() => router.push('/portfolio')}
                 className="px-6 py-3 rounded-full bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold text-xs uppercase tracking-wider hover:from-red-500 hover:to-orange-500 transition-all shadow-lg shadow-red-600/40 cursor-pointer"

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useAuth } from '@/lib/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useBodyScrollLock } from '@/lib/useBodyScrollLock';
 import AdminNotificationBell from './AdminNotificationBell';
 
@@ -20,6 +20,8 @@ export default function Navbar() {
   const logout = auth?.logout ?? (() => {});
   const loading = auth?.loading ?? false;
   const router = useRouter();
+  const pathname = usePathname();
+  const isHome = pathname === '/';
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [container, setContainer] = useState(null);
@@ -62,12 +64,14 @@ export default function Navbar() {
     'flex items-center py-2.5 px-3 rounded-xl text-sm font-bold uppercase tracking-wider text-white/80 hover:text-white hover:bg-white/[0.06] transition-all';
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#110808]/80 backdrop-blur-md text-sm font-extrabold uppercase tracking-wider">
-      <div className="w-full flex items-center justify-between pl-8 pr-12 md:pl-12 md:pr-16 py-5">
+    <nav className={`sticky top-0 z-50 border-b border-white/[0.08] backdrop-blur-xl text-sm font-extrabold uppercase tracking-wider transition-colors duration-300 ${
+      isHome ? 'bg-[#070305]/70' : 'bg-[#110808]/85'
+    }`}>
+      <div className="w-full flex items-center justify-between pl-8 pr-12 md:pl-12 md:pr-16 py-4 md:py-5">
         {/* Logo Brand */}
         <Link
           href="/"
-          className="flex items-center gap-3.5 group transition-transform duration-150 active:scale-95"
+          className="flex items-center gap-3.5 group transition-transform duration-150 active:scale-95 shrink-0"
         >
           <div className="relative flex h-10 w-10 items-center justify-center transition-all duration-200 group-hover:scale-105">
             <img
@@ -85,6 +89,51 @@ export default function Navbar() {
             </span>
           </div>
         </Link>
+
+        {/* Milestone Navigation on Homepage */}
+        {isHome && (
+          <div className="hidden xl:flex items-center gap-3 text-[10px] font-black tracking-[0.2em] uppercase text-white/70 bg-white/[0.03] px-5 py-2 rounded-full border border-white/[0.08] backdrop-blur-md shadow-inner mx-auto">
+            <button
+              onClick={() => {
+                const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="hover:text-red-400 transition-colors cursor-pointer"
+            >
+              Studio
+            </button>
+            <span className="w-1 h-1 rounded-full bg-white/20" />
+            <button
+              onClick={() => {
+                const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+                window.scrollTo({ top: maxScroll * 0.32, behavior: 'smooth' });
+              }}
+              className="hover:text-red-400 transition-colors cursor-pointer"
+            >
+              Craft
+            </button>
+            <span className="w-1 h-1 rounded-full bg-white/20" />
+            <button
+              onClick={() => {
+                const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+                window.scrollTo({ top: maxScroll * 0.58, behavior: 'smooth' });
+              }}
+              className="hover:text-red-400 transition-colors cursor-pointer"
+            >
+              Energy
+            </button>
+            <span className="w-1 h-1 rounded-full bg-white/20" />
+            <button
+              onClick={() => {
+                const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+                window.scrollTo({ top: maxScroll * 0.88, behavior: 'smooth' });
+              }}
+              className="hover:text-red-400 transition-colors cursor-pointer"
+            >
+              Leadership
+            </button>
+          </div>
+        )}
 
         {/* Desktop Navigation Links (Screens ≥ 1024px) */}
         <div className="hidden lg:flex items-center gap-6 md:gap-8 font-bold ml-auto" style={{ color: MUTED }}>
