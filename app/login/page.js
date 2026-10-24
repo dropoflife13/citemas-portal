@@ -54,17 +54,6 @@ export default function LoginPage() {
 
       {/* Left Side: Creative Brand Showcase / Welcome Side */}
       <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-center p-16 xl:p-20 bg-gradient-to-br from-transparent via-[#0d0407]/60 to-[#140509]/90 border-r border-white/[0.06]">
-        {/* Top Brand Logo */}
-        <div className="absolute top-12 left-16 xl:left-20 z-10 flex items-center space-x-3.5 group cursor-pointer">
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-red-600 via-red-500 to-orange-500 flex items-center justify-center font-black text-white text-lg shadow-lg shadow-red-600/30 transition-transform duration-300 group-hover:scale-105">
-            C
-          </div>
-          <div className="flex flex-col">
-            <span className="font-extrabold text-xl tracking-wider text-white">CITEMAS</span>
-            <span className="text-[9px] uppercase tracking-widest text-red-400 font-semibold">Studio Portal</span>
-          </div>
-        </div>
-
         {/* Center Content / Welcome Message */}
         <div className="relative z-10 max-w-lg my-auto">
           <div className="inline-flex items-center space-x-2.5 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-medium mb-8 backdrop-blur-md shadow-inner">
@@ -93,12 +82,6 @@ export default function LoginPage() {
       {/* Right Side: Natural Form Layout */}
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-16 relative bg-gradient-to-bl from-transparent via-[#0b0305]/40 to-[#070305]">
         <div className="w-full max-w-md relative z-10">
-          {/* Mobile Logo Branding */}
-          <div className="flex lg:hidden items-center space-x-3 mb-10">
-            <div className="w-10 h-10 relative flex items-center justify-center"><img src="/logo.png" alt="CITEMAS Logo" className="h-full w-full object-contain filter drop-shadow-[0_4px_12px_rgba(217,41,41,0.5)]" /></div>
-            <span className="font-extrabold text-lg tracking-wider text-white">CITEMAS</span>
-          </div>
-
           <div className="mb-8">
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-red-500">CITEMAS Authentication</span>
             <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight text-white">Welcome Back</h1>
