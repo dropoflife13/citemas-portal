@@ -4,6 +4,7 @@ import '@/models/User';
 import { getUserFromRequest } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
+import { logActivity } from '@/lib/logActivity';
 
 const CAN_MANAGE = ['officer', 'teacher', 'adviser', 'super_admin'];
 
@@ -427,6 +428,16 @@ export async function DELETE(req, { params }) {
     // -------------------------------------------------
 
     await Event.findByIdAndDelete(id);
+
+    await logActivity({
+      req,
+      actor: currentUser,
+      action: 'event.deleted',
+      targetType: 'Event',
+      targetId: id,
+      targetName: event.title,
+      metadata: { location: event.location, date: event.date },
+    });
 
     return NextResponse.json(
       {

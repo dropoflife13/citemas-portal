@@ -89,5 +89,11 @@ const eventSchema = new mongoose.Schema(
   }
 );
 
+// DB-07: Index foreign keys, event dates, and attendee lookups
+eventSchema.index({ date: 1 });
+eventSchema.index({ isPast: 1, date: 1 });
+eventSchema.index({ 'attendees.user': 1 });
+eventSchema.index({ createdBy: 1, createdAt: -1 });
+
 export default mongoose.models.Event ||
   mongoose.model('Event', eventSchema);

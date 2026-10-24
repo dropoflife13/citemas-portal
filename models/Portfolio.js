@@ -42,4 +42,9 @@ const portfolioSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
+// DB-07: Index foreign keys, owner lookups, and specialization queries
+portfolioSchema.index({ owner: 1, createdAt: -1 });
+portfolioSchema.index({ specialization: 1, status: 1 });
+portfolioSchema.index({ status: 1, createdAt: -1 });
+
 export default mongoose.models.Portfolio || mongoose.model('Portfolio', portfolioSchema);

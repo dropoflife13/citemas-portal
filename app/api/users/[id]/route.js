@@ -35,6 +35,15 @@ export async function PATCH(req, { params }) {
     return NextResponse.json({ message: 'Missing user id' }, { status: 400 });
   }
 
+  // Prevent self-role modification (SEC-05, SEC-02)
+  const currentUserId = String(currentUser.id || currentUser._id);
+  if (String(id) === currentUserId) {
+    return NextResponse.json(
+      { message: 'You cannot modify your own role or permissions' },
+      { status: 400 }
+    );
+  }
+
   try {
     const body = await req.json();
     const { role, officerPosition } = body;
@@ -54,6 +63,36 @@ export async function PATCH(req, { params }) {
     }
 
     await connectDB();
+
+    const targetUser = await User.findById(id).select('firstName lastName role officerPosition');
+    if (!targetUser) {
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
+    }
+
+    // Privilege Escalation Prevention (SEC-05, SEC-02)
+    // 1. Only super_admin can modify an existing super_admin
+    if (targetUser.role === 'super_admin' && dbUser.role !== 'super_admin') {
+      return NextResponse.json(
+        { message: 'Only super administrators can modify an administrator account' },
+        { status: 403 }
+      );
+    }
+
+    // 2. Only super_admin can grant super_admin, teacher, or adviser roles
+    if (['super_admin', 'teacher', 'adviser'].includes(role) && dbUser.role !== 'super_admin') {
+      return NextResponse.json(
+        { message: 'Only super administrators can assign admin or staff roles' },
+        { status: 403 }
+      );
+    }
+
+    // 3. Officers cannot modify teachers or advisers
+    if (['teacher', 'adviser'].includes(targetUser.role) && dbUser.role === 'officer') {
+      return NextResponse.json(
+        { message: 'Officers cannot modify staff accounts' },
+        { status: 403 }
+      );
+    }
 
     // Prevent duplicate officer positions for single-holder executive roles (e.g. president, treasurer, secretary, vice_president)
     // Multi-holder positions such as PRO, PIO, and Year Level Representative allow multiple members.
@@ -99,7 +138,7 @@ export async function PATCH(req, { params }) {
       targetType: 'User',
       targetId: id,
       targetName: `${updated.firstName} ${updated.lastName}`,
-      metadata: { newRole: role, officerPosition: updates.officerPosition },
+      metadata: { previousRole: targetUser.role, newRole: role, officerPosition: updates.officerPosition },
     });
 
     return NextResponse.json({ message: 'User role updated', user: updated });

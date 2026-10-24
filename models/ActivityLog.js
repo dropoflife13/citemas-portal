@@ -27,5 +27,16 @@ const ActivityLogSchema = new mongoose.Schema({
   },
 });
 
+// Append-only invariant (DB-01, SEC-02): Disallow UPDATE/DELETE from any application path
+ActivityLogSchema.pre(
+  ['updateOne', 'updateMany', 'findOneAndUpdate', 'deleteOne', 'deleteMany', 'findOneAndDelete'],
+  function () {
+    throw new Error('ActivityLog is strictly append-only. Modification and deletion are prohibited.');
+  }
+);
+
+ActivityLogSchema.index({ action: 1, createdAt: -1 });
+ActivityLogSchema.index({ actor: 1, createdAt: -1 });
+
 export default mongoose.models.ActivityLog ||
   mongoose.model('ActivityLog', ActivityLogSchema);

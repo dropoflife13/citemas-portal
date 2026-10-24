@@ -42,6 +42,14 @@ export async function PATCH(req, { params }) {
     const previousRole = applicant.role || 'user';
     const previousApplicationStatus = applicant.applicationStatus || 'pending';
 
+    // Invariant Enforcement (SEC-05): Approver cannot be the submitter
+    if (String(applicantId) === String(currentUser.id)) {
+      return NextResponse.json(
+        { error: 'Self-approval is prohibited. Applications must be reviewed by another officer or adviser.' },
+        { status: 403 }
+      );
+    }
+
     // Step b: Update Application document status
     application.status = decision;
     application.reviewedBy = currentUser.id;

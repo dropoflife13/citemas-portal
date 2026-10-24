@@ -4,6 +4,7 @@ import User from '@/models/User';
 import { getUserFromRequest } from '@/lib/auth';
 import { getFreshUser } from '@/lib/permissions';
 import { NextResponse } from 'next/server';
+import { logActivity } from '@/lib/logActivity';
 
 const STAFF_ROLES = ['super_admin', 'teacher', 'adviser', 'officer'];
 const CAN_CREATE = ['super_admin', 'teacher', 'adviser', 'officer', 'member', 'alumni'];
@@ -90,6 +91,16 @@ export async function POST(req) {
     });
     await newEntry.save();
 
+    await logActivity({
+      req,
+      actor: currentUser,
+      action: 'portfolio.created',
+      targetType: 'Portfolio',
+      targetId: newEntry._id,
+      targetName: newEntry.title,
+      metadata: { specialization, level, mediaUrl },
+    });
+
     return NextResponse.json(newEntry, { status: 201 });
   } catch (err) {
     return NextResponse.json({ error: err.message }, { status: 400 });
@@ -121,6 +132,16 @@ export async function DELETE(req) {
     if (!deleted) {
       return NextResponse.json({ error: 'Portfolio not found' }, { status: 404 });
     }
+
+    await logActivity({
+      req,
+      actor: currentUser,
+      action: 'portfolio.deleted',
+      targetType: 'Portfolio',
+      targetId: id,
+      targetName: deleted.title,
+      metadata: { owner: deleted.owner, specialization: deleted.specialization },
+    });
 
     return NextResponse.json({ message: 'Portfolio deleted successfully' });
   } catch (err) {
