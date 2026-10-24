@@ -7,7 +7,6 @@ import { useAuth } from '@/lib/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import ScrollSpine from '@/components/ScrollSpine';
-import EditorialNav from '@/components/EditorialNav';
 
 type OfficerRecord = {
   _id: string;
@@ -282,8 +281,7 @@ export default function Home() {
         />
       </div>
 
-      {/* Editorial Index (Left) & Data Spine (Right) */}
-      <EditorialNav />
+      {/* Data Spine Progress Indicator (Right) */}
       <ScrollSpine />
 
       {/* ═══════════════════════════════════════════════════
@@ -387,7 +385,7 @@ export default function Home() {
             >
               <div className="p-1 rounded-2xl bg-black/60 border border-white/20 backdrop-blur-md shadow-2xl">
                 <div className="w-36 lg:w-44 h-24 lg:h-28 rounded-xl overflow-hidden">
-                  <img src="/orgpic.jpg" alt="Guild Sprint" className="w-full h-full object-cover filter contrast-110" />
+                  <img src="/orgpic.jpg" alt="Org Sprint" className="w-full h-full object-cover filter contrast-110" />
                 </div>
               </div>
             </div>
@@ -440,8 +438,8 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Hero Typography & CTAs (z-20) - Elevated with pb-32 mb-24 to eliminate overlap */}
-          <div className="relative z-20 my-auto w-full max-w-2xl lg:max-w-3xl space-y-7 pointer-events-auto pb-32 mb-24">
+          {/* Hero Typography & CTAs (z-20) - Elevated with pb-40 mb-40 to eliminate overlap */}
+          <div className="relative z-20 my-auto w-full max-w-2xl lg:max-w-3xl space-y-7 pointer-events-auto pb-40 mb-40">
             <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 backdrop-blur-md">
               <span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
               <span className="text-[11px] font-mono tracking-widest text-slate-300 uppercase">
@@ -463,7 +461,7 @@ export default function Home() {
                 CANNOT BUY.
               </h1>
               <p className="font-sans text-base sm:text-lg md:text-xl text-slate-300 max-w-xl leading-relaxed font-light">
-                Where vision meets execution. The premier creative and multimedia guild uniting digital visionaries, 3D sculptors, and traditional artisans.
+                Where vision meets execution. The premier creative and multimedia organization uniting digital visionaries, 3D sculptors, and traditional artisans.
               </p>
             </div>
 
@@ -481,7 +479,7 @@ export default function Home() {
                   href="/register"
                   className="inline-flex items-center gap-2 border border-white/20 bg-white/5 hover:bg-white/10 text-white px-6 py-4 rounded-full font-semibold uppercase tracking-widest mt-8 transition-colors cursor-pointer text-xs"
                 >
-                  Join Guild
+                  Join the Org
                 </Link>
               )}
               <div className="flex items-center gap-2 text-xs font-mono text-slate-400 pl-2 mt-8">
@@ -492,7 +490,18 @@ export default function Home() {
           </div>
 
           {/* 6. Fixed Bottom Marquee (z-50) */}
-          <div className="absolute bottom-0 left-0 w-full z-50 h-12 border-t border-white/10 bg-[#090a0b] backdrop-blur-md overflow-hidden flex items-center pointer-events-none">
+          <div
+            className="absolute -bottom-[10px] left-0 w-full z-50 h-12 border-t border-white/10 bg-[#090a0b] overflow-hidden flex items-center pointer-events-none"
+            style={{
+              position: 'absolute',
+              bottom: '-10px',
+              left: 0,
+              width: '100%',
+              zIndex: 50,
+              background: '#090a0b',
+              borderTop: '1px solid rgba(255,255,255,0.1)',
+            }}
+          >
             <div className="flex whitespace-nowrap animate-marquee font-mono text-[11px] font-bold tracking-[0.25em] uppercase text-white/60">
               <span className="mx-6">
                 DIGITAL ARTS • 3D ANIMATION • VIDEOGRAPHY • PHOTOGRAPHY • VOICE ACTING • TRADITIONAL ARTS • DIGITAL ARTS • 3D ANIMATION • VIDEOGRAPHY • PHOTOGRAPHY • VOICE ACTING • TRADITIONAL ARTS • 
@@ -515,7 +524,7 @@ export default function Home() {
           >
             {/* Header Telemetry */}
             <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-slate-400 uppercase">
-              <span>GUILD // 02 [SPECIALIZATIONS]</span>
+              <span>ORG // 02 [SPECIALIZATIONS]</span>
               <span>SIX CREATIVE TRACKS</span>
             </div>
 
@@ -560,7 +569,7 @@ export default function Home() {
 
             <div className="flex items-center justify-between text-xs font-mono text-slate-500 pt-4 border-t border-white/[0.06]">
               <span>DISCIPLINES SYNCHRONIZED</span>
-              <span>PHINMA CITE GUILD</span>
+              <span>PHINMA CITE ORG</span>
             </div>
           </div>
         </section>
@@ -576,7 +585,7 @@ export default function Home() {
           >
             {/* Header Telemetry */}
             <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-slate-400 uppercase">
-              <span>GUILD // 03 [TELEMETRY]</span>
+              <span>ORG // 03 [TELEMETRY]</span>
               <span>CAMPUS IMPACT METRICS</span>
             </div>
 
@@ -597,7 +606,7 @@ export default function Home() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-t border-b border-white/10 divide-y sm:divide-y-0 sm:divide-x divide-white/10 py-6 my-auto">
               {[
                 { value: '50+', label: 'Active Creators', desc: 'Tech & digital visionaries', code: 'CH // 01', status: 'ACTIVE' },
-                { value: '10+', label: 'Guild Exhibits', desc: 'Showcases and sprints', code: 'CH // 02', status: 'SYNCHRONIZED' },
+                { value: '10+', label: 'Org Exhibits', desc: 'Showcases and sprints', code: 'CH // 02', status: 'SYNCHRONIZED' },
                 { value: '50+', label: 'Projects Built', desc: 'Brand and digital media', code: 'CH // 03', status: 'DEPLOYED' },
                 { value: '05+', label: 'Years Legacy', desc: 'Continuous student innovation', code: 'CH // 04', status: 'ESTABLISHED' },
               ].map((stat, i) => (
@@ -634,7 +643,7 @@ export default function Home() {
           <div className="w-full max-w-7xl h-[86vh] rounded-3xl p-8 md:p-14 relative flex flex-col justify-between overflow-hidden border border-white/[0.08] backdrop-blur-2xl bg-[#090a0b]">
             {/* Header Telemetry */}
             <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-slate-400 uppercase">
-              <span>GUILD // 04 [LEADERSHIP]</span>
+              <span>ORG // 04 [LEADERSHIP]</span>
               <span>EXECUTIVE COUNCIL</span>
             </div>
 
@@ -783,7 +792,7 @@ export default function Home() {
                   href="/portfolio"
                   className="px-6 py-3 rounded-full bg-gradient-to-r from-red-600 to-orange-600 text-white font-bold text-xs uppercase tracking-widest hover:brightness-110 shadow-lg shadow-red-600/30 transition-all cursor-pointer"
                 >
-                  View Guild Portfolios &rarr;
+                  View Org Portfolios &rarr;
                 </Link>
                 <Link
                   href="/events"

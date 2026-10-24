@@ -201,7 +201,7 @@ export default function DashboardPage() {
       <div className="flex min-h-screen items-center justify-center bg-[#070305] text-[#FEF2F2]">
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-red-600 border-t-transparent" />
-          <p className="text-xs font-mono uppercase tracking-widest text-slate-400">Verifying Guild Session...</p>
+          <p className="text-xs font-mono uppercase tracking-widest text-slate-400">Verifying Org Session...</p>
         </div>
       </div>
     );
@@ -219,7 +219,7 @@ export default function DashboardPage() {
           <div className="lg:col-span-8 flex flex-col justify-between space-y-8 bg-[#111111]/90 p-8 sm:p-10 border border-white/[0.08] plate-corner relative overflow-hidden">
             {/* Top Bar with Live Ping */}
             <div className="flex items-center justify-between border-b border-white/[0.08] pb-4">
-              <LivePing label="CITEMAS GUILD // ONLINE" color="bg-[#DC2626]" />
+              <LivePing label="CITEMAS ORG // ONLINE" color="bg-[#DC2626]" />
               <span className="text-[10px] font-mono uppercase tracking-widest text-white/40">
                 PORTAL_V2 // ACADEMIC 2026
               </span>
@@ -227,7 +227,7 @@ export default function DashboardPage() {
 
             <div className="space-y-4 my-auto py-4">
               <span className="text-[11px] font-mono uppercase tracking-[0.24em] text-[#02d2e3] block">
-                PHINMA UI CREATIVE GUILD
+                PHINMA UI CREATIVE ORG
               </span>
               <h1 className="font-display font-bold uppercase text-5xl sm:text-6xl md:text-7xl leading-[0.95] tracking-[-0.04em] text-white">
                 YOUR CREATIVE <span className="text-[#DC2626]">HOME BASE</span>.
@@ -273,7 +273,7 @@ export default function DashboardPage() {
             />
             <EditorialStatCard
               value="12+"
-              label="YEARS OF GUILD CRAFT"
+              label="YEARS OF ORG CRAFT"
               code="EST_2014"
             />
           </div>
@@ -314,7 +314,7 @@ export default function DashboardPage() {
               ['2014', 'Founded from the creative roots of PIKYAW', '01'],
               ['CITE', 'Built for student growth in tech and media', '02'],
               ['STUDIO', 'Digital storytelling and traditional arts', '03'],
-              ['GUILD', 'A campus platform to sharpen creative craft', '04'],
+              ['ORG', 'A campus platform to sharpen creative craft', '04'],
             ].map(([title, text, num]) => (
               <BracketPanel
                 key={title}

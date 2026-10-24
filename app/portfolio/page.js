@@ -344,7 +344,7 @@ export default function PortfolioPage() {
             <div className="space-y-6">
               <div className="inline-flex items-center gap-2 rounded-full border border-red-500/25 bg-red-500/10 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-red-300">
                 <span className="inline-block h-2 w-2 rounded-full bg-red-500 animate-pulse" />
-                CITEMAS Creative Guild Gallery
+                CITEMAS Creative Org Gallery
               </div>
 
               <div className="space-y-3">
@@ -452,7 +452,7 @@ export default function PortfolioPage() {
                     <div className="relative z-10 text-center space-y-1 p-4">
                       <Sparkles size={24} className="mx-auto text-amber-500/70 mb-2" />
                       <div className="text-xs font-mono uppercase tracking-widest text-slate-300 font-bold">
-                        GUILD SPOTLIGHT READY
+                        ORG SPOTLIGHT READY
                       </div>
                       <div className="text-[11px] text-slate-500 font-mono">
                         Member creative submissions will be featured here
@@ -463,7 +463,7 @@ export default function PortfolioPage() {
 
                 <div className="mt-4 space-y-1.5">
                   <div className="flex items-center justify-between gap-2">
-                    <h2 className="text-lg font-black text-white truncate">{featureEntry?.title || 'Guild Showcase'}</h2>
+                    <h2 className="text-lg font-black text-white truncate">{featureEntry?.title || 'Org Showcase'}</h2>
                     {featureEntry?.level && (
                       <span className={`rounded-full border px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${LEVEL_COLORS[featureEntry.level] || 'text-slate-400 border-white/10'}`}>
                         {featureEntry.level}
@@ -471,7 +471,7 @@ export default function PortfolioPage() {
                     )}
                   </div>
                   <p className="text-xs leading-relaxed text-slate-400 line-clamp-2">
-                    {featureEntry?.description || 'Fresh creative submissions from guild members will be highlighted here.'}
+                    {featureEntry?.description || 'Fresh creative submissions from org members will be highlighted here.'}
                   </p>
                 </div>
               </div>
@@ -484,7 +484,7 @@ export default function PortfolioPage() {
           <div className="rounded-[28px] border border-white/10 bg-white/[0.02] p-4 shadow-xl backdrop-blur-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
             <div className="flex flex-wrap gap-2">
               {[
-                { id: 'all', label: 'All Guild Works', count: entries.length },
+                { id: 'all', label: 'All Org Works', count: entries.length },
                 { id: 'my_posts', label: 'My Submissions', count: myEntries.length },
                 { id: 'achievements', label: 'Achievements', count: achievements.length },
               ].map((tab) => (
@@ -577,7 +577,7 @@ export default function PortfolioPage() {
               <div className="space-y-1">
                 <h3 className="text-lg font-black text-white">No achievements posted yet</h3>
                 <p className="text-xs text-slate-400 max-w-sm mx-auto">
-                  Showcase awards, certifications, contest wins, and honors across the guild.
+                  Showcase awards, certifications, contest wins, and honors across the org.
                 </p>
               </div>
               {canCreate && (
@@ -831,7 +831,7 @@ export default function PortfolioPage() {
             </div>
             <div>
               <h3 className="font-bold text-white">Delete Portfolio Piece</h3>
-              <p className="text-xs text-slate-400">Are you sure you want to remove this piece from the guild gallery?</p>
+              <p className="text-xs text-slate-400">Are you sure you want to remove this piece from the org gallery?</p>
             </div>
           </div>
 

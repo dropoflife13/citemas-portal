@@ -79,14 +79,14 @@ export default function LoginPage() {
           </h1>
 
           <p className="font-sans text-sm sm:text-base text-slate-400 max-w-md font-light leading-relaxed">
-            Collaborate on multimedia productions, submit creative portfolios, and access the active CITEMAS creative guild directory.
+            Collaborate on multimedia productions, submit creative portfolios, and access the active CITEMAS creative org directory.
           </p>
         </div>
 
         {/* Technical Footer Telemetry */}
         <div className="flex items-center justify-between text-[10px] font-mono tracking-widest text-slate-500 uppercase border-t border-white/10 pt-4">
           <span>PHINMA UNIVERSITY OF ILOILO</span>
-          <span>EST. 2014 // CITE GUILD</span>
+          <span>EST. 2014 // CITE ORG</span>
         </div>
       </div>
 
@@ -180,7 +180,7 @@ export default function LoginPage() {
           <div className="pt-4 border-t border-white/10 text-center text-xs font-mono text-slate-400">
             DON&apos;T HAVE AN ACCOUNT YET?{' '}
             <Link href="/register" className="font-bold text-red-400 hover:text-red-300 underline underline-offset-4 ml-1">
-              JOIN GUILD →
+              JOIN THE ORG →
             </Link>
           </div>
         </div>

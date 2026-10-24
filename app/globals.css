@@ -145,27 +145,32 @@ nav {
   box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.9);
 }
 
-/* Modern, visible scrollbar */
+/* Custom themed scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
 }
-
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: #090a0b;
 }
-
 ::-webkit-scrollbar-thumb {
-  background: rgba(150, 150, 150, 0.35);
-  border-radius: 6px;
+  background: #dc2626;
+  border-radius: 10px;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(180, 180, 180, 0.55);
+  background: #ef4444;
 }
-
-/* Firefox */
+/* For Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(150, 150, 150, 0.35) transparent;
+  scrollbar-color: #dc2626 #090a0b;
+}
+
+/* Autofill Dark Theme Fix */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 30px #090a0b inset !important;
+  -webkit-text-fill-color: white !important;
+  transition: background-color 5000s ease-in-out 0s;
 }

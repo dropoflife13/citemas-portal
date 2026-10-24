@@ -67,11 +67,11 @@ export default function Footer() {
           {/* Col 3: Community */}
           <div className="space-y-3">
             <span className="text-[10px] font-mono tracking-widest uppercase text-slate-500 block">
-              03 // GUILD
+              03 // ORG
             </span>
             <div className="flex flex-col space-y-2 text-xs font-mono uppercase tracking-wider">
               <Link href="/applications" className="text-slate-300 hover:text-white transition-colors">
-                Apply for Guild
+                Apply for Org
               </Link>
               <Link href="/login" className="text-slate-300 hover:text-white transition-colors">
                 Member Sign In
@@ -90,7 +90,7 @@ export default function Footer() {
             <div className="space-y-1.5 text-xs font-mono text-slate-400">
               <p className="text-white">PHINMA University of Iloilo</p>
               <p>College of Information Tech.</p>
-              <p className="text-red-400 pt-1">STATUS: GUILD ACTIVE</p>
+              <p className="text-red-400 pt-1">STATUS: ORG ACTIVE</p>
             </div>
           </div>
         </div>

@@ -289,8 +289,8 @@ export default function ApplicationsPage() {
             </h1>
             <p className="text-xs text-slate-400 mt-0.5">
               {isStaff
-                ? 'Review, verify credentials, and approve student applications for official guild membership.'
-                : 'Manage your creative guild membership application and track verification status.'}
+                ? 'Review, verify credentials, and approve student applications for official org membership.'
+                : 'Manage your creative org membership application and track verification status.'}
             </p>
           </div>
 
@@ -351,7 +351,7 @@ export default function ApplicationsPage() {
             >
               <div className="text-[10px] font-black uppercase tracking-wider text-emerald-400">Approved</div>
               <div className="text-2xl font-black text-emerald-200 mt-1">{approvedCount}</div>
-              <div className="text-[11px] text-slate-500 mt-1">Official guild members</div>
+              <div className="text-[11px] text-slate-500 mt-1">Official org members</div>
             </button>
 
             <button
@@ -373,7 +373,7 @@ export default function ApplicationsPage() {
         {/* Application Form */}
         {(canApply || isRejected) && showForm && (
           <form onSubmit={handleSubmit} className="rounded-[28px] border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.02] p-8 shadow-[0_30px_70px_rgba(0,0,0,0.6)] backdrop-blur-2xl animate-fadeIn">
-            <h2 className="text-xl font-black uppercase tracking-[0.18em] text-white mb-6">New Guild Application</h2>
+            <h2 className="text-xl font-black uppercase tracking-[0.18em] text-white mb-6">New Org Application</h2>
             
             {formError && (
               <div className="mb-6 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
@@ -482,7 +482,7 @@ export default function ApplicationsPage() {
               </span>
               <h2 className="text-xl font-bold text-white">Application Submitted Successfully</h2>
               <p className="text-xs text-amber-100/80 leading-relaxed max-w-xl">
-                Your guild application {appStatusData.application?.specialization ? `for ${SPECIALIZATION_LABELS[appStatusData.application.specialization] || appStatusData.application.specialization}` : ''} has been received and is currently under review by our executive officers and advisers. Once reviewed, your role will update automatically.
+                Your org application {appStatusData.application?.specialization ? `for ${SPECIALIZATION_LABELS[appStatusData.application.specialization] || appStatusData.application.specialization}` : ''} has been received and is currently under review by our executive officers and advisers. Once reviewed, your role will update automatically.
               </p>
               <div className="pt-2">
                 <Link
@@ -530,7 +530,7 @@ export default function ApplicationsPage() {
               <span className="inline-block rounded-full border border-red-500/30 bg-red-500/10 px-3 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] text-red-300">
                 Student Account
               </span>
-              <h2 className="text-2xl font-black text-white">Apply for CITEMAS Guild Membership</h2>
+              <h2 className="text-2xl font-black text-white">Apply for CITEMAS Org Membership</h2>
               <p className="text-xs text-white/70 max-w-md mx-auto leading-relaxed">
                 You are currently registered with a Student account. Choose your creative specialization, submit your motivation statement and portfolio link, and apply to become an official CITEMAS member.
               </p>
@@ -611,7 +611,7 @@ export default function ApplicationsPage() {
                   </div>
                   <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 font-mono">
                     {applications.length === 0
-                      ? 'When students apply for guild membership, their submissions will appear here.'
+                      ? 'When students apply for org membership, their submissions will appear here.'
                       : 'Try resetting filters or modifying your search keyword.'}
                   </p>
                 </div>
