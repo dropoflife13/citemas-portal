@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/AuthContext';
 import { useRouter } from 'next/navigation';
-import { Camera, Edit3, User, CheckCircle2 } from 'lucide-react';
+import { Camera, Edit3, User, CheckCircle2, Image as ImageIcon, Upload, Trash2, ExternalLink } from 'lucide-react';
 
 const ROLE_BADGES = {
   super_admin: { label: 'Super Admin', style: 'border-red-500/50 bg-red-500/15 text-red-600 dark:text-red-300' },
@@ -44,6 +44,127 @@ export default function ProfilePage() {
 
   const avatarInputRef = useRef(null);
   const coverInputRef = useRef(null);
+  const portfolioInputRef = useRef(null);
+  const [uploadingPortfolio, setUploadingPortfolio] = useState(false);
+
+  const handlePortfolioGalleryUpload = async (event) => {
+    const files = Array.from(event?.target?.files || []);
+    if (!files.length || !token) return;
+
+    const validFiles = files.filter((f) => f.type.startsWith('image/'));
+    if (!validFiles.length) {
+      setMessage({ type: 'error', text: 'Please select valid image files.' });
+      return;
+    }
+
+    setUploadingPortfolio(true);
+    setMessage({ type: '', text: '' });
+
+    try {
+      const uploadedUrls = [];
+      for (const file of validFiles) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const uploadRes = await fetch('/api/portfolio/upload', {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${token}` },
+          body: formData,
+        });
+
+        const uploadData = await uploadRes.json();
+        if (!uploadRes.ok) {
+          throw new Error(uploadData.error || 'Portfolio image upload failed.');
+        }
+        if (uploadData.url) {
+          uploadedUrls.push(uploadData.url);
+        }
+      }
+
+      const nextImages = [
+        ...new Set([...(profile?.portfolioImages || []), ...uploadedUrls]),
+      ];
+
+      const patchRes = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ portfolioImages: nextImages }),
+      });
+
+      const patchData = await patchRes.json();
+      if (!patchRes.ok) {
+        throw new Error(patchData.message || patchData.error || 'Failed to save portfolio images to profile.');
+      }
+
+      setProfile((prev) => ({ ...prev, portfolioImages: nextImages }));
+      setMessage({
+        type: 'success',
+        text: `Added ${uploadedUrls.length} portfolio image${uploadedUrls.length > 1 ? 's' : ''} to your profile.`,
+      });
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message || 'Portfolio image upload failed.' });
+    } finally {
+      setUploadingPortfolio(false);
+      if (event?.target) event.target.value = '';
+    }
+  };
+
+  const handleSetFromPortfolio = async (field, imgUrl) => {
+    if (!token || !imgUrl) return;
+    setSaving(true);
+    setMessage({ type: '', text: '' });
+    try {
+      const patchRes = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ [field]: imgUrl }),
+      });
+      const patchData = await patchRes.json();
+      if (!patchRes.ok) {
+        throw new Error(patchData.message || 'Could not update profile photo.');
+      }
+      setProfile((prev) => ({ ...prev, [field]: imgUrl }));
+      updateUser({ [field]: imgUrl });
+      setMessage({
+        type: 'success',
+        text: field === 'avatar' ? 'Portfolio image set as profile avatar!' : 'Portfolio image set as cover banner!',
+      });
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message || 'Could not update profile photo.' });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleRemovePortfolioImage = async (imgUrl) => {
+    if (!token || !imgUrl) return;
+    const nextImages = (profile?.portfolioImages || []).filter((url) => url !== imgUrl);
+    setSaving(true);
+    try {
+      const patchRes = await fetch('/api/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ portfolioImages: nextImages }),
+      });
+      if (patchRes.ok) {
+        setProfile((prev) => ({ ...prev, portfolioImages: nextImages }));
+        setMessage({ type: 'success', text: 'Portfolio image removed from profile.' });
+      }
+    } catch {
+      setMessage({ type: 'error', text: 'Failed to remove image.' });
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const handleImageUpload = async (type, event) => {
     const file = event?.target?.files?.[0];
@@ -385,6 +506,112 @@ export default function ProfilePage() {
           <p className="whitespace-pre-wrap font-sans text-sm sm:text-base font-light leading-relaxed text-slate-700 dark:text-slate-300">
             {profile.bio || 'No bio added yet. Click "Edit Details" to share your creative discipline, tools, and artistic background.'}
           </p>
+        </div>
+
+        {/* Portfolio & Uploaded Works Section (Synced from Applications & Profile) */}
+        <div className="space-y-5 rounded-3xl border border-black/10 dark:border-white/10 bg-[var(--card-bg)]/90 dark:bg-[#090a0b]/90 p-6 shadow-xl backdrop-blur-2xl md:p-8 transition-colors duration-300">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-black/10 dark:border-white/10 pb-4">
+            <div>
+              <h2 className="flex items-center gap-2 text-xs font-mono font-bold uppercase tracking-widest text-red-500">
+                <ImageIcon size={15} />
+                <span>06 // PORTFOLIO &amp; UPLOADED WORKS</span>
+              </h2>
+              <p className="mt-1 text-xs font-mono text-slate-500 dark:text-slate-400">
+                Images uploaded during your Org Application or directly here are showcased on your profile.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => portfolioInputRef.current?.click()}
+                disabled={uploadingPortfolio}
+                className="inline-flex items-center gap-2 rounded-full border border-red-500/40 bg-red-500/10 px-4 py-2 text-[11px] font-mono font-bold uppercase tracking-widest text-red-600 dark:text-red-300 hover:bg-red-500/20 transition-all disabled:opacity-50 cursor-pointer"
+              >
+                <Upload size={13} />
+                <span>{uploadingPortfolio ? 'Uploading...' : '+ Upload Artwork'}</span>
+              </button>
+              <input
+                type="file"
+                ref={portfolioInputRef}
+                accept="image/*"
+                multiple
+                onChange={handlePortfolioGalleryUpload}
+                className="hidden"
+              />
+            </div>
+          </div>
+
+          {(!profile.portfolioImages || profile.portfolioImages.length === 0) ? (
+            <div
+              onClick={() => !uploadingPortfolio && portfolioInputRef.current?.click()}
+              className="group flex flex-col items-center justify-center gap-2.5 rounded-2xl border border-dashed border-black/15 dark:border-white/15 bg-black/[0.02] dark:bg-white/[0.02] px-6 py-10 text-center transition-all hover:border-red-500/50 cursor-pointer"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-red-500/30 bg-red-500/10 text-red-500 group-hover:scale-105 transition-transform">
+                <ImageIcon size={22} />
+              </div>
+              <p className="font-mono text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-200">
+                No portfolio images uploaded yet
+              </p>
+              <p className="max-w-md text-xs text-slate-500 dark:text-slate-400">
+                Upload images when submitting your CITEMAS Org Application or click here to add artwork directly to your creator profile.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+              {profile.portfolioImages.map((imgUrl, idx) => (
+                <div
+                  key={`${imgUrl}-${idx}`}
+                  className="group relative aspect-[4/3] overflow-hidden rounded-2xl border border-black/10 dark:border-white/10 bg-[#070305] shadow-lg"
+                >
+                  <img
+                    src={imgUrl}
+                    alt={`Portfolio work ${idx + 1}`}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-between p-3">
+                    <div className="flex justify-end gap-1.5">
+                      <a
+                        href={imgUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        title="Open full size"
+                        className="flex h-7 w-7 items-center justify-center rounded-full border border-white/20 bg-black/70 text-white/80 hover:text-white hover:border-white/40 transition-colors"
+                      >
+                        <ExternalLink size={12} />
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => handleRemovePortfolioImage(imgUrl)}
+                        title="Remove from profile"
+                        className="flex h-7 w-7 items-center justify-center rounded-full border border-red-500/30 bg-black/70 text-red-400 hover:bg-red-600 hover:text-white transition-colors cursor-pointer"
+                      >
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => handleSetFromPortfolio('avatar', imgUrl)}
+                        className="rounded-lg border border-white/20 bg-black/70 px-2.5 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-white hover:border-red-500 hover:bg-red-600/80 transition-colors cursor-pointer"
+                      >
+                        Use as Avatar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleSetFromPortfolio('coverPhoto', imgUrl)}
+                        className="rounded-lg border border-white/20 bg-black/70 px-2.5 py-1 text-[10px] font-mono font-bold uppercase tracking-wider text-white hover:border-red-500 hover:bg-red-600/80 transition-colors cursor-pointer"
+                      >
+                        Use as Cover
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

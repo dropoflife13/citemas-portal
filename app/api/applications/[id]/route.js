@@ -61,10 +61,16 @@ export async function PATCH(req, { params }) {
     const newApplicationStatus = decision === 'approved' ? 'approved' : 'rejected';
 
     if (applicantId) {
-      await User.findByIdAndUpdate(applicantId, {
-        role: newRole,
-        applicationStatus: newApplicationStatus,
-      });
+      const updateDoc = {
+        $set: {
+          role: newRole,
+          applicationStatus: newApplicationStatus,
+        },
+      };
+      if (decision === 'approved' && Array.isArray(application.portfolioImages) && application.portfolioImages.length > 0) {
+        updateDoc.$addToSet = { portfolioImages: { $each: application.portfolioImages } };
+      }
+      await User.findByIdAndUpdate(applicantId, updateDoc);
     }
 
     // Step d: Call logActivity AFTER User record is updated successfully

@@ -23,7 +23,7 @@ export async function GET(req) {
 
   await connectDB();
   const applications = await Application.find()
-    .populate('applicant', 'firstName lastName email role studentId yearLevel department avatar')
+    .populate('applicant', 'firstName lastName email role studentId yearLevel department avatar portfolioImages')
     .populate('reviewedBy', 'firstName lastName role')
     .sort({ createdAt: -1 });
   return NextResponse.json(applications);
@@ -53,7 +53,7 @@ export async function POST(req) {
       return NextResponse.json({ error: 'You already have a pending membership application under review' }, { status: 409 });
     }
 
-    const { specialization, motivationLetter, portfolioLink } = await req.json();
+    const { specialization, motivationLetter, portfolioLink, portfolioImages } = await req.json();
 
     if (!specialization) {
       return NextResponse.json({ error: 'Specialization is required' }, { status: 400 });
@@ -62,19 +62,34 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Motivation letter is required' }, { status: 400 });
     }
 
+    const cleanedImages = Array.isArray(portfolioImages)
+      ? portfolioImages
+          .filter((url) => typeof url === 'string' && url.trim().length > 0)
+          .map((url) => url.trim())
+      : [];
+
     const newApplication = new Application({
       applicant: currentUser.id,
       specialization,
       motivationLetter: motivationLetter.trim(),
       portfolioLink: portfolioLink?.trim() || '',
+      portfolioImages: cleanedImages,
     });
     await newApplication.save();
 
-    await User.findByIdAndUpdate(currentUser.id, {
-      role: 'applicant',
-      applicationStatus: 'pending',
-      applicationDate: new Date(),
-    });
+    const userUpdate = {
+      $set: {
+        role: 'applicant',
+        applicationStatus: 'pending',
+        applicationDate: new Date(),
+        specialization,
+      },
+    };
+    if (cleanedImages.length > 0) {
+      userUpdate.$addToSet = { portfolioImages: { $each: cleanedImages } };
+    }
+
+    await User.findByIdAndUpdate(currentUser.id, userUpdate);
 
     return NextResponse.json(newApplication, { status: 201 });
   } catch (err) {

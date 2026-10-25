@@ -79,6 +79,7 @@ const userSchema = new mongoose.Schema({
   bio: { type: String },
   avatar: { type: String, default: '' },
   coverPhoto: { type: String, default: '' },
+  portfolioImages: { type: [String], default: [] },
 
   applicationStatus: {
     type: String,

@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
+import Application from '@/models/Application';
+import Portfolio from '@/models/Portfolio';
 import { verifyAuth } from '@/lib/auth';
 import { profilePatchSchema } from '@/lib/validators';
 import { logActivity } from '@/lib/logActivity';
@@ -25,14 +27,38 @@ export async function GET(req) {
       return NextResponse.json({ message: 'User not found in database' }, { status: 404 });
     }
 
-    return NextResponse.json({ user }, { status: 200 });
+    // Merge any portfolio images submitted via Applications or Portfolio entries
+    const [applications, portfolios] = await Promise.all([
+      Application.find({ applicant: userId }).select('portfolioImages').sort({ createdAt: -1 }).lean(),
+      Portfolio.find({ owner: userId }).select('mediaUrl').sort({ createdAt: -1 }).lean(),
+    ]);
+
+    const appImages = applications.flatMap((app) =>
+      Array.isArray(app.portfolioImages) ? app.portfolioImages : []
+    );
+    const portfolioMedia = portfolios
+      .map((item) => item.mediaUrl)
+      .filter((url) => typeof url === 'string' && url.trim().length > 0);
+
+    const existingImages = Array.isArray(user.portfolioImages) ? user.portfolioImages : [];
+    const mergedImages = Array.from(new Set([...existingImages, ...appImages, ...portfolioMedia])).filter(Boolean);
+
+    return NextResponse.json(
+      {
+        user: {
+          ...user,
+          portfolioImages: mergedImages,
+        },
+      },
+      { status: 200 }
+    );
   } catch (error) {
     console.error('CRITICAL /api/profile GET Error:', error);
     return NextResponse.json(
       {
         message: 'Internal Server Error',
         error: error.message,
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
       },
       { status: 500 }
     );
@@ -56,7 +82,10 @@ export async function PATCH(req) {
     const parsed = profilePatchSchema.safeParse(body);
 
     if (!parsed.success) {
-      return NextResponse.json({ message: parsed.error.issues[0]?.message || 'Invalid profile payload' }, { status: 400 });
+      return NextResponse.json(
+        { message: parsed.error.issues[0]?.message || 'Invalid profile payload' },
+        { status: 400 }
+      );
     }
 
     const {
@@ -66,6 +95,7 @@ export async function PATCH(req) {
       bio,
       avatar,
       coverPhoto,
+      portfolioImages,
       yearLevel,
       department,
       specialization,
@@ -78,6 +108,11 @@ export async function PATCH(req) {
     if (bio !== undefined) updates.bio = bio.trim();
     if (avatar !== undefined) updates.avatar = avatar.trim();
     if (coverPhoto !== undefined) updates.coverPhoto = coverPhoto.trim();
+    if (Array.isArray(portfolioImages)) {
+      updates.portfolioImages = portfolioImages
+        .filter((url) => typeof url === 'string' && url.trim().length > 0)
+        .map((url) => url.trim());
+    }
     if (yearLevel !== undefined) updates.yearLevel = yearLevel.trim();
     if (department !== undefined) updates.department = department.trim();
     if (specialization !== undefined) updates.specialization = specialization.trim();
@@ -91,7 +126,9 @@ export async function PATCH(req) {
       userId,
       { $set: updates },
       { new: true, runValidators: true }
-    ).select('-password').lean();
+    )
+      .select('-password')
+      .lean();
 
     if (!updatedUser) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
@@ -153,7 +190,7 @@ export async function PATCH(req) {
     return NextResponse.json(
       {
         message: 'Failed to update profile',
-        error: error.message
+        error: error.message,
       },
       { status: 500 }
     );

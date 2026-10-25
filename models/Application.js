@@ -10,6 +10,7 @@ const applicationSchema = new mongoose.Schema({
   },
   motivationLetter: { type: String, required: true },
   portfolioLink: { type: String },
+  portfolioImages: { type: [String], default: [] },
 
   status: {
     type: String,
