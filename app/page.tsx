@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/AuthContext';
@@ -38,6 +38,15 @@ export default function Home() {
 
   // Mouse Parallax for 3D Centerpiece & Floating Assets
   const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
+
+  // 3D Model Loading State with Smooth Scene Transition
+  const [isModelLoaded, setIsModelLoaded] = useState(false);
+
+  useEffect(() => {
+    // Safety fallback: ensure model is revealed even if iframe onload event is delayed
+    const timer = setTimeout(() => setIsModelLoaded(true), 3500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const handleHeroMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();
@@ -290,7 +299,7 @@ export default function Home() {
           id="hero"
           onMouseMove={handleHeroMouseMove}
           onMouseLeave={handleHeroMouseLeave}
-          className="sticky top-0 min-h-screen h-screen w-full flex flex-col justify-between px-6 sm:px-12 md:px-16 lg:px-24 pt-28 pb-20 sm:pb-24 overflow-hidden relative"
+          className="sticky top-0 min-h-screen h-screen w-full flex flex-col justify-between px-6 sm:px-12 md:px-16 lg:px-24 pt-6 sm:pt-10 pb-16 overflow-hidden relative"
           style={{
             transform: `scale(${1 - cardProgress[0] * 0.08})`,
             filter: `brightness(${1 - cardProgress[0] * 0.45})`,
@@ -415,7 +424,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* 3D Official CITEMAS Logo Centerpiece (z-10) */}
+          {/* 3D Official CITEMAS Logo Centerpiece (z-10) with Suspense & Sleek Loading State */}
           <div
             className="absolute right-[-10%] sm:right-[-5%] top-0 h-full w-full sm:w-[75vw] md:w-[65vw] lg:w-[60vw] min-w-[500px] md:min-w-[620px] lg:min-w-[700px] flex items-center justify-center pointer-events-auto z-10"
             style={{
@@ -423,19 +432,64 @@ export default function Home() {
               transition: 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
             }}
           >
-            <div className="w-full h-full flex items-center justify-center animate-float-model">
-              <iframe
-                src="/citemas-logo-3d.html?embed"
-                title="CITEMAS 3D Logo"
-                className="w-full h-full border-0 pointer-events-auto"
-                style={{ background: 'transparent' }}
-                allow="autoplay"
-              />
-            </div>
+            <Suspense
+              fallback={
+                <div className="w-full h-full flex flex-col items-center justify-center gap-3">
+                  <div className="relative flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-full border border-red-500/40 animate-ping absolute" />
+                    <div className="w-12 h-12 rounded-full border-2 border-red-500/20 border-t-red-500 animate-spin" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_12px_#dc2626]" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
+                    <span className="font-mono text-[10px] tracking-[0.25em] text-red-500 font-extrabold uppercase drop-shadow-[0_0_8px_rgba(220,38,38,0.6)]">
+                      LOADING STUDIO...
+                    </span>
+                  </div>
+                </div>
+              }
+            >
+              <div className="w-full h-full relative flex items-center justify-center">
+                {/* Sleek Custom Loading Indicator (Transitions Out Smoothly) */}
+                <div
+                  className={`absolute inset-0 flex flex-col items-center justify-center gap-3 transition-opacity duration-700 ease-out z-20 pointer-events-none ${
+                    isModelLoaded ? 'opacity-0' : 'opacity-100'
+                  }`}
+                >
+                  <div className="relative flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-full border border-red-500/40 animate-ping absolute" />
+                    <div className="w-12 h-12 rounded-full border-2 border-red-500/20 border-t-red-500 animate-spin" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_12px_#dc2626]" />
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
+                    <span className="font-mono text-[10px] tracking-[0.25em] text-red-500 font-extrabold uppercase drop-shadow-[0_0_8px_rgba(220,38,38,0.6)]">
+                      LOADING STUDIO...
+                    </span>
+                  </div>
+                </div>
+
+                {/* 3D Model with Smooth Scene Fade-In */}
+                <div
+                  className={`w-full h-full flex items-center justify-center animate-float-model transition-opacity duration-700 ease-out ${
+                    isModelLoaded ? 'opacity-100' : 'opacity-0'
+                  }`}
+                >
+                  <iframe
+                    src="/citemas-logo-3d.html?embed"
+                    title="CITEMAS 3D Logo"
+                    className="w-full h-full border-0 pointer-events-auto"
+                    style={{ background: 'transparent' }}
+                    allow="autoplay"
+                    onLoad={() => setIsModelLoaded(true)}
+                  />
+                </div>
+              </div>
+            </Suspense>
           </div>
 
-          {/* Hero Typography & CTAs (z-20) */}
-          <div className="relative z-20 my-auto w-full max-w-2xl lg:max-w-3xl space-y-5 sm:space-y-6 pointer-events-auto pb-20">
+          {/* Hero Typography & CTAs (z-20) - Shifted Upwards so Buttons are Comfortably Visible */}
+          <div className="relative z-20 mt-2 sm:mt-4 mb-auto w-full max-w-2xl lg:max-w-3xl space-y-5 sm:space-y-6 pointer-events-auto pb-14">
             <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 backdrop-blur-md">
               <span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
               <span className="text-[11px] font-mono tracking-widest text-slate-300 uppercase">

@@ -45,7 +45,7 @@ export default function RootLayout({
             <ScrollSpine />
 
             {/* Main Content */}
-            <main className="relative z-10 flex-1 flex flex-col">{children}</main>
+            <main className="relative z-10 flex-1 flex flex-col pt-20">{children}</main>
 
             <ConditionalFooter />
           </ToastProvider>

@@ -102,7 +102,7 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-[calc(100vh-80px)] w-full bg-[#070305] text-slate-100 selection:bg-red-500 selection:text-white grid grid-cols-1 lg:grid-cols-2 relative overflow-hidden pt-20 pb-10">
+    <div className="min-h-[calc(100vh-80px)] w-full bg-[#070305] text-slate-100 selection:bg-red-500 selection:text-white grid grid-cols-1 lg:grid-cols-2 relative overflow-hidden py-4 sm:py-8">
       {/* Ambient Red/Orange Glows */}
       <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-red-600/10 rounded-full blur-[160px] pointer-events-none" />
       <div className="absolute bottom-10 right-10 w-[500px] h-[500px] bg-orange-600/10 rounded-full blur-[160px] pointer-events-none" />
@@ -145,9 +145,9 @@ export default function RegisterPage() {
         </div>
       </div>
 
-      {/* Right Side (Form): Creative Glassmorphic Card */}
+      {/* Right Side (Form): Form sits directly on page background */}
       <div className="relative flex items-center justify-center p-4 sm:p-8 lg:p-10 z-10 w-full">
-        <div className="w-full max-w-xl bg-[#0a0a0a]/60 border border-white/10 backdrop-blur-xl rounded-2xl p-6 sm:p-8 relative shadow-2xl overflow-hidden my-auto">
+        <div className="w-full max-w-xl relative my-auto">
           {/* Subtle Red/Orange Glow behind Header */}
           <div className="absolute -top-12 -left-12 w-48 h-48 bg-gradient-to-br from-red-600/25 via-orange-500/15 to-transparent rounded-full blur-3xl pointer-events-none" />
 
