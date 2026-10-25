@@ -55,6 +55,7 @@ export default function EventsPage() {
   }, [loading, user, token, router]);
   const { showToast } = useToast();
   const [events, setEvents] = useState([]);
+  const [eventsLoading, setEventsLoading] = useState(true);
   const [fetchError, setFetchError] = useState('');
 
   // Active Tab State: 'upcoming' | 'previous'
@@ -111,6 +112,7 @@ export default function EventsPage() {
 
   async function loadEvents() {
     try {
+      setEventsLoading(true);
       const res = await fetch('/api/events', {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -123,6 +125,8 @@ export default function EventsPage() {
       setFetchError('');
     } catch {
       setFetchError('Could not connect to the server');
+    } finally {
+      setEventsLoading(false);
     }
   }
 
@@ -346,7 +350,7 @@ export default function EventsPage() {
     setTimeout(() => setCopiedEmails(false), 2000);
   }
 
-  if (checkingAuth || loading || !user || !token) {
+  if (checkingAuth || loading || eventsLoading || !user || !token) {
     return <CitemasLoader label="Loading events directory..." />;
   }
 

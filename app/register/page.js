@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useToast } from '@/components/Toast';
 import { useAuth } from '@/lib/AuthContext';
+import CitemasLoader from '@/components/CitemasLoader';
 
 const YEAR_LEVELS = ['1st', '2nd', '3rd', '4th', 'Graduate'];
 const SPECIALIZATIONS = [
@@ -51,7 +52,13 @@ export default function RegisterPage() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [pageReady, setPageReady] = useState(false);
   const isStudent = form.accountType === 'student';
+
+  useEffect(() => {
+    const timer = setTimeout(() => setPageReady(true), 280);
+    return () => clearTimeout(timer);
+  }, []);
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -99,6 +106,14 @@ export default function RegisterPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (!pageReady || loading) {
+    return (
+      <CitemasLoader
+        label={loading ? 'Creating studio account...' : 'Loading registration portal...'}
+      />
+    );
   }
 
   return (

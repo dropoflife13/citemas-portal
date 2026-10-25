@@ -19,6 +19,7 @@ export default function DashboardPage() {
   const { user, token, loading: authLoading } = useAuth();
   const router = useRouter();
   const [checkingAuth, setCheckingAuth] = useState(true);
+  const [dashboardLoading, setDashboardLoading] = useState(true);
   const [activeIdx, setActiveIdx] = useState(0);
   const [officerRows, setOfficerRows] = useState([]);
   const [achievements, setAchievements] = useState([]);
@@ -88,9 +89,10 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!token) return;
 
+    setDashboardLoading(true);
     const headers = { Authorization: `Bearer ${token}` };
 
-    fetch('/api/users', { headers })
+    const usersPromise = fetch('/api/users', { headers })
       .then((res) => (res.ok ? res.json() : { users: [] }))
       .then((data) => {
         const count = data.users?.filter((u) => u.role === 'member' || u.role === 'alumni').length || 0;
@@ -98,7 +100,7 @@ export default function DashboardPage() {
       })
       .catch(() => setDashboardStats((prev) => ({ ...prev, members: 0 })));
 
-    fetch('/api/events', { headers })
+    const eventsPromise = fetch('/api/events', { headers })
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
         const eventsList = Array.isArray(data) ? data : [];
@@ -111,7 +113,7 @@ export default function DashboardPage() {
         setDashboardStats((prev) => ({ ...prev, events: 0 }));
       });
 
-    fetch('/api/portfolio', { headers })
+    const portfolioPromise = fetch('/api/portfolio', { headers })
       .then((res) => (res.ok ? res.json() : []))
       .then((data) => {
         const portfoliosList = Array.isArray(data) ? data : [];
@@ -122,6 +124,10 @@ export default function DashboardPage() {
         setLivePortfolios([]);
         setDashboardStats((prev) => ({ ...prev, portfolios: 0 }));
       });
+
+    Promise.allSettled([usersPromise, eventsPromise, portfolioPromise]).finally(() => {
+      setDashboardLoading(false);
+    });
   }, [token]);
 
   const featuredOfficers = officerRows
@@ -197,8 +203,8 @@ export default function DashboardPage() {
     summary: entry.description || '',
   }));
 
-  if (checkingAuth || authLoading || !user || !token) {
-    return <CitemasLoader label="Verifying Org Session..." />;
+  if (checkingAuth || authLoading || dashboardLoading || !user || !token) {
+    return <CitemasLoader label="Loading studio dashboard..." />;
   }
 
   return (
@@ -459,10 +465,8 @@ export default function DashboardPage() {
         </div>
 
         {achievementsLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-64 plate-corner border border-white/[0.06] bg-[#111111] p-6 animate-pulse" />
-            ))}
+          <div className="py-12 flex justify-center">
+            <CitemasLoader label="Loading recent achievements..." fullScreen={false} size="sm" />
           </div>
         ) : achievements.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">

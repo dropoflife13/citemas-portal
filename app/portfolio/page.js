@@ -50,6 +50,7 @@ export default function PortfolioPage() {
   const [checkingAuth, setCheckingAuth] = useState(true);
   const { showToast } = useToast();
   const [entries, setEntries] = useState([]);
+  const [portfolioLoading, setPortfolioLoading] = useState(true);
 
   // Strict Auth Guard: verify token and redirect immediately if unauthenticated
   useEffect(() => {
@@ -137,10 +138,15 @@ export default function PortfolioPage() {
 
   useEffect(() => {
     if (token && canView) {
-      loadEntries();
-      loadAchievements();
+      setPortfolioLoading(true);
+      Promise.allSettled([loadEntries(), loadAchievements()]).finally(() => {
+        setPortfolioLoading(false);
+      });
+    } else if (!loading && user) {
+      const timer = setTimeout(() => setPortfolioLoading(false), 350);
+      return () => clearTimeout(timer);
     }
-  }, [token, canView, loadEntries, loadAchievements]);
+  }, [token, canView, loading, user, loadEntries, loadAchievements]);
 
   // Handle local file preview
   function handleFileChange(e) {
@@ -308,7 +314,7 @@ export default function PortfolioPage() {
 
   const featureEntry = entries[0] || null;
 
-  if (checkingAuth || loading || !user || !token) {
+  if (checkingAuth || loading || portfolioLoading || !user || !token) {
     return <CitemasLoader label="Loading creative portfolio..." />;
   }
 

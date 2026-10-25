@@ -1,19 +1,26 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/AuthContext';
 import { Mail, Lock, Eye, EyeOff, Sparkles } from 'lucide-react';
+import CitemasLoader from '@/components/CitemasLoader';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, loading: authLoading } = useAuth();
 
   const [form, setForm] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [pageReady, setPageReady] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setPageReady(true), 280);
+    return () => clearTimeout(timer);
+  }, []);
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -44,6 +51,14 @@ export default function LoginPage() {
       setError('Could not connect to the server');
       setLoading(false);
     }
+  }
+
+  if (!pageReady || authLoading || loading) {
+    return (
+      <CitemasLoader
+        label={loading ? 'Signing in to CITEMAS Studio...' : 'Loading authentication portal...'}
+      />
+    );
   }
 
   return (

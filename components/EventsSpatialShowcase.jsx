@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Calendar, History, Users, Image as ImageIcon, MapPin, Sparkles } from 'lucide-react';
 import BracketPanel from './BracketPanel';
 import LivePing from './LivePing';
+import CitemasLoader from './CitemasLoader';
 
 const gradients = [
   'radial-gradient(circle at 50% 20%, rgba(220, 38, 38, 0.45) 0%, rgba(127, 29, 29, 0.25) 50%, rgba(10, 4, 4, 0.98) 90%)',
@@ -61,23 +62,10 @@ export default function EventsSpatialShowcase({ token, isHero = true }) {
   const currentGlow = glowColors[gradientIdx];
 
   if (loading) {
-    if (isHero) {
-      return (
-        <div
-          className="mx-auto h-[460px] w-full max-w-xl animate-pulse rounded-[28px] border border-white/[0.08] bg-[#000000]"
-        />
-      );
-    }
     return (
-      <section className="mx-auto max-w-7xl border-t border-white/10 px-6 py-20 sm:px-8">
-        <div className="mb-12 text-center">
-          <p className="text-[10px] font-black uppercase tracking-[0.28em] text-red-300">Archives</p>
-          <h2 className="mt-3 text-3xl font-black tracking-[-0.04em] text-[#F8F2EC] sm:text-4xl">Past Events</h2>
-        </div>
-        <div
-          className="mx-auto h-[460px] w-full max-w-3xl animate-pulse rounded-[28px] border border-white/[0.08] bg-[#000000]"
-        />
-      </section>
+      <div className="mx-auto flex h-[320px] w-full max-w-3xl items-center justify-center rounded-[28px] border border-white/[0.08] bg-[#090a0b]/80">
+        <CitemasLoader label="Loading event archives..." fullScreen={false} size="sm" />
+      </div>
     );
   }
 

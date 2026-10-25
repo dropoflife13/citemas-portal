@@ -78,8 +78,13 @@ export default function UsersDirectoryPage() {
   }, [authLoading, authUser, token, router]);
 
   useEffect(() => {
-    if (!authLoading && authUser && token && canView) {
-      fetchUsers(false);
+    if (!authLoading && authUser && token) {
+      if (canView) {
+        fetchUsers(true);
+      } else {
+        const timer = setTimeout(() => setLoading(false), 350);
+        return () => clearTimeout(timer);
+      }
     }
   }, [authLoading, authUser?.id, authUser?.role, token, canView]);
 
@@ -189,7 +194,7 @@ export default function UsersDirectoryPage() {
 
   const uniqueDepartments = Array.from(new Set(users.map((u) => u.department).filter(Boolean)));
 
-  if (checkingAuth || authLoading || !authUser || !token || (canView && loading && !isRefreshing)) {
+  if (checkingAuth || authLoading || !authUser || !token || (loading && !isRefreshing)) {
     return <CitemasLoader label="Loading member directory..." />;
   }
 

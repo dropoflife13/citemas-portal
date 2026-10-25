@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import CitemasLoader from '@/components/CitemasLoader';
 
 const SCHOOL_EMAIL_PATTERN = /^[^\s@]+@phinmaed\.com$/i;
 
@@ -14,7 +15,13 @@ export default function ForgotPasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [step, setStep] = useState('request');
   const [loading, setLoading] = useState(false);
+  const [pageReady, setPageReady] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
+
+  useEffect(() => {
+    const timer = setTimeout(() => setPageReady(true), 280);
+    return () => clearTimeout(timer);
+  }, []);
 
   async function requestCode(event) {
     event.preventDefault();
@@ -76,6 +83,10 @@ export default function ForgotPasswordPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (!pageReady) {
+    return <CitemasLoader label="Loading account recovery..." />;
   }
 
   return (

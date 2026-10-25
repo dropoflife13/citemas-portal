@@ -31,9 +31,15 @@ function getInitialsAvatar(name: string): string {
 }
 
 export default function Home() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const isLoggedIn = Boolean(user);
   const router = useRouter();
+  const [pageReady, setPageReady] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setPageReady(true), 280);
+    return () => clearTimeout(timer);
+  }, []);
 
   const stackContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -170,6 +176,10 @@ export default function Home() {
     const targetScroll = scrollTop + (index / 3) * totalScrollable;
     window.scrollTo({ top: targetScroll, behavior: 'smooth' });
   };
+
+  if (!pageReady || authLoading) {
+    return <CitemasLoader label="Loading CITEMAS Studio..." />;
+  }
 
   return (
     <div className="relative bg-[var(--background)] text-[var(--foreground)] overflow-x-clip -mt-16 transition-colors duration-300">
