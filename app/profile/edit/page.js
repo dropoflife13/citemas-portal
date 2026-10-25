@@ -1,4 +1,3 @@
-// app/profile/edit/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -6,6 +5,18 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/AuthContext';
 import { ArrowLeft, Save, CheckCircle2, AlertCircle } from 'lucide-react';
+
+const DEPARTMENTS = [
+  'College of Arts & Sciences (CAS)',
+  'College of Accountancy',
+  'College of Allied Health Sciences (CAHS)',
+  'College of Criminal Justice Education (CCJE)',
+  'College of Education (CoEd)',
+  'College of Engineering',
+  'College of Information Technology Education (CITE)',
+  'College of Management (COM)',
+  'College of Maritime Education (COME)',
+];
 
 export default function EditProfilePage() {
   const { user: authUser, token, loading: authLoading, login } = useAuth();
@@ -37,6 +48,7 @@ export default function EditProfilePage() {
     if (authUser && token) {
       fetchEditableProfile();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authUser, authLoading, token, router]);
 
   const fetchEditableProfile = async () => {
@@ -54,7 +66,10 @@ export default function EditProfilePage() {
           firstName: data.user.firstName || '',
           lastName: data.user.lastName || '',
           accountType: data.user.accountType || 'student',
-          identityId: data.user.accountType === 'teacher' || data.user.accountType === 'adviser' ? data.user.staffId || '' : data.user.studentId || '',
+          identityId:
+            data.user.accountType === 'teacher' || data.user.accountType === 'adviser'
+              ? data.user.staffId || ''
+              : data.user.studentId || '',
           yearLevel: data.user.yearLevel || '',
           department: data.user.department || '',
           specialization: data.user.specialization || '',
@@ -97,7 +112,11 @@ export default function EditProfilePage() {
 
       if (res.ok) {
         const updatedUser = data.user || { ...authUser, ...formData };
-        login(token, { ...(authUser || {}), ...updatedUser, id: updatedUser._id || updatedUser.id || authUser?.id });
+        login(token, {
+          ...(authUser || {}),
+          ...updatedUser,
+          id: updatedUser._id || updatedUser.id || authUser?.id,
+        });
         setMessage({ type: 'success', text: 'Profile updated successfully!' });
         setTimeout(() => {
           router.push('/profile');
@@ -115,216 +134,267 @@ export default function EditProfilePage() {
 
   if (authLoading || loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-[#110808] text-[#FDFBF7]">
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[var(--background)] text-[var(--foreground)] transition-colors duration-300">
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-red-600 border-t-transparent" />
-          <p className="text-sm font-medium tracking-wider text-[#FDFBF7]/70">Loading editor...</p>
+          <p className="text-xs font-mono uppercase tracking-widest text-slate-500 dark:text-slate-400">
+            Loading profile editor...
+          </p>
         </div>
       </div>
     );
   }
 
+  const inputClass =
+    'w-full rounded-xl border border-black/15 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.03] px-4 py-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-red-500/80 focus:outline-none focus:ring-1 focus:ring-red-500/50 transition-all font-sans';
+  const selectClass =
+    'w-full cursor-pointer rounded-xl border border-black/15 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.03] px-4 py-3 text-sm text-slate-900 dark:text-white focus:border-red-500/80 focus:outline-none focus:ring-1 focus:ring-red-500/50 transition-all font-sans';
+  const labelClass =
+    'block text-[10px] font-mono font-bold uppercase tracking-widest text-slate-600 dark:text-slate-400 mb-1.5';
+
+  const departmentOptions =
+    formData.department && !DEPARTMENTS.includes(formData.department)
+      ? [formData.department, ...DEPARTMENTS]
+      : DEPARTMENTS;
+
   return (
-    <div className="min-h-screen bg-[#110808] px-4 py-12 text-[#FDFBF7] sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-3xl space-y-8">
-        
+    <div className="min-h-[calc(100vh-4rem)] bg-[var(--background)] px-4 py-10 text-[var(--foreground)] sm:px-6 lg:px-8 relative overflow-hidden transition-colors duration-300 bg-grid-faint">
+      {/* Ambient Studio Glows */}
+      <div className="pointer-events-none absolute top-0 left-1/4 h-[450px] w-[450px] rounded-full bg-red-600/10 blur-[150px]" />
+      <div className="pointer-events-none absolute bottom-0 right-1/4 h-[450px] w-[450px] rounded-full bg-orange-600/10 blur-[150px]" />
+
+      <div className="mx-auto max-w-3xl space-y-6 relative z-10">
         {/* Header / Back Link */}
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-widest px-1">
           <Link
             href="/profile"
-            className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.2em] text-[#FDFBF7]/70 transition-colors hover:text-white"
+            className="inline-flex items-center gap-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white transition-colors"
           >
-            <ArrowLeft size={16} />
-            Back to Profile
+            <ArrowLeft size={14} />
+            <span>RETURN TO DOSSIER</span>
           </Link>
-          <span className="text-[10px] font-black uppercase tracking-[0.25em] text-red-400">
-            Account Configuration
+          <span className="flex items-center gap-2 text-red-500 font-bold">
+            <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-ping" />
+            CONFIG // 02 [EDIT PROFILE]
           </span>
         </div>
 
         {/* Main Form Container */}
-        <div className="rounded-[32px] border border-white/10 bg-gradient-to-b from-white/[0.07] to-white/[0.02] p-8 shadow-[0_30px_60px_rgba(0,0,0,0.6)] backdrop-blur-2xl md:p-10">
-          <div className="mb-8 border-b border-white/10 pb-5">
-            <h1 className="text-3xl font-black tracking-tight text-[#FDFBF7]">Edit Profile Details</h1>
-            <p className="mt-1 text-sm text-[#FDFBF7]/60">
-              Customize your student profile information visible across the CITEMAS directory.
+        <div className="rounded-3xl border border-black/10 dark:border-white/10 bg-[var(--card-bg)]/90 dark:bg-[#090a0b]/90 p-6 sm:p-8 md:p-10 shadow-2xl backdrop-blur-2xl transition-colors duration-300">
+          <div className="mb-7 border-b border-black/10 dark:border-white/10 pb-5">
+            <div className="text-[10px] font-mono font-bold uppercase tracking-widest text-red-500">
+              CREATOR SETTINGS
+            </div>
+            <h1 className="mt-1 font-display text-3xl sm:text-4xl font-black uppercase tracking-tight text-slate-900 dark:text-white">
+              Edit Profile{' '}
+              <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-orange-500 to-slate-900 dark:from-red-500 dark:via-orange-400 dark:to-white lowercase">
+                details.
+              </span>
+            </h1>
+            <p className="mt-1 text-xs font-mono text-slate-600 dark:text-slate-400">
+              Customize your profile information visible across the CITEMAS studio directory.
             </p>
           </div>
 
           {message.text && (
             <div
-              className={`mb-6 flex items-center gap-3 rounded-2xl border px-5 py-4 text-sm font-medium ${
+              className={`mb-6 flex items-center gap-3 rounded-2xl border px-5 py-3.5 text-xs font-mono ${
                 message.type === 'success'
-                  ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-200'
-                  : 'border-red-500/30 bg-red-500/10 text-red-200'
+                  ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-200'
+                  : 'border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-200'
               }`}
             >
-              {message.type === 'success' ? <CheckCircle2 size={18} /> : <AlertCircle size={18} />}
-              {message.text}
+              {message.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+              <span>{message.text}</span>
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div>
-                <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-[#FDFBF7]/60 mb-2">
-                  First Name
-                </label>
+                <label className={labelClass}>First Name</label>
                 <input
                   type="text"
                   name="firstName"
                   value={formData.firstName}
                   onChange={handleChange}
                   required
-                  className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3.5 text-sm text-white placeholder-white/30 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition-all"
+                  className={inputClass}
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-[#FDFBF7]/60 mb-2">
-                  Last Name
-                </label>
+                <label className={labelClass}>Last Name</label>
                 <input
                   type="text"
                   name="lastName"
                   value={formData.lastName}
                   onChange={handleChange}
                   required
-                  className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3.5 text-sm text-white placeholder-white/30 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition-all"
+                  className={inputClass}
                 />
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div>
-                <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-[#FDFBF7]/60 mb-2">
+                <label className={labelClass}>
                   {formData.accountType === 'student' ? 'Student ID' : 'Staff ID'}
                 </label>
                 <input
                   type="text"
                   value={formData.identityId}
                   disabled
-                  className="w-full cursor-not-allowed rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3.5 text-sm text-white/60"
+                  className="w-full cursor-not-allowed rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] px-4 py-3 font-mono text-sm text-slate-500 dark:text-slate-400"
                 />
-                <p className="mt-2 text-[10px] leading-relaxed text-white/40">Your institution-issued ID is protected. Contact an administrator if it needs correction.</p>
+                <p className="mt-1.5 text-[10px] font-mono leading-relaxed text-slate-500">
+                  Institution-issued ID is locked. Contact an admin if it needs correction.
+                </p>
               </div>
 
               <div>
-                <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-[#FDFBF7]/60 mb-2">
-                  Year Level
-                </label>
+                <label className={labelClass}>Year Level</label>
                 <select
                   name="yearLevel"
                   value={formData.yearLevel}
                   onChange={handleChange}
-                  className="w-full rounded-2xl border border-white/10 bg-[#1a0d0d] px-4 py-3.5 text-sm text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition-all"
+                  className={selectClass}
                 >
-                  <option value="">Select Year Level</option>
-                  <option value="1st">1st Year</option>
-                  <option value="2nd">2nd Year</option>
-                  <option value="3rd">3rd Year</option>
-                  <option value="4th">4th Year</option>
+                  <option value="" className="bg-white text-slate-900 dark:bg-[#0a0a0a] dark:text-white">
+                    Select Year Level
+                  </option>
+                  <option value="1st" className="bg-white text-slate-900 dark:bg-[#0a0a0a] dark:text-white">
+                    1st Year
+                  </option>
+                  <option value="2nd" className="bg-white text-slate-900 dark:bg-[#0a0a0a] dark:text-white">
+                    2nd Year
+                  </option>
+                  <option value="3rd" className="bg-white text-slate-900 dark:bg-[#0a0a0a] dark:text-white">
+                    3rd Year
+                  </option>
+                  <option value="4th" className="bg-white text-slate-900 dark:bg-[#0a0a0a] dark:text-white">
+                    4th Year
+                  </option>
+                  <option value="Graduate" className="bg-white text-slate-900 dark:bg-[#0a0a0a] dark:text-white">
+                    Graduate
+                  </option>
                 </select>
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div>
-                <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-[#FDFBF7]/60 mb-2">
-                  Department / Program
-                </label>
-                <input
-                  type="text"
+                <label className={labelClass}>Department / College</label>
+                <select
                   name="department"
                   value={formData.department}
                   onChange={handleChange}
-                  placeholder="e.g. College of Technology Education"
-                  className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3.5 text-sm text-white placeholder-white/30 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition-all"
-                />
+                  className={selectClass}
+                >
+                  <option value="" className="bg-white text-slate-900 dark:bg-[#0a0a0a] dark:text-white">
+                    Select Department
+                  </option>
+                  {departmentOptions.map((dept) => (
+                    <option
+                      key={dept}
+                      value={dept}
+                      className="bg-white text-slate-900 dark:bg-[#0a0a0a] dark:text-white"
+                    >
+                      {dept}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>
-                <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-[#FDFBF7]/60 mb-2">
-                  Specialization
-                </label>
+                <label className={labelClass}>Creative Specialization</label>
                 <select
                   name="specialization"
                   value={formData.specialization}
                   onChange={handleChange}
-                  className="w-full rounded-2xl border border-white/10 bg-[#1a0d0d] px-4 py-3.5 text-sm text-white focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition-all"
+                  className={selectClass}
                 >
-                  <option value="">Select Specialization</option>
-                  <option value="traditional_arts">Traditional Arts</option>
-                  <option value="digital_arts">Digital Arts</option>
-                  <option value="voice_acting">Voice Acting</option>
-                  <option value="animation">Animation</option>
-                  <option value="videography">Videography</option>
-                  <option value="photography">Photography</option>
+                  <option value="" className="bg-white text-slate-900 dark:bg-[#0a0a0a] dark:text-white">
+                    Select Specialization
+                  </option>
+                  <option value="traditional_arts" className="bg-white text-slate-900 dark:bg-[#0a0a0a] dark:text-white">
+                    Traditional Arts
+                  </option>
+                  <option value="digital_arts" className="bg-white text-slate-900 dark:bg-[#0a0a0a] dark:text-white">
+                    Digital Arts
+                  </option>
+                  <option value="voice_acting" className="bg-white text-slate-900 dark:bg-[#0a0a0a] dark:text-white">
+                    Voice Acting
+                  </option>
+                  <option value="animation" className="bg-white text-slate-900 dark:bg-[#0a0a0a] dark:text-white">
+                    Animation
+                  </option>
+                  <option value="videography" className="bg-white text-slate-900 dark:bg-[#0a0a0a] dark:text-white">
+                    Videography
+                  </option>
+                  <option value="photography" className="bg-white text-slate-900 dark:bg-[#0a0a0a] dark:text-white">
+                    Photography
+                  </option>
                 </select>
               </div>
             </div>
 
-            <div>
-              <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-[#FDFBF7]/60 mb-2">
-                Phone Number
-              </label>
-              <input
-                type="text"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                placeholder="+63 900 000 0000"
-                className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3.5 text-sm text-white placeholder-white/30 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition-all"
-              />
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <div>
+                <label className={labelClass}>Phone Number</label>
+                <input
+                  type="text"
+                  name="phone"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  placeholder="+63 900 000 0000"
+                  className={inputClass}
+                />
+              </div>
+
+              <div>
+                <label className={labelClass}>Avatar Image URL (Optional)</label>
+                <input
+                  type="url"
+                  name="avatar"
+                  value={formData.avatar}
+                  onChange={handleChange}
+                  placeholder="https://..."
+                  className={inputClass}
+                />
+              </div>
             </div>
 
             <div>
-              <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-[#FDFBF7]/60 mb-2">
-                Avatar Image URL
-              </label>
-              <input
-                type="url"
-                name="avatar"
-                value={formData.avatar}
-                onChange={handleChange}
-                placeholder="https://images.unsplash.com/..."
-                className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3.5 text-sm text-white placeholder-white/30 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition-all"
-              />
-            </div>
-
-            <div>
-              <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-[#FDFBF7]/60 mb-2">
-                Bio / Overview
-              </label>
+              <label className={labelClass}>Bio &amp; Creative Overview</label>
               <textarea
                 name="bio"
                 rows={4}
                 value={formData.bio}
                 onChange={handleChange}
                 placeholder="Tell the community about your creative passion, software stack, or artistic background..."
-                className="w-full rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3.5 text-sm text-white placeholder-white/30 focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500 transition-all resize-none"
+                className={`${inputClass} resize-none`}
               />
             </div>
 
-            <div className="flex items-center justify-end gap-4 pt-4 border-t border-white/10">
+            <div className="flex items-center justify-end gap-4 pt-4 border-t border-black/10 dark:border-white/10">
               <Link
                 href="/profile"
-                className="px-6 py-3.5 text-xs font-black uppercase tracking-[0.18em] rounded-2xl border border-white/10 hover:bg-white/[0.05] transition-all"
+                className="px-6 py-3 text-xs font-mono font-bold uppercase tracking-widest rounded-full border border-black/15 dark:border-white/15 text-slate-700 dark:text-slate-300 hover:bg-black/5 dark:hover:bg-white/5 transition-all"
               >
                 Cancel
               </Link>
               <button
                 type="submit"
                 disabled={saving}
-                className="inline-flex items-center gap-2 rounded-2xl bg-gradient-to-r from-red-600 to-red-800 px-8 py-3.5 text-xs font-black uppercase tracking-[0.2em] text-[#FDFBF7] shadow-[0_10px_25px_rgba(220,38,38,0.4)] transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50"
+                className="inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-red-600 to-orange-600 px-8 py-3 text-xs font-black uppercase tracking-widest text-white shadow-lg shadow-red-600/25 transition-all hover:brightness-110 active:scale-95 disabled:opacity-50 cursor-pointer"
               >
-                <Save size={16} />
-                {saving ? 'Saving...' : 'Save Changes'}
+                <Save size={15} />
+                <span>{saving ? 'Saving...' : 'Save Changes'}</span>
               </button>
             </div>
           </form>
         </div>
-
       </div>
     </div>
   );
