@@ -7,7 +7,7 @@ import { useAuth } from '@/lib/AuthContext';
 import { useRouter, usePathname } from 'next/navigation';
 import { useBodyScrollLock } from '@/lib/useBodyScrollLock';
 import AdminNotificationBell from './AdminNotificationBell';
-import { LogOut, ArrowRight } from 'lucide-react';
+import { LogOut, ArrowRight, Sun, Moon } from 'lucide-react';
 
 // CITEMAS Palette
 const CITEMAS_RED = '#DC2626';
@@ -25,6 +25,35 @@ export default function Navbar() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [container, setContainer] = useState(null);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [theme, setTheme] = useState('dark');
+
+  // Theme Initializer
+  useEffect(() => {
+    try {
+      const savedTheme = localStorage.getItem('citemas-theme');
+      if (savedTheme === 'light') {
+        setTheme('light');
+        document.documentElement.classList.add('light');
+      } else {
+        setTheme('dark');
+        document.documentElement.classList.remove('light');
+      }
+    } catch {}
+  }, []);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    try {
+      if (nextTheme === 'light') {
+        document.documentElement.classList.add('light');
+        localStorage.setItem('citemas-theme', 'light');
+      } else {
+        document.documentElement.classList.remove('light');
+        localStorage.setItem('citemas-theme', 'dark');
+      }
+    } catch {}
+  };
 
   useBodyScrollLock(isDrawerOpen);
 
@@ -91,13 +120,13 @@ export default function Navbar() {
   return (
     <nav
       id="site-nav"
-      className={`fixed top-0 left-0 right-0 w-full z-50 transition-colors duration-300 px-6 py-3.5 sm:px-8 text-[12px] font-semibold uppercase tracking-widest ${
+      className={`fixed top-0 left-0 right-0 w-full z-50 h-16 max-h-16 py-2 px-6 sm:px-8 text-[12px] font-semibold uppercase tracking-widest flex items-center transition-all duration-300 ${
         isScrolled
-          ? 'bg-black/50 backdrop-blur-md border-b border-white/10'
+          ? 'bg-black/60 backdrop-blur-md border-b border-white/10 shadow-lg'
           : 'bg-transparent border-b border-transparent'
       }`}
     >
-      <div className="mx-auto flex h-11 max-w-7xl items-center justify-between gap-4">
+      <div className="mx-auto flex h-full w-full max-w-7xl items-center justify-between gap-4">
         {/* Left — Brand Logo */}
         <Link
           href="/"
@@ -184,6 +213,20 @@ export default function Navbar() {
                   )}
                 </Link>
 
+                {/* Dark / Light Mode Toggle */}
+                <button
+                  onClick={toggleTheme}
+                  aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                  title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                  className="flex items-center justify-center rounded-full border border-white/10 p-2 text-white/70 hover:border-white/20 hover:bg-white/[0.06] hover:text-white transition-all active:scale-95 cursor-pointer"
+                >
+                  {theme === 'dark' ? (
+                    <Sun className="h-3.5 w-3.5 text-amber-300" />
+                  ) : (
+                    <Moon className="h-3.5 w-3.5 text-blue-300" />
+                  )}
+                </button>
+
                 {/* Logout Button with Tooltip */}
                 <div className="group relative flex items-center">
                   <button
@@ -200,6 +243,20 @@ export default function Navbar() {
               </>
             ) : (
               <>
+                {/* Dark / Light Mode Toggle */}
+                <button
+                  onClick={toggleTheme}
+                  aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                  title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+                  className="flex items-center justify-center rounded-full border border-white/10 p-2 text-white/70 hover:border-white/20 hover:bg-white/[0.06] hover:text-white transition-all active:scale-95 cursor-pointer"
+                >
+                  {theme === 'dark' ? (
+                    <Sun className="h-3.5 w-3.5 text-amber-300" />
+                  ) : (
+                    <Moon className="h-3.5 w-3.5 text-blue-300" />
+                  )}
+                </button>
+
                 {/* Log In Link */}
                 <Link
                   href="/login"
@@ -342,6 +399,18 @@ export default function Navbar() {
                         <AdminNotificationBell />
                       </div>
                     )}
+
+                    {/* Theme Toggle in Mobile Drawer */}
+                    <div className="flex items-center justify-between py-2 px-3 rounded-xl hover:bg-white/[0.04] text-white/80 transition-colors">
+                      <span className="text-sm font-bold uppercase tracking-wider">Theme</span>
+                      <button
+                        onClick={toggleTheme}
+                        className="flex items-center gap-2 rounded-full border border-white/10 px-3 py-1 text-xs font-mono"
+                      >
+                        {theme === 'dark' ? <Sun className="h-3.5 w-3.5 text-amber-300" /> : <Moon className="h-3.5 w-3.5 text-blue-300" />}
+                        <span className="capitalize">{theme}</span>
+                      </button>
+                    </div>
                   </nav>
 
                   {/* Log Out button at bottom */}
@@ -371,6 +440,18 @@ export default function Navbar() {
                     <Link href="/portfolio" onClick={closeDrawer} className={drawerLinkClass}>
                       Portfolio
                     </Link>
+
+                    {/* Theme Toggle in Mobile Drawer */}
+                    <div className="flex items-center justify-between py-2 px-3 rounded-xl hover:bg-white/[0.04] text-white/80 transition-colors">
+                      <span className="text-sm font-bold uppercase tracking-wider">Theme</span>
+                      <button
+                        onClick={toggleTheme}
+                        className="flex items-center gap-2 rounded-full border border-white/10 px-3 py-1 text-xs font-mono"
+                      >
+                        {theme === 'dark' ? <Sun className="h-3.5 w-3.5 text-amber-300" /> : <Moon className="h-3.5 w-3.5 text-blue-300" />}
+                        <span className="capitalize">{theme}</span>
+                      </button>
+                    </div>
                   </nav>
 
                   <div className="mt-auto pt-6 border-t border-white/10 flex flex-col gap-3">

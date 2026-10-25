@@ -299,7 +299,7 @@ export default function Home() {
           id="hero"
           onMouseMove={handleHeroMouseMove}
           onMouseLeave={handleHeroMouseLeave}
-          className="sticky top-0 min-h-screen h-screen w-full flex flex-col justify-between px-6 sm:px-12 md:px-16 lg:px-24 pt-6 sm:pt-10 pb-16 overflow-hidden relative"
+          className="sticky top-0 min-h-screen h-screen w-full flex flex-col justify-between px-6 sm:px-12 md:px-16 lg:px-24 pt-1 sm:pt-2 pb-14 overflow-hidden relative"
           style={{
             transform: `scale(${1 - cardProgress[0] * 0.08})`,
             filter: `brightness(${1 - cardProgress[0] * 0.45})`,
@@ -488,8 +488,8 @@ export default function Home() {
             </Suspense>
           </div>
 
-          {/* Hero Typography & CTAs (z-20) - Shifted Upwards so Buttons are Comfortably Visible */}
-          <div className="relative z-20 mt-2 sm:mt-4 mb-auto w-full max-w-2xl lg:max-w-3xl space-y-5 sm:space-y-6 pointer-events-auto pb-14">
+          {/* Hero Typography & CTAs (z-20) - Shifted Upwards with Clean Spacing */}
+          <div className="relative z-20 mt-1 mb-auto w-full max-w-2xl lg:max-w-3xl space-y-4 pointer-events-auto">
             <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 backdrop-blur-md">
               <span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
               <span className="text-[11px] font-mono tracking-widest text-slate-300 uppercase">
@@ -497,7 +497,7 @@ export default function Home() {
               </span>
             </div>
 
-            <div className="space-y-4">
+            <div>
               <h1 className="font-display text-5xl sm:text-7xl md:text-8xl lg:text-[7.5rem] font-black uppercase tracking-tighter leading-[0.88] text-white drop-shadow-2xl">
                 CITEMAS
                 <br />
@@ -507,13 +507,10 @@ export default function Home() {
                 </span>
                 .
               </h1>
-              <p className="font-sans text-base sm:text-lg md:text-xl text-slate-300 max-w-xl leading-relaxed font-light">
-                Where vision meets execution. The premier creative and multimedia organization uniting digital visionaries, 3D sculptors, and traditional artisans.
-              </p>
             </div>
 
-            {/* Action Buttons: Primary Pill CTA */}
-            <div className="flex flex-row flex-wrap items-center gap-4 mt-8">
+            {/* Action Buttons: Positioned directly below headline */}
+            <div className="flex flex-row flex-wrap items-center gap-4 mt-6 sm:mt-8">
               <Link
                 href="/dashboard"
                 className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest transition-colors cursor-pointer shadow-xl shadow-red-600/30"

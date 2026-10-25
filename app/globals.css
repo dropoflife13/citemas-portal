@@ -22,6 +22,30 @@
   --foreground: var(--polar-white);
 }
 
+html.light {
+  --apple-carbon: #f8f9fa;
+  --absolute-black: #ffffff;
+  --polar-white: #0f172a;
+  --apple-steel: #64748b;
+  --paper: #f8f9fa;
+  --paper-deep: #f1f5f9;
+  --paper-glass: rgba(255, 255, 255, 0.85);
+  --ink: #0f172a;
+  --ink-muted: rgba(15, 23, 42, 0.72);
+  --ink-faint: rgba(15, 23, 42, 0.46);
+  --line: rgba(0, 0, 0, 0.08);
+  --background: #f8f9fa;
+  --foreground: #0f172a;
+}
+
+html.light body {
+  background:
+    radial-gradient(circle at top left, rgba(217, 41, 41, 0.1), transparent 24%),
+    radial-gradient(circle at top right, rgba(245, 178, 74, 0.05), transparent 22%),
+    #f8f9fa;
+  color: #0f172a;
+}
+
 @theme inline {
   --color-apple-carbon: var(--apple-carbon);
   --color-absolute-black: var(--absolute-black);
