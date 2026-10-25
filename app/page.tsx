@@ -479,8 +479,8 @@ export default function Home() {
             </Suspense>
           </div>
 
-          {/* Hero Typography & CTAs (z-20) - Shifted Upwards with Clean Spacing */}
-          <div className="relative z-20 mt-1 mb-auto w-full max-w-2xl lg:max-w-3xl space-y-4 pointer-events-auto">
+          {/* Hero Typography & CTAs (z-20) - Shifted with Clean Breathing Room Below Navbar */}
+          <div className="relative z-20 mt-3 sm:mt-3.5 mb-auto w-full max-w-2xl lg:max-w-3xl space-y-4 pointer-events-auto">
             <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-black/[0.04] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 backdrop-blur-md">
               <span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
               <span className="text-[11px] font-mono tracking-widest text-slate-700 dark:text-slate-300 uppercase">
