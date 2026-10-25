@@ -788,7 +788,7 @@ export default function ApplicationsPage() {
                         {/* Left: Applicant Name (Massive 3xl-5xl font) + Academic Sub-info */}
                         <div className="space-y-1.5 flex-1 min-w-0">
                           <div className="flex items-center gap-3">
-                            <h3 className="font-display text-3xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight text-white hover:text-red-400 transition-colors">
+                            <h3 className="font-display text-3xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight text-slate-900 dark:text-white hover:text-red-500 dark:hover:text-red-400 transition-colors">
                               {applicant.firstName || 'Unknown'} {applicant.lastName || ''}
                             </h3>
                             {isSelf && (
@@ -843,7 +843,7 @@ export default function ApplicationsPage() {
                               href={app.portfolioLink}
                               target="_blank"
                               rel="noreferrer"
-                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 bg-white/[0.04] text-xs font-mono text-slate-300 hover:text-white hover:border-white/20 transition-all"
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.04] text-xs font-mono text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:border-black/20 dark:hover:border-white/20 transition-all"
                             >
                               <span>Portfolio</span>
                               <ExternalLink size={11} />
@@ -859,57 +859,62 @@ export default function ApplicationsPage() {
                           <button
                             type="button"
                             onClick={() => setExpandedId(isExpanded ? null : app._id)}
-                            className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/[0.04] px-3.5 py-1.5 text-[10px] font-mono uppercase tracking-wider text-white/80 hover:text-white hover:bg-white/10 transition-all cursor-pointer"
+                            className="inline-flex items-center gap-1.5 rounded-full border border-black/10 dark:border-white/15 bg-black/[0.03] dark:bg-white/[0.04] px-3.5 py-1.5 text-[10px] font-mono uppercase tracking-wider text-slate-700 dark:text-white/80 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.06] dark:hover:bg-white/10 transition-all cursor-pointer"
                           >
                             <Eye size={12} />
                             <span>{isExpanded ? 'Close' : 'Inspect'}</span>
                           </button>
 
-                          {/* Accept Button */}
-                          <button
-                            type="button"
-                            onClick={() => handleApplicationDecision(app._id, 'approved')}
-                            disabled={actioningId === app._id || status === 'approved' || isSelf}
-                            title={isSelf ? 'Self-approval is prohibited' : 'Accept application'}
-                            className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-wider text-white hover:bg-emerald-500 shadow-md shadow-emerald-950/50 transition-all disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
-                          >
-                            <CheckCircle2 size={12} />
-                            <span>{actioningId === app._id ? '...' : 'Accept'}</span>
-                          </button>
+                          {/* Decision Action Buttons (Hidden when already approved to prevent accidental revocation or user error) */}
+                          {status !== 'approved' && (
+                            <>
+                              {/* Accept Button */}
+                              <button
+                                type="button"
+                                onClick={() => handleApplicationDecision(app._id, 'approved')}
+                                disabled={actioningId === app._id || isSelf}
+                                title={isSelf ? 'Self-approval is prohibited' : 'Accept application'}
+                                className="inline-flex items-center gap-1.5 rounded-full bg-emerald-600 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-wider text-white hover:bg-emerald-500 shadow-md shadow-emerald-950/50 transition-all disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
+                              >
+                                <CheckCircle2 size={12} />
+                                <span>{actioningId === app._id ? '...' : 'Accept'}</span>
+                              </button>
 
-                          {/* Deny Button with inline confirm */}
-                          {isDenying ? (
-                            <div className="inline-flex items-center gap-1 animate-fadeIn">
-                              <button
-                                type="button"
-                                onClick={() => handleApplicationDecision(app._id, 'rejected')}
-                                disabled={actioningId === app._id}
-                                className="rounded-full bg-red-700 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-white hover:bg-red-600 cursor-pointer"
-                              >
-                                Confirm
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => setConfirmDenyId(null)}
-                                className="rounded-full border border-white/10 px-2.5 py-1 text-[9px] font-medium text-slate-400 hover:text-white cursor-pointer"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setConfirmDenyId(app._id);
-                                setConfirmDeleteId(null);
-                              }}
-                              disabled={actioningId === app._id || status === 'rejected' || isSelf}
-                              title={isSelf ? 'Self-review is prohibited' : 'Deny application'}
-                              className="inline-flex items-center gap-1.5 rounded-full bg-red-600/80 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-wider text-white hover:bg-red-500 transition-all disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
-                            >
-                              <XCircle size={12} />
-                              <span>Deny</span>
-                            </button>
+                              {/* Deny Button with inline confirm */}
+                              {isDenying ? (
+                                <div className="inline-flex items-center gap-1 animate-fadeIn">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleApplicationDecision(app._id, 'rejected')}
+                                    disabled={actioningId === app._id}
+                                    className="rounded-full bg-red-700 px-2.5 py-1 text-[9px] font-black uppercase tracking-wider text-white hover:bg-red-600 cursor-pointer"
+                                  >
+                                    Confirm
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => setConfirmDenyId(null)}
+                                    className="rounded-full border border-black/10 dark:border-white/10 px-2.5 py-1 text-[9px] font-medium text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer"
+                                  >
+                                    Cancel
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setConfirmDenyId(app._id);
+                                    setConfirmDeleteId(null);
+                                  }}
+                                  disabled={actioningId === app._id || status === 'rejected' || isSelf}
+                                  title={isSelf ? 'Self-review is prohibited' : 'Deny application'}
+                                  className="inline-flex items-center gap-1.5 rounded-full bg-red-600/80 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-wider text-white hover:bg-red-500 transition-all disabled:cursor-not-allowed disabled:opacity-40 cursor-pointer"
+                                >
+                                  <XCircle size={12} />
+                                  <span>Deny</span>
+                                </button>
+                              )}
+                            </>
                           )}
 
                           {/* Delete Button with inline confirm */}
@@ -950,7 +955,7 @@ export default function ApplicationsPage() {
 
                       {/* Expandable Details Drawer */}
                       {isExpanded && (
-                        <div className="mt-4 rounded-3xl border border-white/10 bg-[#090a0b]/90 p-6 backdrop-blur-2xl grid gap-6 md:grid-cols-[1.3fr_0.7fr]">
+                        <div className="mt-4 rounded-3xl border border-black/10 dark:border-white/10 bg-[var(--card-bg)]/90 dark:bg-[#090a0b]/90 p-6 backdrop-blur-2xl grid gap-6 md:grid-cols-[1.3fr_0.7fr]">
                           <div className="space-y-3">
                             <div className="flex items-center gap-2 text-[10px] font-mono uppercase tracking-widest text-red-400">
                               <FileText size={14} />
