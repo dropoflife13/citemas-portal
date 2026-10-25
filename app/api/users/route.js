@@ -42,12 +42,13 @@ export async function GET(req) {
   try {
     await connectDB();
 
-    const VISIBLE_ROLES = ['member', 'alumni', 'officer'];
-    const users = await User.find({
-      role: { $in: VISIBLE_ROLES },
-    })
+    const isManager = ['super_admin', 'teacher', 'adviser', 'officer'].includes(fresh.role);
+    const query = isManager ? {} : { role: { $in: ['member', 'alumni', 'officer', 'teacher', 'adviser'] } };
+    const users = await User.find(query)
+
+
       .select(
-        'firstName lastName email role officerPosition yearLevel department specialization bio graduationYear avatar'
+        'firstName lastName email role officerPosition yearLevel department specialization bio graduationYear avatar staffId accountType staffApprovalStatus studentId createdAt'
       )
       .sort({ role: 1, lastName: 1 })
       .lean(); // return plain objects (easier to serialize)

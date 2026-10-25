@@ -21,7 +21,7 @@ export default function CitemasLoader({
         />
 
         {/* Secondary Subtle Counter-Ring */}
-        <div className="absolute inset-1.5 rounded-full border border-white/10 dark:border-white/10" />
+        <div className="absolute inset-1.5 rounded-full border border-black/10 dark:border-white/10" />
 
         {/* Official CITEMAS Logo Mark */}
         <img
@@ -36,7 +36,7 @@ export default function CitemasLoader({
       {label && (
         <div className="flex items-center gap-2">
           <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-ping" />
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-slate-600 dark:text-red-200/80">
+          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-slate-700 dark:text-red-200/90">
             {label}
           </p>
         </div>

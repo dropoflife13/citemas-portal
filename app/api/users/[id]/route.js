@@ -46,7 +46,13 @@ export async function PATCH(req, { params }) {
 
   try {
     const body = await req.json();
-    const { role, officerPosition } = body;
+    let { role, officerPosition, decision } = body;
+
+    if (decision === 'approved' && !role) {
+      role = 'adviser';
+    } else if (decision === 'rejected') {
+      role = 'user';
+    }
 
     if (!role || !VALID_ROLES.includes(role)) {
       return NextResponse.json(
@@ -119,8 +125,10 @@ export async function PATCH(req, { params }) {
     };
 
     // Staff roles get approved automatically
-    if (role === 'teacher' || role === 'adviser') {
+    if (role === 'teacher' || role === 'adviser' || decision === 'approved') {
       updates.staffApprovalStatus = 'approved';
+    } else if (decision === 'rejected') {
+      updates.staffApprovalStatus = 'rejected';
     }
 
     const updated = await User.findByIdAndUpdate(id, { $set: updates }, { new: true, runValidators: true })

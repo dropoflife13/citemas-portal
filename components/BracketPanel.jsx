@@ -7,10 +7,10 @@
 export default function BracketPanel({
   children,
   className = '',
-  cornerColor = 'text-white/40',
+  cornerColor = 'text-black/30 dark:text-white/40',
   cornerSize = 10,
-  bg = 'bg-[#111111]',
-  border = 'border-white/[0.08]',
+  bg = 'bg-[var(--card-bg)] dark:bg-[#111111]',
+  border = 'border-black/10 dark:border-white/[0.08]',
 }) {
   return (
     <div

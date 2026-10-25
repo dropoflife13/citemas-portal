@@ -222,7 +222,7 @@ export default function RegisterPage() {
             {/* Row 2: Email & Password */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-5">
               <Field label="Email Address">
-                <input name="email" type="email" placeholder={isStudent ? 'name@phinmaed.com' : 'name@school.edu'} value={form.email} onChange={handleChange} required className={inputClass} />
+                <input name="email" type="email" placeholder={isStudent ? 'name.phinmaed.com' : 'name@school.edu'} value={form.email} onChange={handleChange} required className={inputClass} />
               </Field>
 
               <Field label="Password">
@@ -240,7 +240,7 @@ export default function RegisterPage() {
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-5">
                   <Field label="Student ID">
-                    <input name="studentId" placeholder="e.g. 04-1617-05471 or 04-2122-033338" value={form.studentId} onChange={handleChange} pattern="04-[0-9]{4}-[0-9]{4,7}" title="Use your PHINMA Student ID format (e.g., 04-1617-05471 or 04-2122-033338)" required className={inputClass} />
+                    <input name="studentId" placeholder="e.g. 04-1617-05471 or 04-2122-033338" value={form.studentId} onChange={handleChange} pattern="[0-9]{2}-[0-9]{4}-[0-9]{4,7}" title="Use your student ID format (e.g. 04-1617-05471 or 04-2122-033338)" required className={inputClass} />
                   </Field>
 
                   <Field label="Year Level">

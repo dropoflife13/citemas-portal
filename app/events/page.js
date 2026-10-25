@@ -381,18 +381,18 @@ export default function EventsPage() {
   });
 
   return (
-    <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 text-slate-100 space-y-8 font-sans selection:bg-red-500 selection:text-white">
+    <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 text-[var(--foreground)] space-y-8 font-sans selection:bg-red-500 selection:text-white transition-colors duration-300">
       {/* Header Container */}
-      <div className="relative z-10 rounded-3xl border border-white/10 bg-[#090a0b]/80 p-8 shadow-2xl backdrop-blur-2xl flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+      <div className="relative z-10 rounded-3xl border border-black/10 dark:border-white/10 bg-[var(--card-bg)]/90 dark:bg-[#090a0b]/80 p-8 shadow-2xl backdrop-blur-2xl flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
         <div className="space-y-2">
-          <div className="inline-flex items-center gap-2 px-3 py-1 text-[10px] font-mono uppercase tracking-widest rounded-full border border-red-500/30 bg-red-500/10 text-red-300">
+          <div className="inline-flex items-center gap-2 px-3 py-1 text-[10px] font-mono uppercase tracking-widest rounded-full border border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-300">
             <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
             DIRECTORY // EXHIBITS
           </div>
-          <h1 className="font-display text-3xl sm:text-5xl font-black uppercase tracking-tight text-white">
+          <h1 className="font-display text-3xl sm:text-5xl font-black uppercase tracking-tight text-slate-900 dark:text-white">
             <span className="text-red-500">CITEMAS</span> Events &amp; Exhibits.
           </h1>
-          <p className="text-xs sm:text-sm font-light max-w-2xl leading-relaxed text-slate-400">
+          <p className="text-xs sm:text-sm font-light max-w-2xl leading-relaxed text-slate-600 dark:text-slate-400">
             Explore multimedia workshops, tech showcases, gallery exhibits, and past event history across the creative campus community.
           </p>
         </div>
@@ -400,13 +400,13 @@ export default function EventsPage() {
         {/* Action Controls & Tab Switcher */}
         <div className="flex flex-wrap items-center gap-3">
           {/* Tab Navigation Switches */}
-          <div className="flex p-1 rounded-2xl border border-white/15 bg-black/60 backdrop-blur-xl">
+          <div className="flex p-1 rounded-2xl border border-black/10 dark:border-white/15 bg-black/[0.04] dark:bg-black/60 backdrop-blur-xl">
             <button
               onClick={() => setActiveTab('upcoming')}
               className={`px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer ${
                 activeTab === 'upcoming'
                   ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-lg shadow-red-950/60 font-bold'
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
               }`}
             >
               Upcoming ({upcomingEvents.length})
@@ -416,7 +416,7 @@ export default function EventsPage() {
               className={`px-4 py-2 rounded-xl text-xs font-mono uppercase tracking-wider transition-all cursor-pointer ${
                 activeTab === 'previous'
                   ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-lg shadow-red-950/60 font-bold'
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
               }`}
             >
               Past Archives ({previousEvents.length})
@@ -437,19 +437,19 @@ export default function EventsPage() {
       </div>
 
       {/* Search Toolbar */}
-      <div className="relative z-10 flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.02] p-3 backdrop-blur-xl">
-        <Search size={16} className="text-slate-500 ml-2 shrink-0" />
+      <div className="relative z-10 flex items-center gap-3 rounded-2xl border border-black/10 dark:border-white/10 bg-[var(--card-bg)] p-3 backdrop-blur-xl">
+        <Search size={16} className="text-slate-400 dark:text-slate-500 ml-2 shrink-0" />
         <input
           type="text"
           placeholder={`Search ${activeTab === 'upcoming' ? 'upcoming events' : 'past archives'} by title, venue, or keyword...`}
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full bg-transparent text-xs text-white placeholder:text-slate-500 outline-none"
+          className="w-full bg-transparent text-xs text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none"
         />
         {searchQuery && (
           <button
             onClick={() => setSearchQuery('')}
-            className="text-xs text-slate-400 hover:text-white px-2 cursor-pointer"
+            className="text-xs text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white px-2 cursor-pointer"
           >
             Clear
           </button>
@@ -457,7 +457,7 @@ export default function EventsPage() {
       </div>
 
       {fetchError && (
-        <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-xs font-semibold text-red-300">
+        <div className="rounded-2xl border border-red-500/30 bg-red-500/10 p-4 text-xs font-semibold text-red-600 dark:text-red-300">
           {fetchError}
         </div>
       )}
@@ -466,12 +466,12 @@ export default function EventsPage() {
       <div className="relative z-10 space-y-4">
         {displayedEvents.length === 0 && (
           <div className="py-20 text-center">
-            <div className="max-w-md mx-auto p-12 rounded-3xl border border-white/10 bg-[#090a0b]/80 backdrop-blur-2xl">
+            <div className="max-w-md mx-auto p-12 rounded-3xl border border-black/10 dark:border-white/10 bg-[var(--card-bg)]/80 dark:bg-[#090a0b]/80 backdrop-blur-2xl">
               <Calendar size={36} className="mx-auto mb-3 text-red-500/60" />
-              <p className="font-display text-2xl font-black uppercase tracking-tight text-white">
+              <p className="font-display text-2xl font-black uppercase tracking-tight text-slate-900 dark:text-white">
                 {searchQuery ? 'No matching events found' : `No ${activeTab} events available`}
               </p>
-              <p className="text-xs text-slate-400 mt-2 font-mono">
+              <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 font-mono">
                 {searchQuery
                   ? 'Try modifying your search keywords.'
                   : 'Check back later or switch tabs to view past event archives.'}
@@ -508,39 +508,39 @@ export default function EventsPage() {
           return (
             <div
               key={event._id}
-              className="rounded-3xl border border-white/10 bg-[#090a0b]/90 hover:border-red-500/40 p-6 sm:p-8 backdrop-blur-2xl transition-all duration-300 group"
+              className="rounded-3xl border border-black/10 dark:border-white/10 bg-[var(--card-bg)]/90 dark:bg-[#090a0b]/90 hover:border-red-500/40 p-6 sm:p-8 backdrop-blur-2xl transition-all duration-300 group"
             >
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
                 {/* Left Column: Date & Time in Technical Mono + Index */}
-                <div className="lg:col-span-3 space-y-3 border-b lg:border-b-0 lg:border-r border-white/10 pb-4 lg:pb-0 lg:pr-6">
+                <div className="lg:col-span-3 space-y-3 border-b lg:border-b-0 lg:border-r border-black/10 dark:border-white/10 pb-4 lg:pb-0 lg:pr-6">
                   <div className="flex items-center justify-between text-[10px] font-mono tracking-widest uppercase text-slate-500">
                     <span>EVENT // {String(idx + 1).padStart(2, '0')}</span>
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-white/5 border border-white/10 text-slate-300">
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10 text-slate-700 dark:text-slate-300">
                       {activeTab === 'upcoming' ? 'SCHEDULED' : 'ARCHIVED'}
                     </span>
                   </div>
 
                   <div className="space-y-1">
-                    <div className="font-mono text-2xl sm:text-3xl font-black text-white group-hover:text-red-400 transition-colors">
+                    <div className="font-mono text-2xl sm:text-3xl font-black text-slate-900 dark:text-white group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors">
                       {dateStr}
                     </div>
                     {timeStr && (
-                      <div className="flex items-center gap-1.5 text-xs font-mono text-slate-400">
-                        <Clock size={12} className="text-red-400 shrink-0" />
+                      <div className="flex items-center gap-1.5 text-xs font-mono text-slate-600 dark:text-slate-400">
+                        <Clock size={12} className="text-red-500 dark:text-red-400 shrink-0" />
                         <span>{timeStr}</span>
                       </div>
                     )}
                   </div>
 
                   {event.location && (
-                    <div className="flex items-center gap-1.5 text-xs text-slate-400 font-mono truncate">
-                      <MapPin size={12} className="text-amber-400 shrink-0" />
+                    <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-400 font-mono truncate">
+                      <MapPin size={12} className="text-amber-500 dark:text-amber-400 shrink-0" />
                       <span className="truncate">{event.location}</span>
                     </div>
                   )}
 
                   {/* Thumbnail / Carousel trigger */}
-                  <div className="relative h-24 w-full rounded-2xl overflow-hidden border border-white/10 bg-black/60 mt-2">
+                  <div className="relative h-24 w-full rounded-2xl overflow-hidden border border-black/10 dark:border-white/10 bg-black/5 dark:bg-black/60 mt-2">
                     {event.image ? (
                       <img src={event.image} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     ) : (
@@ -554,17 +554,17 @@ export default function EventsPage() {
                 {/* Center Column: Massive Title + Description + Highlights + Capacity */}
                 <div className="lg:col-span-6 space-y-3">
                   <div className="space-y-1">
-                    <h3 className="font-display text-2xl sm:text-3xl lg:text-4xl font-black uppercase tracking-tight text-white group-hover:text-red-300 transition-colors">
+                    <h3 className="font-display text-2xl sm:text-3xl lg:text-4xl font-black uppercase tracking-tight text-slate-900 dark:text-white group-hover:text-red-500 dark:group-hover:text-red-300 transition-colors">
                       {event.title}
                     </h3>
-                    <p className="font-sans text-xs sm:text-sm text-slate-300 leading-relaxed font-light line-clamp-2">
+                    <p className="font-sans text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-light line-clamp-2">
                       {event.description}
                     </p>
                   </div>
 
                   {event.highlights && (
-                    <div className="p-3 rounded-xl bg-white/[0.02] border border-white/10 text-xs text-amber-200/90 leading-relaxed font-light">
-                      <span className="font-bold text-amber-400 uppercase text-[9px] font-mono block mb-0.5">
+                    <div className="p-3 rounded-xl bg-black/[0.02] dark:bg-white/[0.02] border border-black/10 dark:border-white/10 text-xs text-amber-800 dark:text-amber-200/90 leading-relaxed font-light">
+                      <span className="font-bold text-amber-600 dark:text-amber-400 uppercase text-[9px] font-mono block mb-0.5">
                         HIGHLIGHTS
                       </span>
                       {event.highlights}

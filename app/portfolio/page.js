@@ -331,7 +331,7 @@ export default function PortfolioPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#070305] px-4 py-10 text-slate-100 sm:px-6 lg:px-8 selection:bg-red-500 selection:text-white font-sans relative overflow-hidden">
+    <div className="min-h-screen bg-[var(--background)] px-4 py-10 text-[var(--foreground)] sm:px-6 lg:px-8 selection:bg-red-500 selection:text-white font-sans relative overflow-hidden transition-colors duration-300">
       {/* Background Ambient Glows */}
       <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-red-900/10 rounded-full blur-[140px] pointer-events-none" />
       <div className="absolute bottom-10 left-10 w-[400px] h-[400px] bg-orange-950/15 rounded-full blur-[140px] pointer-events-none" />
@@ -339,22 +339,22 @@ export default function PortfolioPage() {
       <div className="mx-auto max-w-7xl space-y-8 relative z-10">
         
         {/* Hero Spotlight Section */}
-        <section className="relative overflow-hidden rounded-[32px] border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] p-6 sm:p-10 shadow-[0_30px_80px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
+        <section className="relative overflow-hidden rounded-[32px] border border-black/10 dark:border-white/10 bg-gradient-to-br from-[var(--card-bg)]/90 to-[var(--card-bg)]/40 dark:from-white/[0.08] dark:to-white/[0.02] p-6 sm:p-10 shadow-[0_30px_80px_rgba(0,0,0,0.15)] dark:shadow-[0_30px_80px_rgba(0,0,0,0.55)] backdrop-blur-2xl">
           <div className="relative grid items-center gap-8 lg:grid-cols-[1.2fr_0.8fr]">
             <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 rounded-full border border-red-500/25 bg-red-500/10 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-red-300">
+              <div className="inline-flex items-center gap-2 rounded-full border border-red-500/25 bg-red-500/10 px-3.5 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-red-600 dark:text-red-300">
                 <span className="inline-block h-2 w-2 rounded-full bg-red-500 animate-pulse" />
                 CITEMAS Creative Org Gallery
               </div>
 
               <div className="space-y-3">
-                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black leading-tight tracking-tight text-white">
+                <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black leading-tight tracking-tight text-slate-900 dark:text-white">
                   Where craft becomes <br />
                   <span className="bg-gradient-to-r from-red-500 via-rose-400 to-orange-400 bg-clip-text text-transparent">
                     extraordinary.
                   </span>
                 </h1>
-                <p className="max-w-xl text-xs sm:text-sm leading-relaxed text-slate-400 font-light">
+                <p className="max-w-xl text-xs sm:text-sm leading-relaxed text-slate-600 dark:text-slate-400 font-light">
                   Showcase your creative works, discover peer portfolios across 6 multimedia tracks, and build an enduring creative presence.
                 </p>
               </div>
@@ -374,7 +374,7 @@ export default function PortfolioPage() {
                     <button
                       type="button"
                       onClick={() => setIsAchievementModalOpen(true)}
-                      className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-6 py-3.5 text-xs font-black uppercase tracking-widest text-amber-300 transition-all duration-200 hover:bg-amber-500/20 hover:scale-105 active:scale-95 cursor-pointer"
+                      className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-amber-500/10 px-6 py-3.5 text-xs font-black uppercase tracking-widest text-amber-700 dark:text-amber-300 transition-all duration-200 hover:bg-amber-500/20 hover:scale-105 active:scale-95 cursor-pointer"
                     >
                       <Award size={15} />
                       <span>Post Achievement</span>
@@ -385,36 +385,36 @@ export default function PortfolioPage() {
 
               {/* Counters */}
               <div className="grid grid-cols-3 gap-3 pt-2">
-                <div className="rounded-2xl border border-white/10 bg-black/40 p-3.5">
-                  <div className="text-2xl font-black text-amber-400">{entries.length}</div>
-                  <div className="mt-1 text-[10px] font-black uppercase tracking-wider text-slate-400">Student Works</div>
+                <div className="rounded-2xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-black/40 p-3.5">
+                  <div className="text-2xl font-black text-amber-500 dark:text-amber-400">{entries.length}</div>
+                  <div className="mt-1 text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Student Works</div>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-black/40 p-3.5">
-                  <div className="text-2xl font-black text-red-400">{achievements.length}</div>
-                  <div className="mt-1 text-[10px] font-black uppercase tracking-wider text-slate-400">Achievements</div>
+                <div className="rounded-2xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-black/40 p-3.5">
+                  <div className="text-2xl font-black text-red-500 dark:text-red-400">{achievements.length}</div>
+                  <div className="mt-1 text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Achievements</div>
                 </div>
-                <div className="rounded-2xl border border-white/10 bg-black/40 p-3.5">
-                  <div className="text-2xl font-black text-rose-400">6</div>
-                  <div className="mt-1 text-[10px] font-black uppercase tracking-wider text-slate-400">Tracks</div>
+                <div className="rounded-2xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-black/40 p-3.5">
+                  <div className="text-2xl font-black text-rose-500 dark:text-rose-400">6</div>
+                  <div className="mt-1 text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Tracks</div>
                 </div>
               </div>
             </div>
 
             {/* Spotlight Card */}
             <div className="relative">
-              <div className="rounded-3xl border border-white/10 bg-black/50 p-4 shadow-2xl backdrop-blur-xl">
-                <div className="mb-3 flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-400">
-                  <span className="flex items-center gap-1.5 text-amber-400">
+              <div className="rounded-3xl border border-black/10 dark:border-white/10 bg-[var(--card-bg)]/90 dark:bg-black/50 p-4 shadow-2xl backdrop-blur-xl">
+                <div className="mb-3 flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                  <span className="flex items-center gap-1.5 text-amber-500 dark:text-amber-400">
                     <Sparkles size={12} />
                     Spotlight
                   </span>
-                  <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-amber-300">Live</span>
+                  <span className="rounded-full border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-amber-700 dark:text-amber-300">Live</span>
                 </div>
 
                 {featureEntry?.mediaUrl ? (
                   <div
                     onClick={() => setSelectedEntry(featureEntry)}
-                    className="overflow-hidden rounded-2xl border border-white/10 bg-black/60 cursor-pointer group relative"
+                    className="overflow-hidden rounded-2xl border border-black/10 dark:border-white/10 bg-black/60 cursor-pointer group relative"
                   >
                     {featureEntry.mediaUrl.match(/\.(jpeg|jpg|gif|png|webp)$/i) ? (
                       <img
@@ -434,10 +434,10 @@ export default function PortfolioPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="relative flex h-64 items-center justify-center rounded-2xl border border-white/10 bg-[#090a0b]/90 overflow-hidden shadow-inner">
+                  <div className="relative flex h-64 items-center justify-center rounded-2xl border border-black/10 dark:border-white/10 bg-[var(--card-bg)] dark:bg-[#090a0b]/90 overflow-hidden shadow-inner">
                     {/* Massive Faded Typographic Watermark (SHOWCASE) */}
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-                      <span className="font-display text-7xl sm:text-8xl lg:text-[150px] font-black uppercase tracking-tighter text-white/[0.05]">
+                      <span className="font-display text-7xl sm:text-8xl lg:text-[150px] font-black uppercase tracking-tighter text-black/[0.04] dark:text-white/[0.05]">
                         SHOWCASE
                       </span>
                     </div>
@@ -445,16 +445,16 @@ export default function PortfolioPage() {
                     <div
                       className="absolute inset-0 pointer-events-none opacity-25"
                       style={{
-                        backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.12) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.12) 1px, transparent 1px)`,
+                        backgroundImage: `linear-gradient(to right, rgba(0,0,0,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.08) 1px, transparent 1px)`,
                         backgroundSize: '32px 32px',
                       }}
                     />
                     <div className="relative z-10 text-center space-y-1 p-4">
                       <Sparkles size={24} className="mx-auto text-amber-500/70 mb-2" />
-                      <div className="text-xs font-mono uppercase tracking-widest text-slate-300 font-bold">
+                      <div className="text-xs font-mono uppercase tracking-widest text-slate-700 dark:text-slate-300 font-bold">
                         ORG SPOTLIGHT READY
                       </div>
-                      <div className="text-[11px] text-slate-500 font-mono">
+                      <div className="text-[11px] text-slate-500 dark:text-slate-500 font-mono">
                         Member creative submissions will be featured here
                       </div>
                     </div>
@@ -463,14 +463,14 @@ export default function PortfolioPage() {
 
                 <div className="mt-4 space-y-1.5">
                   <div className="flex items-center justify-between gap-2">
-                    <h2 className="text-lg font-black text-white truncate">{featureEntry?.title || 'Org Showcase'}</h2>
+                    <h2 className="text-lg font-black text-slate-900 dark:text-white truncate">{featureEntry?.title || 'Org Showcase'}</h2>
                     {featureEntry?.level && (
-                      <span className={`rounded-full border px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${LEVEL_COLORS[featureEntry.level] || 'text-slate-400 border-white/10'}`}>
+                      <span className={`rounded-full border px-2 py-0.5 text-[9px] font-black uppercase tracking-wider ${LEVEL_COLORS[featureEntry.level] || 'text-slate-500 border-black/10 dark:border-white/10'}`}>
                         {featureEntry.level}
                       </span>
                     )}
                   </div>
-                  <p className="text-xs leading-relaxed text-slate-400 line-clamp-2">
+                  <p className="text-xs leading-relaxed text-slate-600 dark:text-slate-400 line-clamp-2">
                     {featureEntry?.description || 'Fresh creative submissions from org members will be highlighted here.'}
                   </p>
                 </div>
@@ -481,7 +481,7 @@ export default function PortfolioPage() {
 
         {/* Tab Navigation & Search Toolbar */}
         <section className="space-y-4">
-          <div className="rounded-[28px] border border-white/10 bg-white/[0.02] p-4 shadow-xl backdrop-blur-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+          <div className="rounded-[28px] border border-black/10 dark:border-white/10 bg-[var(--card-bg)] p-4 shadow-xl backdrop-blur-2xl flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
             <div className="flex flex-wrap gap-2">
               {[
                 { id: 'all', label: 'All Org Works', count: entries.length },
@@ -494,7 +494,7 @@ export default function PortfolioPage() {
                   className={`rounded-2xl px-5 py-2.5 text-xs font-black uppercase tracking-wider transition-all cursor-pointer ${
                     activeTab === tab.id
                       ? 'bg-gradient-to-r from-red-600 to-orange-600 text-white shadow-lg shadow-red-950/60'
-                      : 'border border-white/10 bg-black/30 text-slate-400 hover:text-white'
+                      : 'border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-black/30 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                   }`}
                 >
                   {tab.label} <span className="ml-1 opacity-70">({tab.count})</span>
@@ -505,15 +505,15 @@ export default function PortfolioPage() {
             {/* Specialization Filter Dropdown */}
             {activeTab !== 'achievements' && (
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1.5 px-3 py-2 rounded-2xl border border-white/10 bg-black/40 text-xs">
-                  <Filter size={14} className="text-slate-400" />
+                <div className="flex items-center gap-1.5 px-3 py-2 rounded-2xl border border-black/10 dark:border-white/10 bg-white dark:bg-black/40 text-xs">
+                  <Filter size={14} className="text-slate-500" />
                   <select
                     value={specializationFilter}
                     onChange={(e) => setSpecializationFilter(e.target.value)}
-                    className="bg-transparent text-xs text-slate-200 outline-none cursor-pointer"
+                    className="bg-transparent text-xs text-slate-800 dark:text-slate-200 outline-none cursor-pointer"
                   >
                     {Object.entries(SPECIALIZATION_LABELS).map(([val, label]) => (
-                      <option key={val} value={val} className="bg-[#120505] text-white">
+                      <option key={val} value={val} className="bg-white text-slate-900 dark:bg-[#120505] dark:text-white">
                         {label}
                       </option>
                     ))}
@@ -525,8 +525,8 @@ export default function PortfolioPage() {
 
           {/* Search bar */}
           {activeTab !== 'achievements' && (
-            <div className="relative flex items-center rounded-2xl border border-white/10 bg-white/[0.02] p-3 backdrop-blur-xl">
-              <Search size={16} className="text-slate-500 ml-2 shrink-0" />
+            <div className="relative flex items-center rounded-2xl border border-black/10 dark:border-white/10 bg-[var(--card-bg)] p-3 backdrop-blur-xl">
+              <Search size={16} className="text-slate-400 dark:text-slate-500 ml-2 shrink-0" />
               <input
                 type="text"
                 placeholder="Search works by title, artist, or keywords..."
@@ -600,7 +600,7 @@ export default function PortfolioPage() {
               return (
                 <article
                   key={entry._id}
-                  className="group relative overflow-hidden rounded-2xl border border-white/10 bg-[#090a0b]/90 hover:border-red-500/50 transition-all duration-500 flex flex-col justify-between"
+                  className="group relative overflow-hidden rounded-2xl border border-black/10 dark:border-white/10 bg-[var(--card-bg)]/90 dark:bg-[#090a0b]/90 hover:border-red-500/50 transition-all duration-500 flex flex-col justify-between"
                 >
                   {/* Full Bleed Image Edge-to-Edge */}
                   <div
@@ -649,25 +649,25 @@ export default function PortfolioPage() {
                   </div>
 
                   {/* Metadata Row Below Image with 1px border */}
-                  <div className="p-5 border-t border-white/10 space-y-3 bg-[#090a0b]/95">
+                  <div className="p-5 border-t border-black/10 dark:border-white/10 space-y-3 bg-[var(--card-bg)]/95 dark:bg-[#090a0b]/95">
                     <div className="flex items-start justify-between gap-2">
-                      <h3 className="font-display text-xl sm:text-2xl font-black uppercase tracking-tight text-white group-hover:text-red-400 transition-colors line-clamp-1">
+                      <h3 className="font-display text-xl sm:text-2xl font-black uppercase tracking-tight text-slate-900 dark:text-white group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors line-clamp-1">
                         {entry.title}
                       </h3>
                       {entry.level && (
-                        <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[9px] font-mono uppercase ${LEVEL_COLORS[entry.level] || 'text-slate-400 border-white/10'}`}>
+                        <span className={`shrink-0 rounded-full border px-2 py-0.5 text-[9px] font-mono uppercase ${LEVEL_COLORS[entry.level] || 'text-slate-500 border-black/10 dark:border-white/10'}`}>
                           {entry.level}
                         </span>
                       )}
                     </div>
 
                     {entry.description && (
-                      <p className="line-clamp-2 text-xs font-sans text-slate-400 font-light leading-relaxed">
+                      <p className="line-clamp-2 text-xs font-sans text-slate-600 dark:text-slate-400 font-light leading-relaxed">
                         {entry.description}
                       </p>
                     )}
 
-                    <div className="flex items-center justify-between gap-3 pt-3 border-t border-white/10 text-xs font-mono">
+                    <div className="flex items-center justify-between gap-3 pt-3 border-t border-black/10 dark:border-white/10 text-xs font-mono">
                       <span className="text-slate-500 text-[11px] truncate">
                         BY // {(entry.owner?.firstName || entry.applicant?.name || 'Member').toUpperCase()} {entry.owner?.lastName?.toUpperCase() || ''}
                       </span>
@@ -675,7 +675,7 @@ export default function PortfolioPage() {
                         <button
                           type="button"
                           onClick={() => setSelectedEntry(entry)}
-                          className="px-3 py-1 rounded-full border border-white/10 bg-white/[0.04] text-[10px] font-mono uppercase text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
+                          className="px-3 py-1 rounded-full border border-black/10 dark:border-white/10 bg-black/[0.04] dark:bg-white/[0.04] text-[10px] font-mono uppercase text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition cursor-pointer"
                         >
                           View
                         </button>
@@ -683,7 +683,7 @@ export default function PortfolioPage() {
                           <button
                             type="button"
                             onClick={() => setDeletingId(entry._id)}
-                            className="p-1.5 rounded-full border border-red-500/30 bg-red-500/10 text-red-400 hover:bg-red-500/20 transition cursor-pointer"
+                            className="p-1.5 rounded-full border border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20 transition cursor-pointer"
                             title="Delete artwork"
                           >
                             <Trash2 size={12} />

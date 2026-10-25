@@ -99,7 +99,7 @@ export default function AdminActivityPage() {
   if (!isAdmin) return null;
 
   return (
-    <div className="min-h-screen bg-[#110808] px-4 py-12 text-[#FDFBF7] sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[var(--background)] px-4 py-12 text-[var(--foreground)] sm:px-6 lg:px-8 transition-colors duration-300">
       <div className="mx-auto max-w-5xl">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -117,7 +117,7 @@ export default function AdminActivityPage() {
           <button
             onClick={fetchLogs}
             disabled={loading}
-            className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-2 text-xs font-black uppercase tracking-widest text-[#FDFBF7]/80 transition-colors hover:border-red-400/40 hover:text-red-200"
+            className="flex items-center gap-2 rounded-2xl border border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.03] px-4 py-2 text-xs font-black uppercase tracking-widest text-slate-700 dark:text-[#FDFBF7]/80 transition-colors hover:border-red-400/40 hover:text-red-600 dark:hover:text-red-200 cursor-pointer"
           >
             <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
             Refresh
@@ -132,7 +132,7 @@ export default function AdminActivityPage() {
               className={`rounded-full border px-3 py-1.5 font-mono text-[10px] uppercase tracking-widest transition-colors ${
                 filter === f.id
                   ? 'border-red-500/50 bg-red-500/15 text-red-200'
-                  : 'border-white/10 text-[#FDFBF7]/60 hover:border-white/25 hover:text-[#FDFBF7]'
+                  : 'border-black/10 dark:border-white/10 text-slate-600 dark:text-[#FDFBF7]/60 hover:border-black/25 dark:hover:border-white/25 hover:text-slate-900 dark:hover:text-[#FDFBF7]'
               }`}
             >
               {f.label}
@@ -159,17 +159,17 @@ export default function AdminActivityPage() {
             return (
               <div
                 key={log._id}
-                className="flex items-start gap-4 rounded-2xl border border-white/10 bg-white/[0.02] px-5 py-4 transition-colors hover:border-white/20"
+                className="flex items-start gap-4 rounded-2xl border border-black/10 dark:border-white/10 bg-[var(--card-bg)]/80 dark:bg-white/[0.02] px-5 py-4 transition-colors hover:border-black/20 dark:hover:border-white/20"
               >
                 <div
-                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/[0.04] ${meta.color}`}
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.04] dark:bg-white/[0.04] ${meta.color}`}
                 >
                   <Icon size={16} />
                 </div>
 
                 <div className="min-w-0 flex-1">
                   <p className="text-sm">
-                    <span className="font-bold text-[#FDFBF7]">
+                    <span className="font-bold text-slate-900 dark:text-[#FDFBF7]">
                       {log.actorName}
                     </span>{' '}
                     <span className={`${meta.color} font-medium`}>
@@ -178,15 +178,15 @@ export default function AdminActivityPage() {
                     {log.targetName && (
                       <>
                         {' '}
-                        <span className="text-[#FDFBF7]/60">·</span>{' '}
-                        <span className="text-[#FDFBF7]/80">
+                        <span className="text-slate-400 dark:text-[#FDFBF7]/60">·</span>{' '}
+                        <span className="text-slate-600 dark:text-[#FDFBF7]/80">
                           {log.targetName}
                         </span>
                       </>
                     )}
                   </p>
 
-                  <p className="mt-0.5 font-mono text-[10px] uppercase tracking-widest text-[#FDFBF7]/40">
+                  <p className="mt-0.5 font-mono text-[10px] uppercase tracking-widest text-slate-500 dark:text-[#FDFBF7]/40">
                     {log.actorRole} · {when}
                     {log.ip && log.ip !== 'unknown' && ` · ${log.ip}`}
                   </p>

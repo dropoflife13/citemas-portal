@@ -105,7 +105,7 @@ export default function Navbar() {
   }
 
   const drawerLinkClass =
-    'flex items-center py-2.5 px-3 rounded-xl text-sm font-bold uppercase tracking-wider text-white/80 hover:text-white hover:bg-white/[0.06] transition-all';
+    'flex items-center py-2.5 px-3 rounded-xl text-sm font-bold uppercase tracking-wider text-slate-800 dark:text-white/80 hover:text-slate-900 dark:hover:text-white hover:bg-black/[0.05] dark:hover:bg-white/[0.06] transition-all';
 
   const centerLinks = user
     ? [
@@ -285,11 +285,24 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Mobile Hamburger Button */}
-          <div className="flex items-center lg:hidden">
+          {/* Mobile Right Controls: Theme Toggle & Hamburger Button */}
+          <div className="flex items-center gap-2 lg:hidden">
+            <button
+              onClick={toggleTheme}
+              aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+              className="flex items-center justify-center rounded-full border border-black/10 dark:border-white/10 p-2 text-slate-700 dark:text-white/70 hover:border-black/20 dark:hover:border-white/20 hover:bg-black/[0.06] dark:hover:bg-white/[0.06] transition-all active:scale-95 cursor-pointer"
+            >
+              {theme === 'dark' ? (
+                <Sun className="h-3.5 w-3.5 text-amber-300" />
+              ) : (
+                <Moon className="h-3.5 w-3.5 text-blue-600" />
+              )}
+            </button>
+
             <button
               onClick={() => setIsDrawerOpen(true)}
-              className="flex items-center justify-center rounded-xl p-2 text-white/80 hover:bg-white/[0.08] hover:text-white transition-all active:scale-95"
+              className="flex items-center justify-center rounded-xl border border-black/10 dark:border-white/10 p-2 text-slate-800 dark:text-white/80 hover:bg-black/[0.06] dark:hover:bg-white/[0.08] hover:text-slate-900 dark:hover:text-white transition-all active:scale-95"
               aria-label="Open navigation menu"
               aria-expanded={isDrawerOpen}
             >
@@ -324,10 +337,10 @@ export default function Navbar() {
           >
             <div
               onClick={(e) => e.stopPropagation()}
-              className="fixed top-0 right-0 h-full w-[300px] max-w-[85vw] z-[85] bg-[#110808] border-l border-white/10 shadow-2xl flex flex-col p-6 text-white font-sans overflow-y-auto"
+              className="fixed top-0 right-0 h-full w-[300px] max-w-[85vw] z-[85] bg-[var(--background)] dark:bg-[#110808] border-l border-black/10 dark:border-white/10 shadow-2xl flex flex-col p-6 text-slate-900 dark:text-white font-sans overflow-y-auto"
             >
               {/* Drawer Header */}
-              <div className="flex items-center justify-between pb-4 border-b border-white/10 mb-4">
+              <div className="flex items-center justify-between pb-4 border-b border-black/10 dark:border-white/10 mb-4">
                 <div className="flex items-center gap-2.5">
                   <div className="relative flex h-8 w-8 items-center justify-center">
                     <img
@@ -342,7 +355,7 @@ export default function Navbar() {
                 </div>
                 <button
                   onClick={closeDrawer}
-                  className="p-1.5 text-white/60 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                  className="p-1.5 text-slate-500 dark:text-white/60 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 rounded-lg transition-colors"
                   aria-label="Close navigation menu"
                 >
                   ✕
@@ -356,7 +369,7 @@ export default function Navbar() {
                   <Link
                     href="/profile"
                     onClick={closeDrawer}
-                    className="flex items-center gap-3 p-3.5 mb-5 rounded-xl border border-white/10 bg-white/[0.04] hover:bg-white/[0.08] hover:border-white/20 transition-all text-white"
+                    className="flex items-center gap-3 p-3.5 mb-5 rounded-xl border border-black/10 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.04] hover:bg-black/[0.06] dark:hover:bg-white/[0.08] hover:border-black/20 dark:hover:border-white/20 transition-all text-slate-900 dark:text-white"
                   >
                     <span className="text-xl">👤</span>
                     <div className="flex flex-col min-w-0">
