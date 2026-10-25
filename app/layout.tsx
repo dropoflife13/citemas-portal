@@ -29,11 +29,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('citemas-theme');if(t==='light'){document.documentElement.classList.add('light');}}catch(e){}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('citemas-theme');if(t==='light'){document.documentElement.classList.remove('dark');document.documentElement.classList.add('light');}else{document.documentElement.classList.remove('light');document.documentElement.classList.add('dark');}}catch(e){}})();`,
           }}
         />
       </head>
@@ -45,13 +45,13 @@ export default function RootLayout({
           <ToastProvider>
             <Background />
 
-            {/* ArtCraft-style Sticky Header */}
+            {/* Global Fixed Header (Outside Page Wrappers) */}
             <Navbar />
 
             {/* Global Scroll Progress Spine */}
             <ScrollSpine />
 
-            {/* Main Content */}
+            {/* Main Content (pt-20 offsets the fixed navbar) */}
             <main className="relative z-10 flex-1 flex flex-col pt-20">{children}</main>
 
             <ConditionalFooter />

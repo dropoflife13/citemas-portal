@@ -27,16 +27,18 @@ export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [theme, setTheme] = useState('dark');
 
-  // Theme Initializer
+  // Theme Initializer (syncs .dark and .light classes on <html>)
   useEffect(() => {
     try {
       const savedTheme = localStorage.getItem('citemas-theme');
       if (savedTheme === 'light') {
         setTheme('light');
+        document.documentElement.classList.remove('dark');
         document.documentElement.classList.add('light');
       } else {
         setTheme('dark');
         document.documentElement.classList.remove('light');
+        document.documentElement.classList.add('dark');
       }
     } catch {}
   }, []);
@@ -46,10 +48,12 @@ export default function Navbar() {
     setTheme(nextTheme);
     try {
       if (nextTheme === 'light') {
+        document.documentElement.classList.remove('dark');
         document.documentElement.classList.add('light');
         localStorage.setItem('citemas-theme', 'light');
       } else {
         document.documentElement.classList.remove('light');
+        document.documentElement.classList.add('dark');
         localStorage.setItem('citemas-theme', 'dark');
       }
     } catch {}
@@ -120,10 +124,8 @@ export default function Navbar() {
   return (
     <nav
       id="site-nav"
-      className={`fixed top-0 left-0 right-0 w-full z-50 h-16 max-h-16 py-2 px-6 sm:px-8 text-[12px] font-semibold uppercase tracking-widest flex items-center transition-all duration-300 ${
-        isScrolled
-          ? 'bg-black/60 backdrop-blur-md border-b border-white/10 shadow-lg'
-          : 'bg-transparent border-b border-transparent'
+      className={`fixed top-0 left-0 w-full z-50 h-16 max-h-16 py-2 px-6 sm:px-8 text-[12px] font-semibold uppercase tracking-widest flex items-center transition-all duration-300 backdrop-blur-md border-b bg-white/60 border-black/10 text-slate-900 dark:bg-black/60 dark:border-white/10 dark:text-white ${
+        isScrolled ? 'shadow-lg' : ''
       }`}
     >
       <div className="mx-auto flex h-full w-full max-w-7xl items-center justify-between gap-4">
@@ -140,7 +142,7 @@ export default function Navbar() {
             />
           </div>
           <span
-            className="text-base sm:text-lg font-black tracking-[-0.04em] text-white transition-colors duration-200 group-hover:text-red-400"
+            className="text-base sm:text-lg font-black tracking-[-0.04em] text-slate-900 dark:text-white transition-colors duration-200 group-hover:text-red-500 dark:group-hover:text-red-400"
             style={{ fontFamily: 'Fraunces, Georgia, serif' }}
           >
             CITEMAS
@@ -151,9 +153,9 @@ export default function Navbar() {
         <div className="hidden items-center justify-center gap-6 lg:flex xl:gap-8">
           {loading ? (
             <div className="flex animate-pulse items-center gap-6">
-              <div className="h-3 w-14 rounded-full bg-white/10" />
-              <div className="h-3 w-14 rounded-full bg-white/10" />
-              <div className="h-3 w-14 rounded-full bg-white/10" />
+              <div className="h-3 w-14 rounded-full bg-black/10 dark:bg-white/10" />
+              <div className="h-3 w-14 rounded-full bg-black/10 dark:bg-white/10" />
+              <div className="h-3 w-14 rounded-full bg-black/10 dark:bg-white/10" />
             </div>
           ) : (
             centerLinks.map((link) => {
@@ -162,8 +164,10 @@ export default function Navbar() {
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`group relative py-1 text-[11px] font-mono tracking-wider transition-all duration-150 hover:text-white ${
-                    isActive ? 'text-white font-bold' : 'text-white/60'
+                  className={`group relative py-1 text-[11px] font-mono tracking-wider transition-all duration-150 hover:text-slate-900 dark:hover:text-white ${
+                    isActive
+                      ? 'text-slate-900 dark:text-white font-bold'
+                      : 'text-slate-600 dark:text-white/60'
                   }`}
                 >
                   <span className="relative z-10 flex items-center gap-1.5">
@@ -183,14 +187,14 @@ export default function Navbar() {
         <div className="flex items-center gap-3">
           <div className="hidden items-center gap-3 lg:flex">
             {loading ? (
-              <div className="h-8 w-24 animate-pulse rounded-full bg-white/10" />
+              <div className="h-8 w-24 animate-pulse rounded-full bg-black/10 dark:bg-white/10" />
             ) : user ? (
               <>
                 {/* Admin Link — super_admin only */}
                 {user.role === 'super_admin' && (
                   <Link
                     href="/admin"
-                    className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-[11px] font-mono font-bold uppercase tracking-wider text-red-300 hover:border-red-400 hover:bg-red-500/20 transition-all active:scale-95"
+                    className="rounded-full border border-red-500/40 bg-red-500/10 px-3 py-1 text-[11px] font-mono font-bold uppercase tracking-wider text-red-600 dark:text-red-300 hover:border-red-400 hover:bg-red-500/20 transition-all active:scale-95"
                   >
                     Admin
                   </Link>
@@ -202,12 +206,12 @@ export default function Navbar() {
                 {/* User Profile Badge */}
                 <Link
                   href="/profile"
-                  className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-[11px] font-mono text-white/90 hover:border-white/20 hover:bg-white/[0.08] transition-all active:scale-95"
+                  className="flex items-center gap-2 rounded-full border border-black/10 dark:border-white/10 bg-black/[0.04] dark:bg-white/[0.04] px-3.5 py-1.5 text-[11px] font-mono text-slate-900 dark:text-white/90 hover:border-black/20 dark:hover:border-white/20 hover:bg-black/[0.08] dark:hover:bg-white/[0.08] transition-all active:scale-95"
                 >
                   <span className="text-xs">👤</span>
                   <span className="font-bold">{user.firstName}</span>
                   {user.role && (
-                    <span className="text-[9px] uppercase text-white/50">
+                    <span className="text-[9px] uppercase text-slate-500 dark:text-white/50">
                       ({user.role === 'user' ? 'student' : user.role.replace('_', ' ')})
                     </span>
                   )}
@@ -218,12 +222,12 @@ export default function Navbar() {
                   onClick={toggleTheme}
                   aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
                   title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-                  className="flex items-center justify-center rounded-full border border-white/10 p-2 text-white/70 hover:border-white/20 hover:bg-white/[0.06] hover:text-white transition-all active:scale-95 cursor-pointer"
+                  className="flex items-center justify-center rounded-full border border-black/10 dark:border-white/10 p-2 text-slate-700 dark:text-white/70 hover:border-black/20 dark:hover:border-white/20 hover:bg-black/[0.06] dark:hover:bg-white/[0.06] hover:text-slate-900 dark:hover:text-white transition-all active:scale-95 cursor-pointer"
                 >
                   {theme === 'dark' ? (
                     <Sun className="h-3.5 w-3.5 text-amber-300" />
                   ) : (
-                    <Moon className="h-3.5 w-3.5 text-blue-300" />
+                    <Moon className="h-3.5 w-3.5 text-blue-600" />
                   )}
                 </button>
 
@@ -232,7 +236,7 @@ export default function Navbar() {
                   <button
                     onClick={handleLogout}
                     aria-label="Log Out"
-                    className="flex items-center justify-center rounded-full border border-white/10 p-2 text-red-400 hover:border-red-500/50 hover:bg-red-600/20 hover:text-red-300 transition-all active:scale-95 cursor-pointer"
+                    className="flex items-center justify-center rounded-full border border-black/10 dark:border-white/10 p-2 text-red-600 dark:text-red-400 hover:border-red-500/50 hover:bg-red-600/20 hover:text-red-500 dark:hover:text-red-300 transition-all active:scale-95 cursor-pointer"
                   >
                     <LogOut className="h-3.5 w-3.5" />
                   </button>
@@ -248,19 +252,19 @@ export default function Navbar() {
                   onClick={toggleTheme}
                   aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
                   title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-                  className="flex items-center justify-center rounded-full border border-white/10 p-2 text-white/70 hover:border-white/20 hover:bg-white/[0.06] hover:text-white transition-all active:scale-95 cursor-pointer"
+                  className="flex items-center justify-center rounded-full border border-black/10 dark:border-white/10 p-2 text-slate-700 dark:text-white/70 hover:border-black/20 dark:hover:border-white/20 hover:bg-black/[0.06] dark:hover:bg-white/[0.06] hover:text-slate-900 dark:hover:text-white transition-all active:scale-95 cursor-pointer"
                 >
                   {theme === 'dark' ? (
                     <Sun className="h-3.5 w-3.5 text-amber-300" />
                   ) : (
-                    <Moon className="h-3.5 w-3.5 text-blue-300" />
+                    <Moon className="h-3.5 w-3.5 text-blue-600" />
                   )}
                 </button>
 
                 {/* Log In Link */}
                 <Link
                   href="/login"
-                  className="px-3.5 py-1.5 text-xs font-mono uppercase tracking-wider text-white/70 hover:text-white transition-colors"
+                  className="px-3.5 py-1.5 text-xs font-mono uppercase tracking-wider text-slate-700 dark:text-white/70 hover:text-slate-900 dark:hover:text-white transition-colors"
                 >
                   Log In
                 </Link>

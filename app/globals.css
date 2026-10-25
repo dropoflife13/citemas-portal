@@ -1,5 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=Italiana&family=Outfit:wght@300;400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,300..500;1,9..144,400&family=Inter:wght@400;500;600&display=swap');
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
   --apple-carbon: #090a0b;
@@ -98,16 +99,6 @@ body {
 ::selection {
   background: var(--accent);
   color: var(--paper);
-}
-
-main,
-header,
-footer,
-section,
-article,
-nav {
-  position: relative;
-  z-index: 1;
 }
 
 /* ==========================================
