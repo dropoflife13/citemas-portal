@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useBodyScrollLock } from '@/lib/useBodyScrollLock';
 import ModalPortal from '@/components/ModalPortal';
+import CitemasLoader from '@/components/CitemasLoader';
 
 const SPECIALIZATION_LABELS = {
   all: 'All Disciplines',
@@ -308,14 +309,7 @@ export default function PortfolioPage() {
   const featureEntry = entries[0] || null;
 
   if (checkingAuth || loading || !user || !token) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#070305] text-[#FEF2F2]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-red-600 border-t-transparent" />
-          <p className="text-xs font-medium tracking-wider text-red-200/70">Loading creative portfolio...</p>
-        </div>
-      </div>
-    );
+    return <CitemasLoader label="Loading creative portfolio..." />;
   }
 
   if (!user || !canView) {

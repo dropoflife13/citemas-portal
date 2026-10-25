@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
+import CitemasLoader from '@/components/CitemasLoader';
 import {
   Activity,
   User,
@@ -139,11 +140,7 @@ export default function AdminPage() {
     .slice(0, 4);
 
   if (checkingAuth || authLoading || loading || !user || !token) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#110808] text-[#FDFBF7]">
-        <p className="text-[#FDFBF7]/70">Loading admin dashboard...</p>
-      </div>
-    );
+    return <CitemasLoader label="Loading admin dashboard..." />;
   }
 
   if (error) {

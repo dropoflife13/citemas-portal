@@ -8,6 +8,7 @@ import AccessDenied from '@/components/AccessDenied';
 import { Search, Users, Mail, BookOpen, Trash2, AlertTriangle, X } from 'lucide-react';
 import { useBodyScrollLock } from '@/lib/useBodyScrollLock';
 import ModalPortal from '@/components/ModalPortal';
+import CitemasLoader from '@/components/CitemasLoader';
 
 export default function UsersDirectoryPage() {
   const { user: authUser, token, loading: authLoading } = useAuth();
@@ -189,14 +190,7 @@ export default function UsersDirectoryPage() {
   const uniqueDepartments = Array.from(new Set(users.map((u) => u.department).filter(Boolean)));
 
   if (checkingAuth || authLoading || !authUser || !token || (canView && loading && !isRefreshing)) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-transparent text-[#FDFBF7]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-red-600 border-t-transparent" />
-          <p className="text-sm font-medium tracking-wider text-[#FDFBF7]/70">Loading member directory...</p>
-        </div>
-      </div>
-    );
+    return <CitemasLoader label="Loading member directory..." />;
   }
 
   if (!canView) {

@@ -8,6 +8,7 @@ import EventCarousel from '@/components/EventCarousel';
 import { useBodyScrollLock } from '@/lib/useBodyScrollLock';
 import ModalPortal from '@/components/ModalPortal';
 import AccessDenied from '@/components/AccessDenied';
+import CitemasLoader from '@/components/CitemasLoader';
 import {
   Calendar,
   MapPin,
@@ -346,14 +347,7 @@ export default function EventsPage() {
   }
 
   if (checkingAuth || loading || !user || !token) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#070305] text-[#FEF2F2]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-red-600 border-t-transparent" />
-          <p className="text-sm font-medium tracking-wider text-red-200/70">Loading events directory...</p>
-        </div>
-      </div>
-    );
+    return <CitemasLoader label="Loading events directory..." />;
   }
 
   if (!user) {

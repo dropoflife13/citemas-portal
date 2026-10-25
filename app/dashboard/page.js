@@ -13,6 +13,7 @@ import EditorialStatCard from '@/components/EditorialStatCard';
 import BracketPanel from '@/components/BracketPanel';
 import LivePing from '@/components/LivePing';
 import EditorialButton from '@/components/EditorialButton';
+import CitemasLoader from '@/components/CitemasLoader';
 
 export default function DashboardPage() {
   const { user, token, loading: authLoading } = useAuth();
@@ -197,14 +198,7 @@ export default function DashboardPage() {
   }));
 
   if (checkingAuth || authLoading || !user || !token) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#070305] text-[#FEF2F2]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-red-600 border-t-transparent" />
-          <p className="text-xs font-mono uppercase tracking-widest text-slate-400">Verifying Org Session...</p>
-        </div>
-      </div>
-    );
+    return <CitemasLoader label="Verifying Org Session..." />;
   }
 
   return (

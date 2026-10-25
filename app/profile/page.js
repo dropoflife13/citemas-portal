@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/AuthContext';
 import { useRouter } from 'next/navigation';
 import { Camera, Edit3, User, CheckCircle2, Image as ImageIcon, Upload, Trash2, ExternalLink } from 'lucide-react';
+import CitemasLoader from '@/components/CitemasLoader';
 
 const ROLE_BADGES = {
   super_admin: { label: 'Super Admin', style: 'border-red-500/50 bg-red-500/15 text-red-600 dark:text-red-300' },
@@ -277,16 +278,7 @@ export default function ProfilePage() {
   };
 
   if (authLoading || loading) {
-    return (
-      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[var(--background)] text-[var(--foreground)] transition-colors duration-300">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-red-600 border-t-transparent" />
-          <p className="text-xs font-mono uppercase tracking-widest text-slate-500 dark:text-slate-400">
-            Loading creator dossier...
-          </p>
-        </div>
-      </div>
-    );
+    return <CitemasLoader label="Loading creator dossier..." />;
   }
 
   if (!profile) {

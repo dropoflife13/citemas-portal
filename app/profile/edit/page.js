@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/AuthContext';
 import { ArrowLeft, Save, CheckCircle2, AlertCircle } from 'lucide-react';
+import CitemasLoader from '@/components/CitemasLoader';
 
 const DEPARTMENTS = [
   'College of Arts & Sciences (CAS)',
@@ -133,16 +134,7 @@ export default function EditProfilePage() {
   };
 
   if (authLoading || loading) {
-    return (
-      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-[var(--background)] text-[var(--foreground)] transition-colors duration-300">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-red-600 border-t-transparent" />
-          <p className="text-xs font-mono uppercase tracking-widest text-slate-500 dark:text-slate-400">
-            Loading profile editor...
-          </p>
-        </div>
-      </div>
-    );
+    return <CitemasLoader label="Loading profile editor..." />;
   }
 
   const inputClass =

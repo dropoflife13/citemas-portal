@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
+import CitemasLoader from '@/components/CitemasLoader';
 import {
   Activity,
   User,
@@ -90,7 +91,7 @@ export default function AdminActivityPage() {
   if (authLoading || (loading && logs.length === 0)) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#110808] text-[#FDFBF7]">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-red-600 border-t-transparent" />
+        <CitemasLoader label="Loading activity logs..." fullScreen={false} />
       </div>
     );
   }

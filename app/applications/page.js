@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { useToast } from '@/components/Toast';
+import CitemasLoader from '@/components/CitemasLoader';
 
 const STATUS_STYLES = {
   pending: 'bg-amber-500/10 text-amber-300 border border-amber-500/40 shadow-[0_0_12px_rgba(245,158,11,0.35)]',
@@ -325,49 +326,36 @@ export default function ApplicationsPage() {
     });
   }, [applications, searchQuery, statusFilter, specializationFilter]);
 
-  if (checkingAuth || authLoading || !user || !token || (loading && isStaff)) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-[#070305] text-[#FEF2F2]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-red-600 border-t-transparent" />
-          <p className="text-sm font-medium tracking-wider text-red-200/70">Loading portal applications...</p>
-        </div>
-      </div>
-    );
+  if (checkingAuth || authLoading || !user || !token || loading) {
+    return <CitemasLoader label="Loading portal applications..." />;
   }
 
   return (
-    <div className="min-h-screen bg-[#070305] px-4 py-12 text-[#FEF2F2] sm:px-6 lg:px-8 relative overflow-hidden font-sans selection:bg-red-500 selection:text-white">
+    <div className="min-h-[calc(100vh-4rem)] bg-[var(--background)] px-4 py-10 text-[var(--foreground)] sm:px-6 lg:px-8 relative overflow-hidden font-sans selection:bg-red-500 selection:text-white transition-colors duration-300">
       {/* Background Ambient Glows */}
       <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-red-900/10 rounded-full blur-[140px] pointer-events-none" />
       <div className="absolute bottom-10 left-10 w-[400px] h-[400px] bg-orange-950/15 rounded-full blur-[140px] pointer-events-none" />
 
-      <div className="mx-auto max-w-7xl space-y-8 relative z-10">
+      <div className="mx-auto max-w-5xl space-y-8 relative z-10">
         
-        {/* Header Section */}
-        <div className="rounded-[28px] border border-white/10 bg-gradient-to-br from-white/[0.08] to-white/[0.02] px-8 py-6 shadow-[0_20px_50px_rgba(0,0,0,0.5)] backdrop-blur-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+        {/* Clean Studio Page Header (No Redundant Box or Duplicate CTA) */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-black/10 dark:border-white/10 pb-6">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-[10px] font-black uppercase tracking-[0.25em] text-red-300 mb-1.5">
-              {isStaff ? 'Executive Review Queue' : 'Member Portal'}
+            <div className="inline-flex items-center gap-2 rounded-full border border-red-500/30 bg-red-500/10 px-3 py-1 text-[10px] font-mono font-bold uppercase tracking-[0.25em] text-red-600 dark:text-red-300 mb-2">
+              {isStaff ? 'Executive Review Queue' : 'Member Portal // Applications'}
             </div>
-            <h1 className="text-2xl md:text-3xl font-black tracking-tight bg-gradient-to-r from-white via-red-200 to-red-400 bg-clip-text text-transparent">
-              Membership Applications
+            <h1 className="font-display text-3xl md:text-4xl font-black uppercase tracking-tight text-slate-900 dark:text-white">
+              Membership{' '}
+              <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-orange-500 to-slate-900 dark:from-red-500 dark:via-orange-400 dark:to-white">
+                Applications
+              </span>
             </h1>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
               {isStaff
                 ? 'Review, verify credentials, and approve student applications for official org membership.'
-                : 'Manage your creative org membership application and track verification status.'}
+                : 'Submit your creative specialization, motivation letter, and portfolio works to join CITEMAS.'}
             </p>
           </div>
-
-          {(canApply || isRejected) && (
-            <button
-              onClick={() => setShowForm((prev) => !prev)}
-              className="rounded-2xl bg-gradient-to-r from-red-600 via-red-600 to-orange-600 px-6 py-3.5 text-xs font-black uppercase tracking-[0.18em] text-white shadow-lg shadow-red-950/60 border border-white/10 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer"
-            >
-              {showForm ? 'Cancel Application' : (isRejected ? '+ Re-apply for Membership' : '+ Submit Application')}
-            </button>
-          )}
         </div>
 
         {/* Executive Summary Cards for Officers / Admins */}
@@ -436,10 +424,28 @@ export default function ApplicationsPage() {
           </div>
         )}
 
-        {/* Application Form */}
-        {(canApply || isRejected) && showForm && (
-          <form onSubmit={handleSubmit} className="rounded-[28px] border border-white/10 bg-gradient-to-b from-white/[0.06] to-white/[0.02] p-8 shadow-[0_30px_70px_rgba(0,0,0,0.6)] backdrop-blur-2xl animate-fadeIn">
-            <h2 className="text-xl font-black uppercase tracking-[0.18em] text-white mb-6">New Org Application</h2>
+        {/* Application Form (Shown directly when student can apply, or when re-applying after rejection) */}
+        {(canApply || (isRejected && showForm)) && !isStaff && (
+          <form onSubmit={handleSubmit} className="rounded-[28px] border border-black/10 dark:border-white/10 bg-[var(--card-bg)]/90 dark:bg-[#090a0b]/90 p-8 shadow-2xl backdrop-blur-2xl animate-fadeIn">
+            <div className="flex items-center justify-between mb-6 pb-4 border-b border-black/10 dark:border-white/10">
+              <div>
+                <span className="text-[10px] font-mono uppercase tracking-[0.22em] text-red-500 font-bold">
+                  FORM // 01
+                </span>
+                <h2 className="text-xl font-black uppercase tracking-[0.14em] text-slate-900 dark:text-white mt-0.5">
+                  New Org Application
+                </h2>
+              </div>
+              {isRejected && (
+                <button
+                  type="button"
+                  onClick={() => setShowForm(false)}
+                  className="text-xs font-mono text-slate-400 hover:text-white transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
             
             {formError && (
               <div className="mb-6 rounded-2xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
@@ -449,64 +455,66 @@ export default function ApplicationsPage() {
 
             <div className="grid gap-6 md:grid-cols-2">
               <div className="md:col-span-2">
-                <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-red-200/70">Specialization</label>
+                <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-red-200/70">Specialization</label>
                 <select
                   value={form.specialization}
                   onChange={(e) => setForm({ ...form, specialization: e.target.value })}
                   required
-                  className="w-full rounded-2xl border border-white/15 bg-black/40 px-4 py-3.5 text-sm text-white outline-none focus:border-red-500 transition-colors"
+                  className="w-full rounded-2xl border border-black/15 dark:border-white/15 bg-white dark:bg-black/40 px-4 py-3.5 text-sm text-slate-900 dark:text-white outline-none focus:border-red-500 transition-colors"
                 >
                   {Object.entries(SPECIALIZATION_LABELS).map(([value, label]) => (
-                    <option key={value} value={value} className="bg-[#120505] text-white">{label}</option>
+                    <option key={value} value={value} className="bg-white dark:bg-[#120505] text-slate-900 dark:text-white">{label}</option>
                   ))}
                 </select>
               </div>
 
               <div className="md:col-span-2">
-                <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-red-200/70">Motivation Letter</label>
+                <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-red-200/70">Motivation Letter</label>
                 <textarea
                   value={form.motivationLetter}
                   onChange={(e) => setForm({ ...form, motivationLetter: e.target.value })}
                   required
                   rows={5}
                   placeholder="Tell us why you want to join CITEMAS..."
-                  className="w-full resize-none rounded-2xl border border-white/15 bg-black/40 px-4 py-3.5 text-sm text-white outline-none placeholder:text-white/30 focus:border-red-500 transition-colors"
+                  className="w-full resize-none rounded-2xl border border-black/15 dark:border-white/15 bg-white dark:bg-black/40 px-4 py-3.5 text-sm text-slate-900 dark:text-white outline-none placeholder:text-slate-400 dark:placeholder:text-white/30 focus:border-red-500 transition-colors"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-red-200/70">
-                  Portfolio Link <span className="text-white/40 font-normal">(Optional)</span>
+                <label className="mb-2 block text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-red-200/70">
+                  Portfolio Link <span className="text-slate-400 dark:text-white/40 font-normal">(Optional)</span>
                 </label>
                 <input
                   type="url"
                   value={form.portfolioLink}
                   onChange={(e) => setForm({ ...form, portfolioLink: e.target.value })}
                   placeholder="https://your-portfolio.com"
-                  className="w-full rounded-2xl border border-white/15 bg-black/40 px-4 py-3.5 text-sm text-white outline-none placeholder:text-white/30 focus:border-red-500 transition-colors"
+                  className="w-full rounded-2xl border border-black/15 dark:border-white/15 bg-white dark:bg-black/40 px-4 py-3.5 text-sm text-slate-900 dark:text-white outline-none placeholder:text-slate-400 dark:placeholder:text-white/30 focus:border-red-500 transition-colors"
                 />
               </div>
 
               <div className="md:col-span-2 space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
-                    <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-red-200/70">
-                      Upload Portfolio Images <span className="text-emerald-400 font-mono">// Auto-Inserted into Your Profile</span>
+                    <label className="block text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 dark:text-red-200/70">
+                      Upload Portfolio Images <span className="text-emerald-600 dark:text-emerald-400 font-mono">// Auto-Inserted into Your Profile</span>
                     </label>
-                    <p className="text-[11px] text-white/50 mt-0.5">
+                    <p className="text-[11px] text-slate-500 dark:text-white/50 mt-0.5">
                       Upload artwork, photography, or design samples. These images will also be added directly to your CITEMAS Profile showcase.
                     </p>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => portfolioFileInputRef.current?.click()}
-                    disabled={uploadingImages}
-                    className="inline-flex items-center gap-2 rounded-xl border border-red-500/40 bg-red-500/15 px-4 py-2.5 text-[11px] font-mono font-bold uppercase tracking-widest text-red-200 hover:bg-red-500/25 hover:border-red-500 transition-all disabled:opacity-50 cursor-pointer"
-                  >
-                    <Upload size={14} className="text-red-400" />
-                    <span>{uploadingImages ? 'Uploading...' : '+ Upload Images'}</span>
-                  </button>
+                  {form.portfolioImages?.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => portfolioFileInputRef.current?.click()}
+                      disabled={uploadingImages}
+                      className="inline-flex items-center gap-2 rounded-xl border border-red-500/40 bg-red-500/15 px-4 py-2 text-[11px] font-mono font-bold uppercase tracking-widest text-red-600 dark:text-red-200 hover:bg-red-500/25 hover:border-red-500 transition-all disabled:opacity-50 cursor-pointer"
+                    >
+                      <Upload size={14} className="text-red-400" />
+                      <span>{uploadingImages ? 'Uploading...' : '+ Add More Images'}</span>
+                    </button>
+                  )}
 
                   <input
                     ref={portfolioFileInputRef}
@@ -522,16 +530,16 @@ export default function ApplicationsPage() {
                 {(!form.portfolioImages || form.portfolioImages.length === 0) ? (
                   <div
                     onClick={() => !uploadingImages && portfolioFileInputRef.current?.click()}
-                    className="group flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-white/15 bg-black/30 px-6 py-8 text-center transition-all hover:border-red-500/50 hover:bg-red-500/[0.04] cursor-pointer"
+                    className="group flex flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-black/15 dark:border-white/15 bg-black/[0.02] dark:bg-black/30 px-6 py-8 text-center transition-all hover:border-red-500/50 hover:bg-red-500/[0.04] cursor-pointer"
                   >
-                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.04] text-red-400 group-hover:scale-105 transition-transform">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-red-500/30 bg-red-500/10 text-red-500 group-hover:scale-105 transition-transform">
                       <ImageIcon size={20} />
                     </div>
-                    <div className="text-xs font-semibold text-white/80">
-                      {uploadingImages ? 'Uploading your artwork to studio storage...' : 'Click to select portfolio images from your device'}
+                    <div className="text-xs font-semibold text-slate-800 dark:text-white/80">
+                      {uploadingImages ? 'Uploading your artwork to studio storage...' : 'Click to upload portfolio images from your device'}
                     </div>
-                    <p className="text-[11px] font-mono text-white/40">
-                      Supports JPG, PNG, WEBP, GIF • Multiple images allowed • Syncs with your Profile
+                    <p className="text-[11px] font-mono text-slate-500 dark:text-white/40">
+                      Supports JPG, PNG, WEBP, GIF • Multiple images allowed • Automatically added to your Profile
                     </p>
                   </div>
                 ) : (
@@ -539,7 +547,7 @@ export default function ApplicationsPage() {
                     {form.portfolioImages.map((imgUrl, idx) => (
                       <div
                         key={`${imgUrl}-${idx}`}
-                        className="group relative aspect-square overflow-hidden rounded-2xl border border-white/15 bg-black/50 shadow-lg"
+                        className="group relative aspect-square overflow-hidden rounded-2xl border border-black/15 dark:border-white/15 bg-black/50 shadow-lg"
                       >
                         <img
                           src={imgUrl}
@@ -567,7 +575,7 @@ export default function ApplicationsPage() {
               </div>
             </div>
 
-            <div className="mt-8 flex justify-end gap-3 pt-6 border-t border-white/10">
+            <div className="mt-8 flex justify-end gap-3 pt-6 border-t border-black/10 dark:border-white/10">
               <button
                 type="submit"
                 disabled={submitting || uploadingImages}
@@ -695,32 +703,6 @@ export default function ApplicationsPage() {
           </div>
         )}
 
-        {/* Student Onboarding Card (Not Applied Yet) */}
-        {canApply && !showForm && !isStaff && (
-          <div className="rounded-[28px] border border-white/10 bg-gradient-to-br from-white/[0.06] to-white/[0.02] p-8 shadow-[0_25px_60px_rgba(0,0,0,0.5)] backdrop-blur-2xl text-center space-y-5 max-w-2xl mx-auto py-12 animate-fadeIn">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-red-500/30 bg-red-500/10 text-red-400">
-              <FileText size={28} />
-            </div>
-            <div className="space-y-2">
-              <span className="inline-block rounded-full border border-red-500/30 bg-red-500/10 px-3 py-0.5 text-[10px] font-black uppercase tracking-[0.2em] text-red-300">
-                Student Account
-              </span>
-              <h2 className="text-2xl font-black text-white">Apply for CITEMAS Org Membership</h2>
-              <p className="text-xs text-white/70 max-w-md mx-auto leading-relaxed">
-                You are currently registered with a Student account. Choose your creative specialization, submit your motivation statement and portfolio link, and apply to become an official CITEMAS member.
-              </p>
-            </div>
-            <div>
-              <button
-                onClick={() => setShowForm(true)}
-                className="rounded-2xl bg-gradient-to-r from-red-600 via-red-600 to-orange-600 px-6 py-3 text-xs font-black uppercase tracking-[0.18em] text-white shadow-lg shadow-red-950/60 border border-white/10 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer"
-              >
-                + Start Application
-              </button>
-            </div>
-          </div>
-        )}
-
         {/* Staff Review Table & Filters */}
         {isStaff && (
           <div className="space-y-4">
@@ -772,9 +754,8 @@ export default function ApplicationsPage() {
             {/* Sleek Editorial Vertical List (No HTML Table) */}
             <div className="border-t border-white/10 divide-y divide-white/10">
               {loading ? (
-                <div className="py-16 text-center text-red-200/50 font-mono text-xs">
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-red-500/30 border-t-red-500 mx-auto mb-2" />
-                  LOADING APPLICATION REPOSITORY...
+                <div className="py-16 flex justify-center">
+                  <CitemasLoader label="Loading application repository..." fullScreen={false} size="sm" />
                 </div>
               ) : filteredApplications.length === 0 ? (
                 <div className="py-20 text-center">

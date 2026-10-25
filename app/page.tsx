@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
+import CitemasLoader from '@/components/CitemasLoader';
 
 type OfficerRecord = {
   _id: string;
@@ -434,18 +435,8 @@ export default function Home() {
           >
             <Suspense
               fallback={
-                <div className="w-full h-full flex flex-col items-center justify-center gap-3">
-                  <div className="relative flex items-center justify-center">
-                    <div className="w-16 h-16 rounded-full border border-red-500/40 animate-ping absolute" />
-                    <div className="w-12 h-12 rounded-full border-2 border-red-500/20 border-t-red-500 animate-spin" />
-                    <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_12px_#dc2626]" />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
-                    <span className="font-mono text-[10px] tracking-[0.25em] text-red-500 font-extrabold uppercase drop-shadow-[0_0_8px_rgba(220,38,38,0.6)]">
-                      LOADING STUDIO...
-                    </span>
-                  </div>
+                <div className="w-full h-full flex flex-col items-center justify-center">
+                  <CitemasLoader label="LOADING STUDIO..." fullScreen={false} />
                 </div>
               }
             >
@@ -456,17 +447,7 @@ export default function Home() {
                     isModelLoaded ? 'opacity-0' : 'opacity-100'
                   }`}
                 >
-                  <div className="relative flex items-center justify-center">
-                    <div className="w-16 h-16 rounded-full border border-red-500/40 animate-ping absolute" />
-                    <div className="w-12 h-12 rounded-full border-2 border-red-500/20 border-t-red-500 animate-spin" />
-                    <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_12px_#dc2626]" />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
-                    <span className="font-mono text-[10px] tracking-[0.25em] text-red-500 font-extrabold uppercase drop-shadow-[0_0_8px_rgba(220,38,38,0.6)]">
-                      LOADING STUDIO...
-                    </span>
-                  </div>
+                  <CitemasLoader label="LOADING STUDIO..." fullScreen={false} />
                 </div>
 
                 {/* 3D Model with Smooth Scene Fade-In */}
@@ -704,9 +685,8 @@ export default function Home() {
 
               {/* Dynamic Officer Spotlight: 50/50 True Editorial Split (No Boxy Sub-Card) */}
               {officersLoading ? (
-                <div className="p-8 text-center text-xs text-slate-500 dark:text-slate-400">
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-red-500/30 border-t-red-500 mx-auto mb-2" />
-                  Loading Council Directory...
+                <div className="p-8 flex justify-center">
+                  <CitemasLoader label="Loading Council Directory..." fullScreen={false} size="sm" />
                 </div>
               ) : currentOfficer ? (
                 <div
