@@ -24,8 +24,20 @@ export default function Navbar() {
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [container, setContainer] = useState(null);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useBodyScrollLock(isDrawerOpen);
+
+  // Glassmorphism scroll listener: blur after 50px
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
+
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   // Setup SSR-safe portal container
   useEffect(() => {
@@ -79,7 +91,11 @@ export default function Navbar() {
   return (
     <nav
       id="site-nav"
-      className="relative w-full z-30 border-b border-white/10 bg-[#090a0b]/95 backdrop-blur-md px-6 py-3.5 sm:px-8 text-[12px] font-semibold uppercase tracking-widest"
+      className={`fixed top-0 left-0 right-0 w-full z-50 transition-colors duration-300 px-6 py-3.5 sm:px-8 text-[12px] font-semibold uppercase tracking-widest ${
+        isScrolled
+          ? 'bg-black/50 backdrop-blur-md border-b border-white/10'
+          : 'bg-transparent border-b border-transparent'
+      }`}
     >
       <div className="mx-auto flex h-11 max-w-7xl items-center justify-between gap-4">
         {/* Left — Brand Logo */}
