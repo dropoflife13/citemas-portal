@@ -3,14 +3,39 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
+  --background: #ffffff;
+  --foreground: #090a0b;
+  --card-bg: #f3f4f6;
+  --apple-carbon: #ffffff;
+  --absolute-black: #f8f9fa;
+  --polar-white: #090a0b;
+  --apple-steel: #64748b;
+  --paper: #ffffff;
+  --paper-deep: #f3f4f6;
+  --paper-glass: rgba(255, 255, 255, 0.85);
+  --ink: #090a0b;
+  --ink-muted: rgba(9, 10, 11, 0.72);
+  --ink-faint: rgba(9, 10, 11, 0.46);
+  --line: rgba(0, 0, 0, 0.08);
+  --accent: #dc2626;
+  --accent-soft: #ef4444;
+  --accent-dim: rgba(220, 38, 38, 0.14);
+  --cyan-accent: #02d2e3;
+  --gold: #f5b24a;
+}
+
+.dark {
+  --background: #070305;
+  --foreground: #FDFBF7;
+  --card-bg: #0a0a0a;
   --apple-carbon: #090a0b;
   --absolute-black: #000000;
   --polar-white: #f5f5f7;
   --apple-steel: #86868b;
-  --paper: #090a0b;
+  --paper: #070305;
   --paper-deep: #0e0f14;
   --paper-glass: rgba(14, 15, 20, 0.72);
-  --ink: #f8f2ec;
+  --ink: #FDFBF7;
   --ink-muted: rgba(248, 242, 236, 0.72);
   --ink-faint: rgba(248, 242, 236, 0.46);
   --line: rgba(255, 255, 255, 0.08);
@@ -19,32 +44,6 @@
   --accent-dim: rgba(220, 38, 38, 0.18);
   --cyan-accent: #02d2e3;
   --gold: #f5b24a;
-  --background: var(--apple-carbon);
-  --foreground: var(--polar-white);
-}
-
-html.light {
-  --apple-carbon: #f8f9fa;
-  --absolute-black: #ffffff;
-  --polar-white: #0f172a;
-  --apple-steel: #64748b;
-  --paper: #f8f9fa;
-  --paper-deep: #f1f5f9;
-  --paper-glass: rgba(255, 255, 255, 0.85);
-  --ink: #0f172a;
-  --ink-muted: rgba(15, 23, 42, 0.72);
-  --ink-faint: rgba(15, 23, 42, 0.46);
-  --line: rgba(0, 0, 0, 0.08);
-  --background: #f8f9fa;
-  --foreground: #0f172a;
-}
-
-html.light body {
-  background:
-    radial-gradient(circle at top left, rgba(217, 41, 41, 0.1), transparent 24%),
-    radial-gradient(circle at top right, rgba(245, 178, 74, 0.05), transparent 22%),
-    #f8f9fa;
-  color: #0f172a;
 }
 
 @theme inline {
@@ -64,6 +63,7 @@ html.light body {
   --color-cyan-accent: var(--cyan-accent);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card-bg: var(--card-bg);
   --font-display: "Oswald", Impact, sans-serif;
   --font-sans: "Space Grotesk", "Outfit", "Inter", system-ui, sans-serif;
   --font-serif: "Italiana", "Fraunces", Georgia, serif;
@@ -73,18 +73,14 @@ html.light body {
 }
 
 html {
-  background: var(--paper);
-  color: var(--ink);
+  background-color: var(--background);
+  color: var(--foreground);
   scroll-behavior: smooth;
 }
 
 body {
-  background:
-    radial-gradient(circle at top left, rgba(217, 41, 41, 0.26), transparent 24%),
-    radial-gradient(circle at top right, rgba(245, 178, 74, 0.08), transparent 22%),
-    radial-gradient(circle at bottom left, rgba(127, 29, 29, 0.24), transparent 28%),
-    var(--paper);
-  color: var(--ink);
+  background-color: var(--background);
+  color: var(--foreground);
   font-family: "Inter", system-ui, sans-serif;
   min-height: 100vh;
   line-height: 1.6;
@@ -113,11 +109,11 @@ body {
   font-family: "Space Grotesk", system-ui, sans-serif;
 }
 
-/* 1px White Faint Grid at 5% Opacity */
+/* 1px Faint Grid */
 .bg-grid-faint {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
   background-size: 40px 40px;
 }
 
@@ -131,33 +127,32 @@ body {
 }
 
 .citemas-card {
-  background-color: #1a1a1c;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background-color: var(--card-bg);
+  border: 1px solid var(--line);
   border-radius: 1.5rem;
   box-shadow: none;
 }
 
 .citemas-card-interactive {
-  background-color: #1a1a1c;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background-color: var(--card-bg);
+  border: 1px solid var(--line);
   border-radius: 1.5rem;
   box-shadow: none;
   transition: all 0.25s ease;
 }
 
 .citemas-card-interactive:hover {
-  background-color: #222225;
   border-color: rgba(220, 38, 38, 0.35);
   transform: translateY(-2px);
 }
 
 .citemas-modal {
-  background-color: rgba(17, 17, 17, 0.95);
+  background-color: var(--paper-glass);
   backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--line);
   border-radius: 1.75rem;
-  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.9);
+  box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.5);
 }
 
 /* Custom themed scrollbar */
@@ -165,7 +160,7 @@ body {
   width: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #090a0b;
+  background: var(--background);
 }
 ::-webkit-scrollbar-thumb {
   background: #dc2626;
@@ -177,15 +172,15 @@ body {
 /* For Firefox */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #dc2626 #090a0b;
+  scrollbar-color: #dc2626 var(--background);
 }
 
-/* Autofill Dark Theme Fix */
+/* Autofill Theme Fix */
 input:-webkit-autofill,
 input:-webkit-autofill:hover, 
 input:-webkit-autofill:focus, 
 input:-webkit-autofill:active {
-  -webkit-box-shadow: 0 0 0 30px #090a0b inset !important;
-  -webkit-text-fill-color: white !important;
+  -webkit-box-shadow: 0 0 0 30px var(--background) inset !important;
+  -webkit-text-fill-color: var(--foreground) !important;
   transition: background-color 5000s ease-in-out 0s;
 }

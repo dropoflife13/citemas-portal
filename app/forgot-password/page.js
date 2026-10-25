@@ -79,19 +79,19 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[#070305] px-4 py-12 text-slate-100">
-      <section className="w-full max-w-md rounded-3xl border border-white/10 bg-white/[0.03] p-8 shadow-2xl backdrop-blur-2xl sm:p-10">
-        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-red-400">Account recovery</p>
-        <h1 className="mt-3 text-3xl font-black tracking-tight text-white">Reset your password</h1>
-        <p className="mt-2 text-sm leading-relaxed text-slate-400">
+    <div className="flex h-[calc(100vh-4rem)] min-h-[calc(100vh-4rem)] items-center justify-center bg-[var(--background)] px-4 py-6 text-[var(--foreground)] transition-colors duration-300 overflow-y-auto">
+      <section className="w-full max-w-md rounded-3xl border border-black/10 dark:border-white/10 bg-[var(--card-bg)]/90 dark:bg-white/[0.03] p-8 shadow-2xl backdrop-blur-2xl sm:p-10">
+        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-red-500 dark:text-red-400">Account recovery</p>
+        <h1 className="mt-3 text-3xl font-black tracking-tight text-slate-900 dark:text-white">Reset your password</h1>
+        <p className="mt-2 text-sm leading-relaxed text-slate-600 dark:text-slate-400">
           We’ll send a 6-digit verification code to your PHINMA school Gmail account.
         </p>
 
-        <div className="mt-7 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.16em] text-white/45">
-          <span className={`flex h-6 w-6 items-center justify-center rounded-full ${step === 'request' ? 'bg-red-500 text-white' : 'bg-emerald-500/20 text-emerald-200'}`}>1</span>
+        <div className="mt-7 flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.16em] text-slate-500 dark:text-white/45">
+          <span className={`flex h-6 w-6 items-center justify-center rounded-full ${step === 'request' ? 'bg-red-500 text-white' : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-200'}`}>1</span>
           <span>School email</span>
-          <span className="h-px flex-1 bg-white/10" />
-          <span className={`flex h-6 w-6 items-center justify-center rounded-full ${step === 'confirm' ? 'bg-red-500 text-white' : 'bg-white/10 text-white/50'}`}>2</span>
+          <span className="h-px flex-1 bg-black/10 dark:bg-white/10" />
+          <span className={`flex h-6 w-6 items-center justify-center rounded-full ${step === 'confirm' ? 'bg-red-500 text-white' : 'bg-black/10 text-slate-500 dark:bg-white/10 dark:text-white/50'}`}>2</span>
           <span>Verify</span>
         </div>
 
@@ -106,8 +106,8 @@ export default function ForgotPasswordPage() {
           </form>
         ) : (
           <form className="mt-7 space-y-5" onSubmit={resetPassword}>
-            <div className="rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3 text-xs text-slate-300">
-              Code sent to <span className="font-bold text-white">{email.trim().toLowerCase()}</span>. It expires in 10 minutes.
+            <div className="rounded-2xl border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] px-4 py-3 text-xs text-slate-600 dark:text-slate-300">
+              Code sent to <span className="font-bold text-slate-900 dark:text-white">{email.trim().toLowerCase()}</span>. It expires in 10 minutes.
             </div>
             <Field label="Verification code">
               <input inputMode="numeric" pattern="[0-9]{6}" maxLength={6} value={code} onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))} placeholder="123456" autoComplete="one-time-code" required className={`${inputClass} text-center text-lg font-black tracking-[0.5em]`} />
@@ -119,24 +119,24 @@ export default function ForgotPasswordPage() {
               <input type="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} minLength={8} placeholder="Repeat your new password" autoComplete="new-password" required className={inputClass} />
             </Field>
             <button type="submit" disabled={loading} className={buttonClass}>{loading ? 'Resetting password...' : 'Verify code and reset password'}</button>
-            <button type="button" onClick={() => { setStep('request'); setCode(''); setMessage({ type: '', text: '' }); }} className="w-full text-xs font-semibold text-red-300 transition hover:text-red-200">Use a different email or resend a code</button>
+            <button type="button" onClick={() => { setStep('request'); setCode(''); setMessage({ type: '', text: '' }); }} className="w-full text-xs font-semibold text-red-600 dark:text-red-300 transition hover:text-red-500 dark:hover:text-red-200">Use a different email or resend a code</button>
           </form>
         )}
 
-        <p className="mt-7 text-center text-xs text-slate-400">Remembered it? <Link href="/login" className="font-semibold text-red-400 underline underline-offset-4 hover:text-red-300">Back to sign in</Link></p>
+        <p className="mt-7 text-center text-xs text-slate-600 dark:text-slate-400">Remembered it? <Link href="/login" className="font-semibold text-red-600 dark:text-red-400 underline underline-offset-4 hover:text-red-500 dark:hover:text-red-300">Back to sign in</Link></p>
       </section>
-    </main>
+    </div>
   );
 }
 
-const inputClass = 'mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.02] px-4 py-3.5 text-sm text-white outline-none placeholder:text-slate-600 focus:border-red-500/80 focus:ring-4 focus:ring-red-500/10';
-const buttonClass = 'w-full rounded-2xl bg-gradient-to-r from-red-600 to-orange-600 px-4 py-3.5 text-xs font-black uppercase tracking-[0.16em] text-white shadow-lg shadow-red-950/40 transition hover:from-red-500 hover:to-orange-500 disabled:cursor-not-allowed disabled:opacity-55';
+const inputClass = 'mt-2 w-full rounded-2xl border border-black/15 dark:border-white/10 bg-black/[0.03] dark:bg-white/[0.02] px-4 py-3.5 text-sm text-slate-900 dark:text-white outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600 focus:border-red-500/80 focus:ring-4 focus:ring-red-500/10';
+const buttonClass = 'w-full rounded-2xl bg-gradient-to-r from-red-600 to-orange-600 px-4 py-3.5 text-xs font-black uppercase tracking-[0.16em] text-white shadow-lg shadow-red-950/30 dark:shadow-red-950/40 transition hover:from-red-500 hover:to-orange-500 disabled:cursor-not-allowed disabled:opacity-55';
 
 function Field({ label, children }) {
-  return <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">{label}{children}</label>;
+  return <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">{label}{children}</label>;
 }
 
 function StatusMessage({ type, text }) {
   const isError = type === 'error';
-  return <div className={`mt-6 rounded-2xl border px-4 py-3 text-xs leading-relaxed ${isError ? 'border-red-500/30 bg-red-500/10 text-red-200' : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-100'}`}>{text}</div>;
+  return <div className={`mt-6 rounded-2xl border px-4 py-3 text-xs leading-relaxed ${isError ? 'border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-200' : 'border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-100'}`}>{text}</div>;
 }

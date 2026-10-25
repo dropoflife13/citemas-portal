@@ -10,15 +10,15 @@ export default function Background() {
   if (isLandingPage) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-[#090a0b]">
+    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden bg-[var(--background)] transition-colors duration-300">
       {/* Subtle Ambient Red Glow at top-left */}
       <div className="absolute top-[-10%] left-[-10%] h-[500px] w-[500px] rounded-full bg-red-600/10 blur-[150px] pointer-events-none" />
 
       {/* 64px Faint Technical Blueprint Grid (App Pages) */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px]" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.04)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px]" />
 
-      {/* Subtle Vignette Mask */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_40%,rgba(9,10,11,0.65)_100%)]" />
+      {/* Subtle Vignette Mask (Dark Mode) */}
+      <div className="absolute inset-0 opacity-0 dark:opacity-100 bg-[radial-gradient(circle_at_center,transparent_40%,rgba(9,10,11,0.65)_100%)] transition-opacity duration-300" />
     </div>
   );
 }

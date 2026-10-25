@@ -171,7 +171,7 @@ export default function Home() {
   };
 
   return (
-    <div className="relative bg-[#070305] text-[#FDFBF7] overflow-x-clip -mt-20">
+    <div className="relative bg-[var(--background)] text-[var(--foreground)] overflow-x-clip -mt-16 transition-colors duration-300">
       {/* ── CSS Animations for Starfield, Marquee & 3D Centerpiece ── */}
       <style jsx global>{`
         @keyframes driftStars {
@@ -273,19 +273,19 @@ export default function Home() {
 
       {/* ── Global Dynamic Background: Starry Hero transitioning into Technical Grid ── */}
       <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        {/* Starfield Layer (Prominent at hero, smoothly fades as user scrolls into stack) */}
+        {/* Starfield Layer (Prominent at hero in dark mode, smoothly fades as user scrolls into stack) */}
         <div
-          className="absolute inset-0 transition-opacity duration-300"
+          className="absolute inset-0 transition-opacity duration-300 hidden dark:block"
           style={{ opacity: Math.max(0, 1 - cardProgress[0] * 1.5) }}
         >
           <div className="absolute inset-0 starfield-layer-1 opacity-70" />
           <div className="absolute inset-0 starfield-layer-2 opacity-45" />
         </div>
 
-        {/* Technical Blueprint Grid (Fades in smoothly past the hero section) */}
+        {/* Technical Blueprint Grid (Always subtly visible in light mode; fades in past hero in dark mode) */}
         <div
-          className="absolute inset-0 transition-opacity duration-300 bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px]"
-          style={{ opacity: Math.min(1, cardProgress[0] * 1.5) }}
+          className="absolute inset-0 transition-opacity duration-300 bg-[linear-gradient(rgba(0,0,0,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.04)_1px,transparent_1px)] dark:bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px]"
+          style={{ opacity: Math.max(0.35, Math.min(1, cardProgress[0] * 1.5)) }}
         />
       </div>
 
@@ -299,7 +299,7 @@ export default function Home() {
           id="hero"
           onMouseMove={handleHeroMouseMove}
           onMouseLeave={handleHeroMouseLeave}
-          className="sticky top-0 min-h-screen h-screen w-full flex flex-col justify-between px-6 sm:px-12 md:px-16 lg:px-24 pt-20 pb-14 overflow-hidden relative"
+          className="sticky top-0 min-h-screen h-screen w-full flex flex-col justify-between px-6 sm:px-12 md:px-16 lg:px-24 pt-16 pb-14 overflow-hidden relative"
           style={{
             transform: `scale(${1 - cardProgress[0] * 0.08})`,
             filter: `brightness(${1 - cardProgress[0] * 0.45})`,
@@ -490,19 +490,19 @@ export default function Home() {
 
           {/* Hero Typography & CTAs (z-20) - Shifted Upwards with Clean Spacing */}
           <div className="relative z-20 mt-1 mb-auto w-full max-w-2xl lg:max-w-3xl space-y-4 pointer-events-auto">
-            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 backdrop-blur-md">
+            <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-black/[0.04] dark:bg-white/[0.04] border border-black/10 dark:border-white/10 backdrop-blur-md">
               <span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
-              <span className="text-[11px] font-mono tracking-widest text-slate-300 uppercase">
+              <span className="text-[11px] font-mono tracking-widest text-slate-700 dark:text-slate-300 uppercase">
                 PHINMA University of Iloilo • EST. 2014
               </span>
             </div>
 
             <div>
-              <h1 className="font-display text-5xl sm:text-7xl md:text-8xl lg:text-[7.5rem] font-black uppercase tracking-tighter leading-[0.88] text-white drop-shadow-2xl">
+              <h1 className="font-display text-5xl sm:text-7xl md:text-8xl lg:text-[7.5rem] font-black uppercase tracking-tighter leading-[0.88] text-slate-900 dark:text-white drop-shadow-2xl">
                 CITEMAS
                 <br />
                 PUSHING BOUNDARIES OF{' '}
-                <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-white lowercase tracking-normal">
+                <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-orange-500 to-slate-900 dark:from-red-500 dark:via-orange-400 dark:to-white lowercase tracking-normal">
                   creative media
                 </span>
                 .
@@ -521,7 +521,7 @@ export default function Home() {
               {!isLoggedIn && (
                 <Link
                   href="/register"
-                  className="inline-flex items-center gap-2 border border-white/20 bg-white/5 hover:bg-white/10 text-white px-6 py-4 rounded-full font-semibold uppercase tracking-widest transition-colors cursor-pointer text-xs"
+                  className="inline-flex items-center gap-2 border border-black/20 bg-black/5 hover:bg-black/10 text-slate-900 dark:border-white/20 dark:bg-white/5 dark:hover:bg-white/10 dark:text-white px-6 py-4 rounded-full font-semibold uppercase tracking-widest transition-colors cursor-pointer text-xs"
                 >
                   Join the Org
                 </Link>
@@ -531,13 +531,13 @@ export default function Home() {
 
           {/* ── FULL-WIDTH HORIZONTAL MARQUEE TICKER (Edge-to-edge across base of Hero) ── */}
           <div
-            className="absolute bottom-0 left-0 w-full z-30 border-t border-white/10 bg-[#090a0b]/95 backdrop-blur-md py-3 sm:py-3.5 overflow-hidden"
+            className="absolute bottom-0 left-0 w-full z-30 border-t border-black/10 dark:border-white/10 bg-[var(--card-bg)]/95 dark:bg-[#090a0b]/95 backdrop-blur-md py-3 sm:py-3.5 overflow-hidden transition-colors duration-300"
             style={{
               maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
               WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
             }}
           >
-            <div className="flex whitespace-nowrap min-w-full animate-marquee font-mono text-[11px] sm:text-[12px] font-bold tracking-[0.28em] uppercase text-white/80">
+            <div className="flex whitespace-nowrap min-w-full animate-marquee font-mono text-[11px] sm:text-[12px] font-bold tracking-[0.28em] uppercase text-slate-800 dark:text-white/80">
               <span className="mx-6 flex items-center gap-4">
                 DIGITAL ARTS <span className="text-red-500">•</span> 3D ANIMATION <span className="text-orange-400">•</span> VIDEOGRAPHY <span className="text-red-500">•</span> PHOTOGRAPHY <span className="text-orange-400">•</span> VOICE ACTING <span className="text-red-500">•</span> TRADITIONAL ARTS <span className="text-red-500">•</span> CREATIVE CODING <span className="text-orange-400">•</span> SOUND DESIGN <span className="text-red-500">•</span>
               </span>
@@ -549,19 +549,19 @@ export default function Home() {
         </section>
 
         {/* ── SECTION CUT: HERO TO TRACKS ── */}
-        <div className="w-full border-t border-white/10 relative z-20" />
+        <div className="w-full border-t border-black/10 dark:border-white/10 relative z-20" />
 
         {/* ── CARD 2: CRAFT & DISCIPLINES (EDITORIAL ROSTER) ── */}
-        <section id="specializations" className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden border-t border-white/10">
+        <section id="specializations" className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden border-t border-black/10 dark:border-white/10">
           <div
-            className="w-full max-w-7xl h-[86vh] rounded-3xl p-8 md:p-14 relative flex flex-col justify-between overflow-hidden transition-transform duration-75 border border-white/[0.08] backdrop-blur-2xl bg-[#090a0b]/95"
+            className="w-full max-w-7xl h-[86vh] rounded-3xl p-8 md:p-14 relative flex flex-col justify-between overflow-hidden transition-all duration-75 border border-black/10 dark:border-white/[0.08] backdrop-blur-2xl bg-[var(--card-bg)]/95 dark:bg-[#090a0b]/95 shadow-xl dark:shadow-none"
             style={{
               transform: `scale(${1 - cardProgress[1] * 0.08})`,
               filter: `brightness(${1 - cardProgress[1] * 0.45})`,
             }}
           >
             {/* Header Telemetry */}
-            <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-slate-400 uppercase">
+            <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-slate-500 dark:text-slate-400 uppercase">
               <span>ORG // 02 [SPECIALIZATIONS]</span>
               <span>SIX CREATIVE TRACKS</span>
             </div>
@@ -571,7 +571,7 @@ export default function Home() {
               <span className="text-xs uppercase tracking-[0.3em] font-bold text-red-500">
                 Disciplines of Excellence
               </span>
-              <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-black uppercase tracking-[-0.03em] leading-none text-white">
+              <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-black uppercase tracking-[-0.03em] leading-none text-slate-900 dark:text-white">
                 Craft &amp; Discipline.
               </h2>
             </div>
@@ -588,24 +588,24 @@ export default function Home() {
               ].map((track) => (
                 <div
                   key={track.num}
-                  className="border-b border-white/10 py-5 sm:py-6 flex items-baseline justify-between group cursor-pointer transition-all duration-300 hover:border-red-500/60 hover:pl-3"
+                  className="border-b border-black/10 dark:border-white/10 py-5 sm:py-6 flex items-baseline justify-between group cursor-pointer transition-all duration-300 hover:border-red-500/60 hover:pl-3"
                 >
                   <div className="flex items-baseline gap-4">
-                    <span className="font-mono text-lg sm:text-xl font-bold text-red-500/80 group-hover:text-red-400 transition-colors">
+                    <span className="font-mono text-lg sm:text-xl font-bold text-red-500/80 group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors">
                       {track.num}
                     </span>
-                    <span className="font-display text-3xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight text-white group-hover:text-red-400 transition-colors">
+                    <span className="font-display text-3xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight text-slate-900 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
                       {track.name}
                     </span>
                   </div>
-                  <span className="text-xs font-mono text-slate-400 uppercase tracking-wider hidden sm:inline group-hover:text-slate-200 transition-colors">
+                  <span className="text-xs font-mono text-slate-600 dark:text-slate-400 uppercase tracking-wider hidden sm:inline group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">
                     {track.subtitle}
                   </span>
                 </div>
               ))}
             </div>
 
-            <div className="flex items-center justify-between text-xs font-mono text-slate-500 pt-4 border-t border-white/[0.06]">
+            <div className="flex items-center justify-between text-xs font-mono text-slate-500 pt-4 border-t border-black/10 dark:border-white/[0.06]">
               <span>DISCIPLINES SYNCHRONIZED</span>
               <span>PHINMA CITE ORG</span>
             </div>
@@ -613,19 +613,19 @@ export default function Home() {
         </section>
 
         {/* ── SECTION CUT: TRACKS TO TELEMETRY ── */}
-        <div className="w-full border-t border-white/10 relative z-20" />
+        <div className="w-full border-t border-black/10 dark:border-white/10 relative z-20" />
 
         {/* ── CARD 3: MOLTEN ENERGY & INSTRUMENTS ── */}
-        <section id="telemetry" className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden border-t border-white/10">
+        <section id="telemetry" className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden border-t border-black/10 dark:border-white/10">
           <div
-            className="w-full max-w-7xl h-[86vh] rounded-3xl p-8 md:p-14 relative flex flex-col justify-between overflow-hidden transition-transform duration-75 border border-white/[0.08] backdrop-blur-2xl bg-[#090a0b]/95"
+            className="w-full max-w-7xl h-[86vh] rounded-3xl p-8 md:p-14 relative flex flex-col justify-between overflow-hidden transition-all duration-75 border border-black/10 dark:border-white/[0.08] backdrop-blur-2xl bg-[var(--card-bg)]/95 dark:bg-[#090a0b]/95 shadow-xl dark:shadow-none"
             style={{
               transform: `scale(${1 - cardProgress[2] * 0.08})`,
               filter: `brightness(${1 - cardProgress[2] * 0.45})`,
             }}
           >
             {/* Header Telemetry */}
-            <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-slate-400 uppercase">
+            <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-slate-500 dark:text-slate-400 uppercase">
               <span>ORG // 03 [TELEMETRY]</span>
               <span>CAMPUS IMPACT METRICS</span>
             </div>
@@ -635,44 +635,44 @@ export default function Home() {
               <span className="text-xs uppercase tracking-[0.3em] font-bold text-red-500">
                 Impact &amp; Production
               </span>
-              <h2 className="font-display text-5xl sm:text-6xl md:text-7xl font-black uppercase tracking-[-0.03em] leading-[0.9] text-white">
+              <h2 className="font-display text-5xl sm:text-6xl md:text-7xl font-black uppercase tracking-[-0.03em] leading-[0.9] text-slate-900 dark:text-white">
                 Molten Energy.
               </h2>
-              <p className="font-sans text-sm md:text-base text-slate-300 leading-relaxed font-light">
+              <p className="font-sans text-sm md:text-base text-slate-600 dark:text-slate-300 leading-relaxed font-light">
                 Dynamic student exhibitions, hands-on production sprints, and cross-departmental creative summits shaping the creative identity of PHINMA University of Iloilo.
               </p>
             </div>
 
             {/* Architectural Full-Bleed Telemetry Panel (No Generic Boxy Cards) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-t border-b border-white/10 divide-y sm:divide-y-0 sm:divide-x divide-white/10 py-6 my-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 border-t border-b border-black/10 dark:border-white/10 divide-y sm:divide-y-0 sm:divide-x divide-black/10 dark:divide-white/10 py-6 my-auto">
               {[
                 { value: '50+', label: 'Active Creators', desc: 'Tech & digital visionaries', code: 'CH // 01', status: 'ACTIVE' },
                 { value: '10+', label: 'Org Exhibits', desc: 'Showcases and sprints', code: 'CH // 02', status: 'SYNCHRONIZED' },
                 { value: '50+', label: 'Projects Built', desc: 'Brand and digital media', code: 'CH // 03', status: 'DEPLOYED' },
                 { value: '05+', label: 'Years Legacy', desc: 'Continuous student innovation', code: 'CH // 04', status: 'ESTABLISHED' },
               ].map((stat, i) => (
-                <div key={i} className="px-6 py-6 group hover:bg-white/[0.02] transition-colors relative">
+                <div key={i} className="px-6 py-6 group hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors relative">
                   <div className="flex items-center justify-between text-[10px] font-mono text-slate-500 uppercase tracking-widest pb-3">
                     <span>{stat.code}</span>
-                    <span className="flex items-center gap-1.5 text-cyan-400">
-                      <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
+                    <span className="flex items-center gap-1.5 text-cyan-600 dark:text-cyan-400">
+                      <span className="h-1.5 w-1.5 rounded-full bg-cyan-500 dark:bg-cyan-400 animate-pulse" />
                       {stat.status}
                     </span>
                   </div>
-                  <div className="font-display text-6xl sm:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-white group-hover:scale-105 transition-transform duration-300 origin-left">
+                  <div className="font-display text-6xl sm:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-600 via-orange-500 to-slate-900 dark:from-red-500 dark:via-orange-400 dark:to-white group-hover:scale-105 transition-transform duration-300 origin-left">
                     {stat.value}
                   </div>
-                  <div className="text-sm font-bold uppercase tracking-wider text-white mt-2">
+                  <div className="text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-white mt-2">
                     {stat.label}
                   </div>
-                  <div className="text-xs text-slate-400 font-mono mt-1">
+                  <div className="text-xs text-slate-600 dark:text-slate-400 font-mono mt-1">
                     {stat.desc}
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="flex items-center justify-between text-xs font-mono text-slate-500 pt-4 border-t border-white/[0.06]">
+            <div className="flex items-center justify-between text-xs font-mono text-slate-500 pt-4 border-t border-black/10 dark:border-white/[0.06]">
               <span>TELEMETRY VERIFIED</span>
               <span>METRICS REALTIME</span>
             </div>
@@ -680,13 +680,13 @@ export default function Home() {
         </section>
 
         {/* ── SECTION CUT: TELEMETRY TO LEADERSHIP ── */}
-        <div className="w-full border-t border-white/10 relative z-20" />
+        <div className="w-full border-t border-black/10 dark:border-white/10 relative z-20" />
 
         {/* ── CARD 4: EXECUTIVE LEADERSHIP & HUB (50/50 EDITORIAL SPLIT) ── */}
-        <section id="leadership" className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden border-t border-white/10">
-          <div className="w-full max-w-7xl h-[86vh] rounded-3xl p-8 md:p-14 relative flex flex-col justify-between overflow-hidden border border-white/[0.08] backdrop-blur-2xl bg-[#090a0b]">
+        <section id="leadership" className="sticky top-0 h-screen w-full flex items-center justify-center p-6 md:p-12 overflow-hidden border-t border-black/10 dark:border-white/10">
+          <div className="w-full max-w-7xl h-[86vh] rounded-3xl p-8 md:p-14 relative flex flex-col justify-between overflow-hidden border border-black/10 dark:border-white/[0.08] backdrop-blur-2xl bg-[var(--card-bg)] dark:bg-[#090a0b] shadow-xl dark:shadow-none">
             {/* Header Telemetry */}
-            <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-slate-400 uppercase">
+            <div className="flex items-center justify-between text-[11px] font-mono tracking-widest text-slate-500 dark:text-slate-400 uppercase">
               <span>ORG // 04 [LEADERSHIP]</span>
               <span>EXECUTIVE COUNCIL</span>
             </div>
@@ -697,14 +697,14 @@ export default function Home() {
                 <span className="text-xs uppercase tracking-[0.3em] font-bold text-red-500">
                   Executive Roster
                 </span>
-                <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-black uppercase tracking-[-0.03em] leading-none text-white">
+                <h2 className="font-display text-4xl sm:text-5xl md:text-6xl font-black uppercase tracking-[-0.03em] leading-none text-slate-900 dark:text-white">
                   Leadership.
                 </h2>
               </div>
 
               {/* Dynamic Officer Spotlight: 50/50 True Editorial Split (No Boxy Sub-Card) */}
               {officersLoading ? (
-                <div className="p-8 text-center text-xs text-slate-400">
+                <div className="p-8 text-center text-xs text-slate-500 dark:text-slate-400">
                   <div className="h-6 w-6 animate-spin rounded-full border-2 border-red-500/30 border-t-red-500 mx-auto mb-2" />
                   Loading Council Directory...
                 </div>
@@ -716,7 +716,7 @@ export default function Home() {
                 >
                   {/* Left: 5 Cols - Tall Stylish Portrait */}
                   <div className="lg:col-span-5 flex justify-center lg:justify-start">
-                    <div className="relative h-72 sm:h-80 md:h-[380px] w-60 sm:w-72 md:w-full max-w-sm rounded-3xl overflow-hidden border border-white/20 shadow-2xl group">
+                    <div className="relative h-72 sm:h-80 md:h-[380px] w-60 sm:w-72 md:w-full max-w-sm rounded-3xl overflow-hidden border border-black/15 dark:border-white/20 shadow-2xl group">
                       <img
                         src={currentOfficer.image}
                         alt={currentOfficer.name}
@@ -738,24 +738,24 @@ export default function Home() {
                   {/* Right: 7 Cols - Massive Bold Typography & Details */}
                   <div className="lg:col-span-7 space-y-4 text-center lg:text-left">
                     <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3">
-                      <span className="px-3.5 py-1.5 rounded-full bg-red-600/20 border border-red-500/40 text-red-300 text-xs font-black uppercase tracking-widest shadow-[0_0_15px_rgba(239,68,68,0.25)]">
+                      <span className="px-3.5 py-1.5 rounded-full bg-red-600/10 dark:bg-red-600/20 border border-red-500/40 text-red-600 dark:text-red-300 text-xs font-black uppercase tracking-widest shadow-[0_0_15px_rgba(239,68,68,0.2)]">
                         {currentOfficer.role}
                       </span>
-                      <span className="text-xs text-slate-400 font-mono tracking-wider">
+                      <span className="text-xs text-slate-500 dark:text-slate-400 font-mono tracking-wider">
                         // {currentOfficer.yearLevel}
                       </span>
                     </div>
 
                     <div>
-                      <h3 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black text-white uppercase tracking-tight leading-[0.9]">
+                      <h3 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white uppercase tracking-tight leading-[0.9]">
                         {currentOfficer.name}
                       </h3>
-                      <p className="text-xs font-mono text-slate-400 uppercase tracking-widest mt-2">
+                      <p className="text-xs font-mono text-slate-500 dark:text-slate-400 uppercase tracking-widest mt-2">
                         {currentOfficer.department}
                       </p>
                     </div>
 
-                    <p className="font-sans text-sm sm:text-base text-slate-300 max-w-xl leading-relaxed font-light">
+                    <p className="font-sans text-sm sm:text-base text-slate-600 dark:text-slate-300 max-w-xl leading-relaxed font-light">
                       {currentOfficer.bio}
                     </p>
 
@@ -768,7 +768,7 @@ export default function Home() {
                               prev === 0 ? featuredOfficers.length - 1 : prev - 1
                             )
                           }
-                          className="h-10 w-10 rounded-full border border-white/20 hover:border-red-500/60 hover:bg-red-600/10 text-white transition-all flex items-center justify-center cursor-pointer active:scale-95"
+                          className="h-10 w-10 rounded-full border border-black/20 dark:border-white/20 hover:border-red-500/60 hover:bg-red-600/10 text-slate-900 dark:text-white transition-all flex items-center justify-center cursor-pointer active:scale-95"
                           aria-label="Previous officer"
                         >
                           &larr;
@@ -777,15 +777,15 @@ export default function Home() {
                           onClick={() =>
                             setActiveOfficerIdx((prev) => (prev + 1) % featuredOfficers.length)
                           }
-                          className="h-10 w-10 rounded-full border border-white/20 hover:border-red-500/60 hover:bg-red-600/10 text-white transition-all flex items-center justify-center cursor-pointer active:scale-95"
+                          className="h-10 w-10 rounded-full border border-black/20 dark:border-white/20 hover:border-red-500/60 hover:bg-red-600/10 text-slate-900 dark:text-white transition-all flex items-center justify-center cursor-pointer active:scale-95"
                           aria-label="Next officer"
                         >
                           &rarr;
                         </button>
                       </div>
 
-                      <div className="text-xs font-mono text-slate-400 tracking-widest">
-                        <span className="text-white font-bold">
+                      <div className="text-xs font-mono text-slate-500 dark:text-slate-400 tracking-widest">
+                        <span className="text-slate-900 dark:text-white font-bold">
                           {String(activeOfficerIdx + 1).padStart(2, '0')}
                         </span>{' '}
                         /{' '}
@@ -807,7 +807,7 @@ export default function Home() {
                               className={`relative h-11 w-11 rounded-xl overflow-hidden border transition-all cursor-pointer shrink-0 ${
                                 activeOfficerIdx === idx
                                   ? 'border-red-500 scale-110 shadow-[0_0_16px_rgba(239,68,68,0.6)]'
-                                  : 'border-white/20 opacity-50 hover:opacity-100 hover:scale-105'
+                                  : 'border-black/20 dark:border-white/20 opacity-50 hover:opacity-100 hover:scale-105'
                               }`}
                               title={person.name}
                             >
@@ -830,7 +830,7 @@ export default function Home() {
             </div>
 
             {/* Quick Navigation CTAs */}
-            <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-white/[0.06]">
+            <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-black/10 dark:border-white/[0.06]">
               <div className="flex flex-wrap items-center gap-4">
                 <Link
                   href="/portfolio"
@@ -840,7 +840,7 @@ export default function Home() {
                 </Link>
                 <Link
                   href="/events"
-                  className="px-6 py-3 rounded-full border border-white/20 bg-white/5 text-slate-200 font-semibold text-xs uppercase tracking-widest hover:bg-white/10 transition-all cursor-pointer"
+                  className="px-6 py-3 rounded-full border border-black/20 bg-black/5 text-slate-800 hover:bg-black/10 dark:border-white/20 dark:bg-white/5 dark:text-slate-200 font-semibold text-xs uppercase tracking-widest dark:hover:bg-white/10 transition-all cursor-pointer"
                 >
                   Upcoming Events
                 </Link>
@@ -853,7 +853,7 @@ export default function Home() {
         </section>
 
         {/* ── SECTION CUT: STACK TO FOOTER ── */}
-        <div className="w-full border-t border-white/10 relative z-20" />
+        <div className="w-full border-t border-black/10 dark:border-white/10 relative z-20" />
         <div className="fixed right-4 sm:right-6 top-1/2 -translate-y-1/2 z-40 hidden md:flex flex-col items-center gap-3 pointer-events-auto">
           <div className="text-[9px] font-mono tracking-widest text-slate-500 uppercase rotate-90 mb-4 origin-center">
             RULER // 04
@@ -877,7 +877,7 @@ export default function Home() {
                   className={`font-mono text-[10px] tracking-wider transition-all duration-300 ${
                     isActive
                       ? 'text-red-500 font-black scale-125'
-                      : 'text-slate-600 hover:text-slate-300'
+                      : 'text-slate-500 dark:text-slate-600 hover:text-slate-900 dark:hover:text-slate-300'
                   }`}
                 >
                   {item.tick}
@@ -886,18 +886,18 @@ export default function Home() {
                   className={`ml-2 h-[2px] transition-all duration-300 ${
                     isActive
                       ? 'w-5 bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]'
-                      : 'w-2 bg-white/20 group-hover:w-3 group-hover:bg-white/40'
+                      : 'w-2 bg-black/20 dark:bg-white/20 group-hover:w-3 group-hover:bg-black/40 dark:group-hover:bg-white/40'
                   }`}
                 />
                 {/* Tooltip on hover */}
-                <span className="absolute right-full mr-3 hidden group-hover:block px-2.5 py-1 rounded bg-[#090a0b] border border-white/20 text-[9px] font-mono tracking-widest uppercase text-white whitespace-nowrap shadow-xl z-50">
+                <span className="absolute right-full mr-3 hidden group-hover:block px-2.5 py-1 rounded bg-white dark:bg-[#090a0b] border border-black/20 dark:border-white/20 text-[9px] font-mono tracking-widest uppercase text-slate-900 dark:text-white whitespace-nowrap shadow-xl z-50">
                   {item.tick} // {item.label}
                 </span>
               </button>
             );
           })}
 
-          <div className="h-8 w-[1px] bg-gradient-to-b from-white/20 via-red-500/40 to-transparent mt-2" />
+          <div className="h-8 w-[1px] bg-gradient-to-b from-black/20 dark:from-white/20 via-red-500/40 to-transparent mt-2" />
           <div className="text-[9px] font-mono text-red-500/80 font-bold">
             {String(Math.round((activeCardIndex / 3) * 100)).padStart(2, '0')}%
           </div>

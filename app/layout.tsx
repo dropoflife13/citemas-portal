@@ -39,7 +39,7 @@ export default function RootLayout({
       </head>
       <body
         suppressHydrationWarning
-        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-transparent text-ink relative overflow-x-clip`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen flex flex-col bg-[var(--background)] text-[var(--foreground)] transition-colors duration-300 relative overflow-x-clip`}
       >
         <AuthProvider>
           <ToastProvider>
@@ -51,8 +51,8 @@ export default function RootLayout({
             {/* Global Scroll Progress Spine */}
             <ScrollSpine />
 
-            {/* Main Content (pt-20 offsets the fixed navbar) */}
-            <main className="relative z-10 flex-1 flex flex-col pt-20">{children}</main>
+            {/* Main Content (pt-16 matches the fixed h-16 navbar with zero gap) */}
+            <main className="relative z-10 flex-1 flex flex-col pt-16">{children}</main>
 
             <ConditionalFooter />
           </ToastProvider>
