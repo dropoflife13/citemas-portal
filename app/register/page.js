@@ -225,7 +225,7 @@ export default function RegisterPage() {
               <>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-5">
                   <Field label="Student ID">
-                    <input name="studentId" placeholder="04-2122-033338" value={form.studentId} onChange={handleChange} pattern="04-[0-9]{4}-[0-9]{6}" title="Use the format 04-2122-033338" required className={inputClass} />
+                    <input name="studentId" placeholder="e.g. 04-1617-05471 or 04-2122-033338" value={form.studentId} onChange={handleChange} pattern="04-[0-9]{4}-[0-9]{4,7}" title="Use your PHINMA Student ID format (e.g., 04-1617-05471 or 04-2122-033338)" required className={inputClass} />
                   </Field>
 
                   <Field label="Year Level">
