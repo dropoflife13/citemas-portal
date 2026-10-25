@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import Link from 'next/link';
 import { useAuth } from '@/lib/AuthContext';
@@ -24,53 +24,8 @@ export default function Navbar() {
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [container, setContainer] = useState(null);
-  const [isVisible, setIsVisible] = useState(true);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const lastScrollYRef = useRef(0);
 
   useBodyScrollLock(isDrawerOpen);
-
-  // Smart scroll-synchronization hook (ArtCraft style: hides on scroll down, reveals on scroll up)
-  useEffect(() => {
-    let ticking = false;
-
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          const currentScrollY = window.scrollY;
-          const previousScrollY = lastScrollYRef.current;
-          const delta = currentScrollY - previousScrollY;
-
-          // Subtle blur and shadow background when scrolled
-          setIsScrolled(currentScrollY > 20);
-
-          // Keep navbar visible if drawer is open
-          if (isDrawerOpen) {
-            setIsVisible(true);
-          } else if (currentScrollY <= 20) {
-            // At the top of the page: always visible
-            setIsVisible(true);
-          } else if (currentScrollY > 64) {
-            // Scrolling DOWN past threshold: slide out of view
-            if (delta > 8) {
-              setIsVisible(false);
-            }
-            // Scrolling UP: immediately slide into view and follow
-            else if (delta < -8) {
-              setIsVisible(true);
-            }
-          }
-
-          lastScrollYRef.current = currentScrollY;
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isDrawerOpen]);
 
   // Setup SSR-safe portal container
   useEffect(() => {
@@ -122,17 +77,10 @@ export default function Navbar() {
       ];
 
   return (
-    <>
-      <nav
-        id="site-nav"
-        className={`fixed top-0 inset-x-0 w-full z-50 transition-transform duration-300 ease-in-out will-change-transform px-6 py-3.5 sm:px-8 text-[12px] font-semibold uppercase tracking-widest ${
-          isVisible ? 'translate-y-0' : '-translate-y-full'
-        } ${
-          isScrolled
-            ? 'bg-[#090a0b]/95 backdrop-blur-md border-b border-white/10 shadow-lg shadow-black/50'
-            : 'bg-[#090a0b]/80 backdrop-blur-sm border-b border-white/5'
-        }`}
-      >
+    <nav
+      id="site-nav"
+      className="relative w-full z-30 border-b border-white/10 bg-[#090a0b]/95 backdrop-blur-md px-6 py-3.5 sm:px-8 text-[12px] font-semibold uppercase tracking-widest"
+    >
       <div className="mx-auto flex h-11 max-w-7xl items-center justify-between gap-4">
         {/* Left — Brand Logo */}
         <Link
@@ -432,11 +380,6 @@ export default function Navbar() {
           </div>,
           container
         )}
-      </nav>
-      {/* Phantom spacer for inner routes so content begins cleanly below the fixed header */}
-      {pathname && pathname !== '/' && (
-        <div className="h-16 sm:h-[68px] w-full shrink-0" aria-hidden="true" />
-      )}
-    </>
+    </nav>
   );
 }

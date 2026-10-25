@@ -290,7 +290,7 @@ export default function Home() {
           id="hero"
           onMouseMove={handleHeroMouseMove}
           onMouseLeave={handleHeroMouseLeave}
-          className="sticky top-0 min-h-screen h-screen w-full flex flex-col justify-between px-6 sm:px-12 md:px-16 lg:px-24 pt-20 sm:pt-24 pb-20 sm:pb-24 overflow-hidden relative"
+          className="sticky top-0 min-h-screen h-screen w-full flex flex-col justify-between px-6 sm:px-12 md:px-16 lg:px-24 pt-6 sm:pt-8 pb-20 sm:pb-24 overflow-hidden relative"
           style={{
             transform: `scale(${1 - cardProgress[0] * 0.08})`,
             filter: `brightness(${1 - cardProgress[0] * 0.45})`,
@@ -435,7 +435,7 @@ export default function Home() {
           </div>
 
           {/* Hero Typography & CTAs (z-20) */}
-          <div className="relative z-20 my-auto w-full max-w-2xl lg:max-w-3xl space-y-6 pointer-events-auto pb-12">
+          <div className="relative z-20 my-auto w-full max-w-2xl lg:max-w-3xl space-y-5 sm:space-y-6 pointer-events-auto pb-14 sm:pb-16">
             <div className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 backdrop-blur-md">
               <span className="h-2 w-2 rounded-full bg-red-500 animate-ping" />
               <span className="text-[11px] font-mono tracking-widest text-slate-300 uppercase">
@@ -445,10 +445,7 @@ export default function Home() {
 
             <div className="space-y-4">
               <h1 className="font-display text-5xl sm:text-7xl md:text-8xl lg:text-[7.5rem] font-black uppercase tracking-tighter leading-[0.88] text-white drop-shadow-2xl">
-                CITEMAS{' '}
-                <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-400 to-white lowercase tracking-normal">
-                  studio
-                </span>
+                CITEMAS
                 <br />
                 THE CONTROL THAT MERE{' '}
                 <span className="font-serif italic font-normal text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500 lowercase tracking-normal">
@@ -478,30 +475,24 @@ export default function Home() {
                   Join the Org
                 </Link>
               )}
-              <div className="flex items-center gap-2 text-xs font-mono text-slate-400 pl-2">
-                <span className="h-1.5 w-1.5 rounded-full bg-cyan-400 animate-pulse" />
-                <span>10°42&apos;N 122°34&apos;E // ILOILO</span>
-              </div>
             </div>
           </div>
 
           {/* ── FULL-WIDTH HORIZONTAL MARQUEE TICKER (Edge-to-edge across base of Hero) ── */}
-          <div className="absolute bottom-0 left-0 w-full z-30 border-t border-white/10 bg-[#090a0b]/95 backdrop-blur-md py-3 sm:py-3.5 overflow-hidden">
-            <div
-              className="w-full overflow-hidden"
-              style={{
-                maskImage: 'linear-gradient(to right, transparent, black 6%, black 94%, transparent)',
-                WebkitMaskImage: 'linear-gradient(to right, transparent, black 6%, black 94%, transparent)',
-              }}
-            >
-              <div className="flex whitespace-nowrap min-w-full animate-marquee font-mono text-[11px] sm:text-[12px] font-bold tracking-[0.28em] uppercase text-white/80">
-                <span className="mx-6 flex items-center gap-4">
-                  DIGITAL ARTS <span className="text-red-500">•</span> 3D ANIMATION <span className="text-orange-400">•</span> VIDEOGRAPHY <span className="text-red-500">•</span> PHOTOGRAPHY <span className="text-orange-400">•</span> VOICE ACTING <span className="text-red-500">•</span> TRADITIONAL ARTS <span className="text-red-500">•</span> CREATIVE CODING <span className="text-orange-400">•</span> SOUND DESIGN <span className="text-red-500">•</span>
-                </span>
-                <span className="mx-6 flex items-center gap-4">
-                  DIGITAL ARTS <span className="text-red-500">•</span> 3D ANIMATION <span className="text-orange-400">•</span> VIDEOGRAPHY <span className="text-red-500">•</span> PHOTOGRAPHY <span className="text-orange-400">•</span> VOICE ACTING <span className="text-red-500">•</span> TRADITIONAL ARTS <span className="text-red-500">•</span> CREATIVE CODING <span className="text-orange-400">•</span> SOUND DESIGN <span className="text-red-500">•</span>
-                </span>
-              </div>
+          <div
+            className="absolute bottom-0 left-0 w-full z-30 border-t border-white/10 bg-[#090a0b]/95 backdrop-blur-md py-3 sm:py-3.5 overflow-hidden"
+            style={{
+              maskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
+              WebkitMaskImage: 'linear-gradient(to right, transparent, black 10%, black 90%, transparent)',
+            }}
+          >
+            <div className="flex whitespace-nowrap min-w-full animate-marquee font-mono text-[11px] sm:text-[12px] font-bold tracking-[0.28em] uppercase text-white/80">
+              <span className="mx-6 flex items-center gap-4">
+                DIGITAL ARTS <span className="text-red-500">•</span> 3D ANIMATION <span className="text-orange-400">•</span> VIDEOGRAPHY <span className="text-red-500">•</span> PHOTOGRAPHY <span className="text-orange-400">•</span> VOICE ACTING <span className="text-red-500">•</span> TRADITIONAL ARTS <span className="text-red-500">•</span> CREATIVE CODING <span className="text-orange-400">•</span> SOUND DESIGN <span className="text-red-500">•</span>
+              </span>
+              <span className="mx-6 flex items-center gap-4">
+                DIGITAL ARTS <span className="text-red-500">•</span> 3D ANIMATION <span className="text-orange-400">•</span> VIDEOGRAPHY <span className="text-red-500">•</span> PHOTOGRAPHY <span className="text-orange-400">•</span> VOICE ACTING <span className="text-red-500">•</span> TRADITIONAL ARTS <span className="text-red-500">•</span> CREATIVE CODING <span className="text-orange-400">•</span> SOUND DESIGN <span className="text-red-500">•</span>
+              </span>
             </div>
           </div>
         </section>
