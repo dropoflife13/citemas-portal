@@ -171,7 +171,7 @@ export default function Home() {
   };
 
   return (
-    <div className="relative bg-[#070305] text-[#FDFBF7] overflow-x-clip">
+    <div className="relative bg-[#070305] text-[#FDFBF7] overflow-x-clip -mt-20">
       {/* ── CSS Animations for Starfield, Marquee & 3D Centerpiece ── */}
       <style jsx global>{`
         @keyframes driftStars {
@@ -299,7 +299,7 @@ export default function Home() {
           id="hero"
           onMouseMove={handleHeroMouseMove}
           onMouseLeave={handleHeroMouseLeave}
-          className="sticky top-0 min-h-screen h-screen w-full flex flex-col justify-between px-6 sm:px-12 md:px-16 lg:px-24 pt-1 sm:pt-2 pb-14 overflow-hidden relative"
+          className="sticky top-0 min-h-screen h-screen w-full flex flex-col justify-between px-6 sm:px-12 md:px-16 lg:px-24 pt-20 pb-14 overflow-hidden relative"
           style={{
             transform: `scale(${1 - cardProgress[0] * 0.08})`,
             filter: `brightness(${1 - cardProgress[0] * 0.45})`,
