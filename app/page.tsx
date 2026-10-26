@@ -618,7 +618,7 @@ export default function Home() {
                   num: '01',
                   name: 'Digital Arts',
                   subtitle: 'Concept Art, UI/UX & Vector Design',
-                  video: '/videos/3d.mp4',
+                  video: '/videos/digital.mp4',
                   tag: 'DIGITAL STUDIO // REEL',
                 },
                 {
