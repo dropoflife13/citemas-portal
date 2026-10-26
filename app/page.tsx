@@ -76,6 +76,50 @@ export default function Home() {
   const [cardProgress, setCardProgress] = useState<number[]>([0, 0, 0, 0]);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
 
+  // Specializations Hover Video Dropdown State (10-second cut)
+  const MAX_CLIP_SECONDS = 10;
+  const [hoveredTrack, setHoveredTrack] = useState<string | null>(null);
+  const [clipTime, setClipTime] = useState<number>(0);
+  const trackVideoRefs = useRef<Record<string, HTMLVideoElement | null>>({});
+
+  const handleTrackEnter = (num: string) => {
+    // Pause any previously playing track video
+    Object.entries(trackVideoRefs.current).forEach(([key, vid]) => {
+      if (vid && key !== num) {
+        vid.pause();
+        vid.currentTime = 0;
+      }
+    });
+    setHoveredTrack(num);
+    setClipTime(0);
+    const videoEl = trackVideoRefs.current[num];
+    if (videoEl) {
+      videoEl.currentTime = 0;
+      videoEl.play().catch(() => {});
+    }
+  };
+
+  const handleTrackLeave = (num: string) => {
+    const videoEl = trackVideoRefs.current[num];
+    if (videoEl) {
+      videoEl.pause();
+      videoEl.currentTime = 0;
+    }
+    setHoveredTrack((prev) => (prev === num ? null : prev));
+    setClipTime(0);
+  };
+
+  const handleTrackTimeUpdate = (num: string, e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const vid = e.currentTarget;
+    if (vid.currentTime >= MAX_CLIP_SECONDS) {
+      vid.currentTime = 0;
+      vid.play().catch(() => {});
+    }
+    if (hoveredTrack === num) {
+      setClipTime(Math.min(MAX_CLIP_SECONDS, vid.currentTime));
+    }
+  };
+
   // Fetch Officers
   useEffect(() => {
     const controller = new AbortController();
@@ -567,33 +611,169 @@ export default function Home() {
               </h2>
             </div>
 
-            {/* Huge Full-Width Editorial Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-1 my-auto">
+            {/* Huge Full-Width Editorial Grid with Hover 10s Video Dropdowns */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-1 my-auto items-start">
               {[
-                { num: '01', name: 'Digital Arts', subtitle: 'Concept Art, UI/UX & Vector Design' },
-                { num: '02', name: '3D Animation', subtitle: 'Modeling, Rigging & Spatial CGI' },
-                { num: '03', name: 'Videography', subtitle: 'Cinematography, Directing & Editing' },
-                { num: '04', name: 'Photography', subtitle: 'Studio Lighting, Portraiture & Color' },
-                { num: '05', name: 'Voice Acting', subtitle: 'Audio Drama, Dubbing & Sound Design' },
-                { num: '06', name: 'Traditional Arts', subtitle: 'Illustration, Painting & Sculpture' },
-              ].map((track) => (
-                <div
-                  key={track.num}
-                  className="border-b border-black/10 dark:border-white/10 py-5 sm:py-6 flex items-baseline justify-between group cursor-pointer transition-all duration-300 hover:border-red-500/60 hover:pl-3"
-                >
-                  <div className="flex items-baseline gap-4">
-                    <span className="font-mono text-lg sm:text-xl font-bold text-red-500/80 group-hover:text-red-500 dark:group-hover:text-red-400 transition-colors">
-                      {track.num}
-                    </span>
-                    <span className="font-display text-3xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight text-slate-900 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-400 transition-colors">
-                      {track.name}
-                    </span>
+                {
+                  num: '01',
+                  name: 'Digital Arts',
+                  subtitle: 'Concept Art, UI/UX & Vector Design',
+                  video: '/videos/3d.mp4',
+                  tag: 'DIGITAL STUDIO // REEL',
+                },
+                {
+                  num: '02',
+                  name: '3D Animation',
+                  subtitle: 'Modeling, Rigging & Spatial CGI',
+                  video: '/videos/3d.mp4',
+                  tag: 'SPATIAL CGI // 3D SHOWREEL',
+                },
+                {
+                  num: '03',
+                  name: 'Videography',
+                  subtitle: 'Cinematography, Directing & Editing',
+                  video: '/videos/3d.mp4',
+                  tag: 'CINEMA // PRODUCTION CUT',
+                },
+                {
+                  num: '04',
+                  name: 'Photography',
+                  subtitle: 'Studio Lighting, Portraiture & Color',
+                  video: '/videos/3d.mp4',
+                  tag: 'OPTICS // STUDIO SESSION',
+                },
+                {
+                  num: '05',
+                  name: 'Voice Acting',
+                  subtitle: 'Audio Drama, Dubbing & Sound Design',
+                  video: '/videos/3d.mp4',
+                  tag: 'ACOUSTICS // BOOTH REEL',
+                },
+                {
+                  num: '06',
+                  name: 'Traditional Arts',
+                  subtitle: 'Illustration, Painting & Sculpture',
+                  video: '/videos/3d.mp4',
+                  tag: 'ATELIER // FINE CRAFT',
+                },
+              ].map((track) => {
+                const isHovered = hoveredTrack === track.num;
+                const progressPct = isHovered
+                  ? Math.min(100, (clipTime / MAX_CLIP_SECONDS) * 100)
+                  : 0;
+
+                return (
+                  <div
+                    key={track.num}
+                    onMouseEnter={() => handleTrackEnter(track.num)}
+                    onMouseLeave={() => handleTrackLeave(track.num)}
+                    onClick={() =>
+                      isHovered ? handleTrackLeave(track.num) : handleTrackEnter(track.num)
+                    }
+                    className={`border-b transition-all duration-300 cursor-pointer group ${
+                      isHovered
+                        ? 'border-red-500/80 py-3 sm:py-4 pl-2'
+                        : hoveredTrack
+                        ? 'border-black/10 dark:border-white/10 py-3 sm:py-3.5 opacity-60 hover:opacity-100'
+                        : 'border-black/10 dark:border-white/10 py-5 sm:py-6 hover:border-red-500/60 hover:pl-3'
+                    }`}
+                  >
+                    <div className="flex items-baseline justify-between gap-3">
+                      <div className="flex items-baseline gap-4">
+                        <span
+                          className={`font-mono text-lg sm:text-xl font-bold transition-colors ${
+                            isHovered
+                              ? 'text-red-500 dark:text-red-400'
+                              : 'text-red-500/80 group-hover:text-red-500 dark:group-hover:text-red-400'
+                          }`}
+                        >
+                          {track.num}
+                        </span>
+                        <span
+                          className={`font-display text-3xl sm:text-4xl lg:text-5xl font-black uppercase tracking-tight transition-colors ${
+                            isHovered
+                              ? 'text-red-600 dark:text-red-400'
+                              : 'text-slate-900 dark:text-white group-hover:text-red-600 dark:group-hover:text-red-400'
+                          }`}
+                        >
+                          {track.name}
+                        </span>
+                      </div>
+                      <span
+                        className={`text-xs font-mono uppercase tracking-wider hidden sm:inline transition-colors ${
+                          isHovered
+                            ? 'text-slate-900 dark:text-slate-200'
+                            : 'text-slate-600 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-slate-200'
+                        }`}
+                      >
+                        {track.subtitle}
+                      </span>
+                    </div>
+
+                    {/* Smooth Hover Dropdown Video Showcase (10-Second Cut) */}
+                    <div
+                      className={`grid transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
+                        isHovered
+                          ? 'grid-rows-[1fr] opacity-100 mt-3.5'
+                          : 'grid-rows-[0fr] opacity-0 mt-0'
+                      }`}
+                    >
+                      <div className="overflow-hidden">
+                        <div className="relative w-full h-36 sm:h-44 lg:h-48 rounded-2xl overflow-hidden border border-black/15 dark:border-white/15 bg-black shadow-2xl">
+                          <video
+                            ref={(el) => {
+                              trackVideoRefs.current[track.num] = el;
+                            }}
+                            src={`${track.video}#t=0,${MAX_CLIP_SECONDS}`}
+                            muted
+                            playsInline
+                            preload="metadata"
+                            onTimeUpdate={(e) => handleTrackTimeUpdate(track.num, e)}
+                            onEnded={(e) => {
+                              e.currentTarget.currentTime = 0;
+                              e.currentTarget.play().catch(() => {});
+                            }}
+                            className="w-full h-full object-cover transform transition-transform duration-700 scale-100 group-hover:scale-105"
+                          />
+
+                          {/* Subtle Vignette & Telemetry Overlay */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/15 to-black/40 pointer-events-none" />
+
+                          {/* Top Telemetry Bar */}
+                          <div className="absolute top-3 left-3.5 right-3.5 flex items-center justify-between pointer-events-none">
+                            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-black/65 border border-white/15 backdrop-blur-md">
+                              <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-ping" />
+                              <span className="text-[10px] font-mono font-bold tracking-widest text-white uppercase">
+                                {track.tag}
+                              </span>
+                            </div>
+                            <div className="px-2.5 py-1 rounded-full bg-black/65 border border-white/15 backdrop-blur-md text-[10px] font-mono text-white/90 tracking-widest">
+                              00:{String(Math.floor(clipTime)).padStart(2, '0')} / 00:{MAX_CLIP_SECONDS}S CUT
+                            </div>
+                          </div>
+
+                          {/* Bottom Caption & 10-Second Progress Bar */}
+                          <div className="absolute bottom-3 left-3.5 right-3.5 flex items-center justify-between pointer-events-none">
+                            <span className="text-[11px] font-mono text-white/90 uppercase tracking-wider">
+                              {track.subtitle}
+                            </span>
+                            <span className="text-[10px] font-mono text-red-400 uppercase tracking-widest font-semibold">
+                              10S PREVIEW LOOP
+                            </span>
+                          </div>
+
+                          <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/15 pointer-events-none">
+                            <div
+                              className="h-full bg-gradient-to-r from-red-600 via-orange-500 to-red-400 transition-all duration-150 ease-linear"
+                              style={{ width: `${progressPct}%` }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <span className="text-xs font-mono text-slate-600 dark:text-slate-400 uppercase tracking-wider hidden sm:inline group-hover:text-slate-900 dark:group-hover:text-slate-200 transition-colors">
-                    {track.subtitle}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="flex items-center justify-between text-xs font-mono text-slate-500 pt-4 border-t border-black/10 dark:border-white/[0.06]">
