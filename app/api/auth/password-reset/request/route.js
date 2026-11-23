@@ -12,7 +12,7 @@ import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
 
-const GENERIC_MESSAGE = 'If an eligible CITEMAS account exists for that email, a verification code has been sent.';
+const SUCCESS_MESSAGE = 'A 6-digit verification code has been sent to your school email.';
 
 export async function POST(req) {
   try {
@@ -25,11 +25,16 @@ export async function POST(req) {
     await connectDB();
     const user = await User.findOne({ email }).select('+passwordResetLastRequestedAt');
 
-    if (!user) return NextResponse.json({ message: GENERIC_MESSAGE });
+    if (!user) {
+      return NextResponse.json(
+        { error: 'No account is associated with this email address.' },
+        { status: 404 }
+      );
+    }
 
     const now = new Date();
     if (user.passwordResetLastRequestedAt && now - user.passwordResetLastRequestedAt < PASSWORD_RESET_RESEND_DELAY_MS) {
-      return NextResponse.json({ message: 'Please wait one minute before requesting another code.' }, { status: 429 });
+      return NextResponse.json({ error: 'Please wait one minute before requesting another code.' }, { status: 429 });
     }
 
     const code = createPasswordResetCode();
@@ -50,7 +55,7 @@ export async function POST(req) {
       await user.save();
       throw mailError;
     }
-    return NextResponse.json({ message: GENERIC_MESSAGE });
+    return NextResponse.json({ message: SUCCESS_MESSAGE });
   } catch (error) {
     console.error('Password reset code request failed:', error);
     const message = error instanceof Error ? error.message : 'Unable to send a verification code.';
