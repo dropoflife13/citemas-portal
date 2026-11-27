@@ -77,10 +77,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const logout = useCallback(() => {
+    const activeToken =
+      typeof window !== 'undefined' ? localStorage.getItem(STORAGE_KEYS.token) : null;
     localStorage.removeItem(STORAGE_KEYS.token);
     localStorage.removeItem(STORAGE_KEYS.user);
     setToken(null);
     setUser(null);
+
+    if (typeof window !== 'undefined') {
+      fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: activeToken ? { Authorization: `Bearer ${activeToken}` } : {},
+        keepalive: true,
+      }).catch(() => {});
+    }
   }, []);
 
   const refreshSession = useCallback(
