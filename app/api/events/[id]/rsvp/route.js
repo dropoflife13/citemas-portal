@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import connectDB from '@/lib/mongodb';
 import Event from '@/models/Event';
 import { getUserFromRequest } from '@/lib/auth';
+import { getFreshUser } from '@/lib/permissions';
 import { logActivity } from '@/lib/logActivity';
 import { NextResponse } from 'next/server';
 
@@ -28,6 +29,11 @@ export async function POST(req, { params }) {
         { error: 'Invalid event ID' },
         { status: 400 }
       );
+    }
+
+    const fresh = await getFreshUser(currentUser.id);
+    if (!fresh) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
     await connectDB();
@@ -142,6 +148,11 @@ export async function DELETE(req, { params }) {
         { error: 'Invalid event ID' },
         { status: 400 }
       );
+    }
+
+    const fresh = await getFreshUser(currentUser.id);
+    if (!fresh) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
     await connectDB();

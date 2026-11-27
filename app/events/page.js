@@ -159,16 +159,18 @@ export default function EventsPage() {
           uploadedUrls.push(data.url);
         } else {
           // Fallback if unsigned preset exists
-          const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || 'yapvq22n';
-          const fallbackData = new FormData();
-          fallbackData.append('file', file);
-          fallbackData.append('upload_preset', 'citemas_preset');
-          const fbRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-            method: 'POST',
-            body: fallbackData,
-          });
-          const fbJson = await fbRes.json();
-          if (fbJson.secure_url) uploadedUrls.push(fbJson.secure_url);
+          const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '';
+          if (cloudName) {
+            const fallbackData = new FormData();
+            fallbackData.append('file', file);
+            fallbackData.append('upload_preset', 'citemas_preset');
+            const fbRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+              method: 'POST',
+              body: fallbackData,
+            });
+            const fbJson = await fbRes.json();
+            if (fbJson.secure_url) uploadedUrls.push(fbJson.secure_url);
+          }
         }
       } catch (err) {
         console.error('Image upload failed:', err);

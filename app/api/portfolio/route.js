@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import connectDB from '@/lib/mongodb';
 import Portfolio from '@/models/Portfolio';
 import User from '@/models/User';
@@ -90,9 +91,12 @@ export async function POST(req) {
     if (!mediaUrl || !mediaUrl.trim()) {
       return NextResponse.json({ error: 'Media URL or upload is required' }, { status: 400 });
     }
+    if (!/^https:\/\//i.test(mediaUrl.trim())) {
+      return NextResponse.json({ error: 'Media URL must use https://' }, { status: 400 });
+    }
 
-    // Staff/officer creations are automatically approved; member submissions default to approved unless moderated
-    const initialStatus = STAFF_ROLES.includes(fresh.role) ? 'approved' : 'approved';
+    // Staff/officer creations are automatically approved; member submissions start pending moderation
+    const initialStatus = STAFF_ROLES.includes(fresh.role) ? 'approved' : 'pending';
 
     let ownerName = applicantName;
     let ownerEmail = applicantEmail || currentUser.email;
@@ -149,7 +153,7 @@ export async function PATCH(req) {
 
   try {
     const { id, status, feedback } = await req.json();
-    if (!id || !['approved', 'rejected', 'pending'].includes(status)) {
+    if (!id || !mongoose.Types.ObjectId.isValid(id) || !['approved', 'rejected', 'pending'].includes(status)) {
       return NextResponse.json({ error: 'Valid id and status ("approved", "rejected", "pending") required' }, { status: 400 });
     }
 
@@ -176,7 +180,8 @@ export async function PATCH(req) {
 
     return NextResponse.json(updated);
   } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error('PATCH portfolio error:', err);
+    return NextResponse.json({ error: 'Failed to update portfolio' }, { status: 500 });
   }
 }
 
@@ -194,8 +199,8 @@ export async function DELETE(req) {
   try {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
-    if (!id) {
-      return NextResponse.json({ error: 'Portfolio ID required' }, { status: 400 });
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ error: 'Valid portfolio ID required' }, { status: 400 });
     }
 
     await connectDB();
@@ -231,6 +236,7 @@ export async function DELETE(req) {
 
     return NextResponse.json({ message: 'Portfolio deleted successfully' });
   } catch (err) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+    console.error('PATCH portfolio error:', err);
+    return NextResponse.json({ error: 'Failed to update portfolio' }, { status: 500 });
   }
 }

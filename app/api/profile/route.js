@@ -55,11 +55,7 @@ export async function GET(req) {
   } catch (error) {
     console.error('CRITICAL /api/profile GET Error:', error);
     return NextResponse.json(
-      {
-        message: 'Internal Server Error',
-        error: error.message,
-        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined,
-      },
+      { message: 'Internal Server Error' },
       { status: 500 }
     );
   }
@@ -106,8 +102,21 @@ export async function PATCH(req) {
     if (lastName !== undefined) updates.lastName = lastName.trim();
     if (phone !== undefined) updates.phone = phone.trim();
     if (bio !== undefined) updates.bio = bio.trim();
-    if (avatar !== undefined) updates.avatar = avatar.trim();
-    if (coverPhoto !== undefined) updates.coverPhoto = coverPhoto.trim();
+    const isSafeMediaUrl = (u) => u === '' || /^https:\/\//i.test(u) || u.startsWith('/');
+    if (avatar !== undefined) {
+      const trimmedAvatar = avatar.trim();
+      if (!isSafeMediaUrl(trimmedAvatar)) {
+        return NextResponse.json({ message: 'Avatar URL must use https:// or a relative path' }, { status: 400 });
+      }
+      updates.avatar = trimmedAvatar;
+    }
+    if (coverPhoto !== undefined) {
+      const trimmedCover = coverPhoto.trim();
+      if (!isSafeMediaUrl(trimmedCover)) {
+        return NextResponse.json({ message: 'Cover photo URL must use https:// or a relative path' }, { status: 400 });
+      }
+      updates.coverPhoto = trimmedCover;
+    }
     if (Array.isArray(portfolioImages)) {
       updates.portfolioImages = portfolioImages
         .filter((url) => typeof url === 'string' && url.trim().length > 0)
@@ -188,10 +197,7 @@ export async function PATCH(req) {
   } catch (error) {
     console.error('CRITICAL /api/profile PATCH Error:', error);
     return NextResponse.json(
-      {
-        message: 'Failed to update profile',
-        error: error.message,
-      },
+      { message: 'Failed to update profile' },
       { status: 500 }
     );
   }

@@ -59,7 +59,7 @@ export async function GET(req) {
 
     return NextResponse.json(
       {
-        message: 'Failed to fetch directory: ' + error.message,
+        message: 'Failed to fetch directory',
       },
       { status: 500 }
     );

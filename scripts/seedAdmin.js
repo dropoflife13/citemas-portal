@@ -26,8 +26,18 @@ const userSchema = new mongoose.Schema({
 }, { timestamps: true, strict: false });
 
 async function seedAdmin() {
-  const adminEmail = 'neilasis43@gmail.com';
-  const plainPassword = '12345678';
+  const adminEmail = process.env.SEED_ADMIN_EMAIL?.trim().toLowerCase();
+  const plainPassword = process.env.SEED_ADMIN_PASSWORD;
+
+  if (!adminEmail || !plainPassword) {
+    console.error('❌ SEED_ADMIN_EMAIL and SEED_ADMIN_PASSWORD must be set in environment or .env.local');
+    process.exit(1);
+  }
+  if (plainPassword.length < 12) {
+    console.error('❌ SEED_ADMIN_PASSWORD must be at least 12 characters long');
+    process.exit(1);
+  }
+
   const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
   const adminData = {
@@ -65,7 +75,7 @@ async function seedAdmin() {
   });
 
   const isMatch = await bcrypt.compare(plainPassword, updatedUser.password);
-  console.log(`Password verification ('${plainPassword}'):`, isMatch ? 'PASSED ✅' : 'FAILED ❌');
+  console.log('Password verification:', isMatch ? 'PASSED ✅' : 'FAILED ❌');
   await mongoose.disconnect();
 
   // If URI matches Atlas cluster, also ensure dev/test/local databases have it so all environments work seamlessly
@@ -93,8 +103,8 @@ async function seedAdmin() {
   }
 
   console.log('\n🎉 Admin seeding complete. You can now log in with:');
-  console.log('   Email:    neilasis43@gmail.com');
-  console.log('   Password: 12345678\n');
+  console.log(`   Email:    ${adminEmail}`);
+  console.log('   Password: (from SEED_ADMIN_PASSWORD)\n');
 }
 
 seedAdmin().catch((err) => {

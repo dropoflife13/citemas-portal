@@ -12,6 +12,7 @@ const achievementSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Portfolio',
       default: null,
+      index: true,
     },
     title: {
       type: String,

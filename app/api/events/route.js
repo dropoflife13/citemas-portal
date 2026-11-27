@@ -2,6 +2,8 @@ import connectDB from '@/lib/mongodb';
 import Event from '@/models/Event';
 import '@/models/User';
 import { getUserFromRequest } from '@/lib/auth';
+import { getFreshUser } from '@/lib/permissions';
+import { logActivity } from '@/lib/logActivity';
 import { NextResponse } from 'next/server';
 const CAN_MANAGE = ['officer', 'teacher', 'adviser', 'super_admin'];
 
@@ -18,9 +20,14 @@ export async function GET(req) {
   }
 
   try {
+    const fresh = await getFreshUser(currentUser.id);
+    if (!fresh) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
     await connectDB();
 
-    const isStaff = CAN_MANAGE.includes(currentUser.role);
+    const isStaff = CAN_MANAGE.includes(fresh.role);
     const events = await Event.find()
       .sort({ date: 1 })
       .populate('createdBy', 'firstName lastName')
@@ -68,7 +75,12 @@ export async function POST(req) {
     );
   }
 
-  if (!CAN_MANAGE.includes(currentUser.role)) {
+  const fresh = await getFreshUser(currentUser.id);
+  if (!fresh) {
+    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  }
+
+  if (!CAN_MANAGE.includes(fresh.role)) {
     return NextResponse.json(
       {
         error:
@@ -252,6 +264,15 @@ export async function POST(req) {
 
     await newEvent.save();
 
+    await logActivity({
+      req,
+      actor: currentUser,
+      action: 'event.created',
+      targetType: 'Event',
+      targetId: newEvent._id,
+      targetName: newEvent.title,
+      metadata: { location: newEvent.location, date: newEvent.date },
+    });
 
     // Populate creator before returning
     const createdEvent = await Event.findById(newEvent._id)

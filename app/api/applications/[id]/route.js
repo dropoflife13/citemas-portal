@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import connectDB from '@/lib/mongodb';
 import Application from '@/models/Application';
 import User from '@/models/User';
@@ -23,8 +24,12 @@ export async function PATCH(req, { params }) {
   }
 
   try {
-    await connectDB();
     const { id } = await params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ error: 'Invalid application ID' }, { status: 400 });
+    }
+
+    await connectDB();
     const { decision } = await req.json(); // "approved" or "rejected"
 
     if (!['approved', 'rejected'].includes(decision)) {
@@ -34,6 +39,13 @@ export async function PATCH(req, { params }) {
     const application = await Application.findById(id).populate('applicant', 'firstName lastName email role applicationStatus');
     if (!application) {
       return NextResponse.json({ error: 'Application not found' }, { status: 404 });
+    }
+
+    if (application.status !== 'pending') {
+      return NextResponse.json(
+        { error: `Application has already been ${application.status}` },
+        { status: 409 }
+      );
     }
 
     const applicant = application.applicant || {};
@@ -116,8 +128,12 @@ export async function DELETE(req, { params }) {
   }
 
   try {
-    await connectDB();
     const { id } = await params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return NextResponse.json({ error: 'Invalid application ID' }, { status: 400 });
+    }
+
+    await connectDB();
 
     const application = await Application.findById(id).populate('applicant', 'firstName lastName email role');
     if (!application) {

@@ -8,8 +8,8 @@ const applicationSchema = new mongoose.Schema({
     enum: ['traditional_arts', 'digital_arts', 'animation', 'voice_acting', 'videography', 'photography'],
     required: true,
   },
-  motivationLetter: { type: String, required: true },
-  portfolioLink: { type: String },
+  motivationLetter: { type: String, required: true, trim: true, maxlength: 5000 },
+  portfolioLink: { type: String, trim: true, maxlength: 500 },
   portfolioImages: { type: [String], default: [] },
 
   status: {

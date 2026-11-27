@@ -8,14 +8,18 @@ export default function CitemasLoader({
   const isSmall = size === 'sm';
 
   const content = (
-    <div className="flex flex-col items-center justify-center gap-4 select-none">
+    <div
+      role="status"
+      aria-busy="true"
+      className="flex flex-col items-center justify-center gap-4 select-none"
+    >
       <div className={`relative flex items-center justify-center ${isSmall ? 'h-14 w-14' : 'h-20 w-20'}`}>
         {/* Ambient Pulsing Crimson Halo */}
-        <div className="absolute inset-0 rounded-full bg-red-600/20 blur-xl animate-pulse" />
+        <div className="absolute inset-0 rounded-full bg-red-600/20 blur-xl animate-pulse motion-reduce:animate-none" />
 
         {/* Outer Rotating Orbital Ring */}
         <div
-          className={`absolute inset-0 rounded-full border-2 border-red-500/15 border-t-red-600 border-r-orange-500/70 animate-spin ${
+          className={`absolute inset-0 rounded-full border-2 border-red-500/15 border-t-red-600 border-r-orange-500/70 animate-spin motion-reduce:animate-none ${
             isSmall ? 'border-[2px]' : 'border-[2.5px]'
           }`}
         />
@@ -29,13 +33,13 @@ export default function CitemasLoader({
           alt="CITEMAS"
           className={`${
             isSmall ? 'h-7 w-7' : 'h-10 w-10'
-          } object-contain drop-shadow-[0_0_14px_rgba(220,38,38,0.65)] animate-pulse`}
+          } object-contain drop-shadow-[0_0_14px_rgba(220,38,38,0.65)] animate-pulse motion-reduce:animate-none`}
         />
       </div>
 
       {label && (
         <div className="flex items-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-ping" />
+          <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-ping motion-reduce:animate-none" />
           <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-slate-700 dark:text-red-200/90">
             {label}
           </p>

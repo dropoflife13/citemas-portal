@@ -2,6 +2,7 @@ import connectDB from '@/lib/mongodb';
 import Event from '@/models/Event';
 import '@/models/User';
 import { getUserFromRequest } from '@/lib/auth';
+import { getFreshUser } from '@/lib/permissions';
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import { logActivity } from '@/lib/logActivity';
@@ -34,6 +35,11 @@ export async function GET(req, { params }) {
       );
     }
 
+    const fresh = await getFreshUser(currentUser.id);
+    if (!fresh) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
     await connectDB();
 
     const event = await Event.findById(id)
@@ -47,9 +53,28 @@ export async function GET(req, { params }) {
       );
     }
 
+    const obj = event.toObject();
+    const isStaff = CAN_MANAGE.includes(fresh.role);
+    const isCreator = String(event.createdBy?._id || event.createdBy) === String(fresh._id);
+    const canSeePii = isStaff || isCreator;
+
+    const safeCreatedBy =
+      obj.createdBy && typeof obj.createdBy === 'object' && !canSeePii
+        ? { _id: obj.createdBy._id, firstName: obj.createdBy.firstName, lastName: obj.createdBy.lastName }
+        : obj.createdBy;
+
+    const safeAttendees = canSeePii
+      ? obj.attendees
+      : (obj.attendees || []).map((att) => ({
+          user: typeof att.user === 'object' ? att.user?._id : att.user,
+          registeredAt: att.registeredAt,
+        }));
+
     return NextResponse.json(
       {
-        ...event.toObject(),
+        ...obj,
+        createdBy: safeCreatedBy,
+        attendees: safeAttendees,
         attendeeCount: event.attendees?.length || 0,
       },
       { status: 200 }
@@ -92,6 +117,11 @@ export async function PATCH(req, { params }) {
       );
     }
 
+    const fresh = await getFreshUser(currentUser.id);
+    if (!fresh) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
     await connectDB();
 
     const event = await Event.findById(id);
@@ -108,10 +138,10 @@ export async function PATCH(req, { params }) {
     // -------------------------------------------------
 
     const isCreator =
-      event.createdBy.toString() === currentUser.id;
+      event.createdBy.toString() === String(fresh._id);
 
     const canManage =
-      CAN_MANAGE.includes(currentUser.role);
+      CAN_MANAGE.includes(fresh.role);
 
     if (!isCreator && !canManage) {
       return NextResponse.json(
@@ -337,6 +367,16 @@ export async function PATCH(req, { params }) {
 
     await event.save();
 
+    await logActivity({
+      req,
+      actor: currentUser,
+      action: 'event.updated',
+      targetType: 'Event',
+      targetId: event._id,
+      targetName: event.title,
+      metadata: { location: event.location, date: event.date },
+    });
+
 
     // -------------------------------------------------
     // Return updated event
@@ -392,6 +432,11 @@ export async function DELETE(req, { params }) {
       );
     }
 
+    const fresh = await getFreshUser(currentUser.id);
+    if (!fresh) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    }
+
     await connectDB();
 
     const event = await Event.findById(id);
@@ -408,10 +453,10 @@ export async function DELETE(req, { params }) {
     // -------------------------------------------------
 
     const isCreator =
-      event.createdBy.toString() === currentUser.id;
+      event.createdBy.toString() === String(fresh._id);
 
     const canManage =
-      CAN_MANAGE.includes(currentUser.role);
+      CAN_MANAGE.includes(fresh.role);
 
     if (!isCreator && !canManage) {
       return NextResponse.json(

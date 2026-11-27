@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import ActivityLog from '@/models/ActivityLog';
 import { getUserFromRequest } from '@/lib/auth';
+import { getFreshUser } from '@/lib/permissions';
 
 const ADMIN_ROLES = ['super_admin', 'teacher', 'adviser', 'officer'];
 
@@ -11,7 +12,12 @@ export async function GET(req) {
     return NextResponse.json({ message: 'Not authenticated' }, { status: 401 });
   }
 
-  if (!ADMIN_ROLES.includes(currentUser.role)) {
+  const fresh = await getFreshUser(currentUser.id);
+  if (!fresh) {
+    return NextResponse.json({ message: 'Not authenticated' }, { status: 401 });
+  }
+
+  if (!ADMIN_ROLES.includes(fresh.role)) {
     return NextResponse.json({ message: 'Admins only' }, { status: 403 });
   }
 
@@ -24,7 +30,10 @@ export async function GET(req) {
     const limit = Math.min(parseInt(url.searchParams.get('limit') || '100'), 500);
 
     const query = {};
-    if (action && action !== 'all') query.action = { $regex: `^${action}` };
+    if (action && action !== 'all') {
+      const escapedAction = action.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      query.action = { $regex: `^${escapedAction}` };
+    }
     if (actor) query.actor = actor;
 
     const logs = await ActivityLog.find(query)

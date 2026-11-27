@@ -1,8 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence, useScroll, useSpring, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useSpring, useTransform, useReducedMotion } from 'framer-motion';
 import { usePathname } from 'next/navigation';
+
+const HIDDEN_ROUTES = ['/login', '/register', '/forgot-password'];
 
 // Friendly uppercase labels for known IDs across the site
 const SECTION_LABELS = {
@@ -21,6 +23,7 @@ const SECTION_LABELS = {
 
 export default function ScrollSpine() {
   const pathname = usePathname();
+  const prefersReducedMotion = useReducedMotion();
   const { scrollYProgress } = useScroll();
   const smoothProgress = useSpring(scrollYProgress, {
     stiffness: 280,
@@ -137,21 +140,25 @@ export default function ScrollSpine() {
   // Position the floating label along the 60vh track from 0% to 100%
   const labelTop = useTransform(smoothProgress, [0, 1], ['0%', '100%']);
 
+  if (prefersReducedMotion || HIDDEN_ROUTES.includes(pathname)) {
+    return null;
+  }
+
   return (
     <aside
-      aria-label="Scroll Progress Spine"
+      aria-hidden="true"
       className="fixed right-8 top-0 h-screen w-4 z-[100] hidden md:flex flex-col items-center justify-center pointer-events-none select-none"
     >
       {/* Top Technical Anchor */}
-      <span className="font-mono text-[9px] text-white/30 tracking-widest mb-3 select-none">
+      <span className="font-mono text-[9px] text-slate-500 dark:text-white/40 tracking-widest mb-3 select-none">
         00
       </span>
 
       {/* The Track Container (60vh) */}
-      <div className="relative w-[1px] h-[60vh] bg-white/10 flex justify-center">
+      <div className="relative w-[1px] h-[60vh] bg-black/15 dark:bg-white/15 flex justify-center">
         {/* The Glowing Red Fill Line */}
         <motion.div
-          className="w-[2px] bg-[#dc2626] shadow-[0_0_12px_#dc2626] absolute top-0 origin-top"
+          className="w-[2px] bg-[#dc2626] absolute top-0 origin-top"
           style={{
             height: '100%',
             scaleY: smoothProgress,
@@ -160,7 +167,7 @@ export default function ScrollSpine() {
 
         {/* Small Leading Glow Node on the Fill */}
         <motion.div
-          className="absolute -left-[2px] w-[5px] h-[5px] rounded-full bg-[#dc2626] shadow-[0_0_8px_#dc2626] -translate-y-1/2 pointer-events-none"
+          className="absolute -left-[2px] w-[5px] h-[5px] rounded-full bg-[#dc2626] -translate-y-1/2 pointer-events-none"
           style={{ top: labelTop }}
         />
 
@@ -172,14 +179,14 @@ export default function ScrollSpine() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -10 }}
               transition={{ duration: 0.18 }}
-              className="absolute right-6 -translate-y-1/2 whitespace-nowrap bg-[#090a0b]/90 border border-white/10 px-2.5 py-1 rounded shadow-lg pointer-events-none flex items-center gap-1.5 backdrop-blur-md"
+              className="absolute right-6 -translate-y-1/2 whitespace-nowrap bg-white/95 dark:bg-[#090a0b]/90 border border-black/15 dark:border-white/15 px-2.5 py-1 rounded pointer-events-none flex items-center gap-1.5 backdrop-blur-md"
               style={{ top: labelTop }}
             >
               <span className="h-1.5 w-1.5 rounded-full bg-red-500 animate-pulse" />
               <span className="font-mono text-[9px] tracking-widest uppercase flex items-center gap-1.5">
-                <span className="text-white/60">{percentage}%</span>
-                <span className="text-white/30">//</span>
-                <span className="text-red-500 font-bold">{activeSection}</span>
+                <span className="text-slate-700 dark:text-white/70">{percentage}%</span>
+                <span className="text-slate-400 dark:text-white/30">//</span>
+                <span className="text-red-600 dark:text-red-500 font-bold">{activeSection}</span>
               </span>
             </motion.div>
           )}
@@ -187,7 +194,7 @@ export default function ScrollSpine() {
 
         {/* The Floating Percentage Label attached to the bottom of the fill line */}
         <motion.div
-          className="font-mono text-[10px] text-red-500 tracking-widest absolute -right-8 -translate-y-1/2 whitespace-nowrap pointer-events-none font-bold"
+          className="font-mono text-[10px] text-red-600 dark:text-red-500 tracking-widest absolute -right-8 -translate-y-1/2 whitespace-nowrap pointer-events-none font-bold"
           style={{ top: labelTop }}
         >
           {percentage}%
@@ -195,7 +202,7 @@ export default function ScrollSpine() {
       </div>
 
       {/* Bottom Technical Anchor */}
-      <span className="font-mono text-[9px] text-white/30 tracking-widest mt-3 select-none">
+      <span className="font-mono text-[9px] text-slate-500 dark:text-white/40 tracking-widest mt-3 select-none">
         100
       </span>
     </aside>

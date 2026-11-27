@@ -4,9 +4,19 @@ import { generateToken } from '@/lib/auth';
 import { logActivity } from '@/lib/logActivity';
 import { NextResponse } from 'next/server';
 import { registerSchema } from '@/lib/validators';
+import { rateLimit, getClientIp } from '@/lib/rateLimit';
 
 export async function POST(req) {
   try {
+    const ip = getClientIp(req);
+    const ipLimit = rateLimit(`register:ip:${ip}`, { limit: 10, windowMs: 15 * 60 * 1000 });
+    if (!ipLimit.ok) {
+      return NextResponse.json(
+        { error: 'Too many registration attempts. Please try again later.' },
+        { status: 429, headers: { 'Retry-After': String(ipLimit.retryAfterSec) } }
+      );
+    }
+
     await connectDB();
     const body = await req.json();
     const parsed = registerSchema.safeParse(body);
@@ -27,6 +37,14 @@ export async function POST(req) {
       department,
       specialization,
     } = parsed.data;
+
+    const emailLimit = rateLimit(`register:email:${email}`, { limit: 5, windowMs: 15 * 60 * 1000 });
+    if (!emailLimit.ok) {
+      return NextResponse.json(
+        { error: 'Too many registration attempts for this email. Please try again later.' },
+        { status: 429, headers: { 'Retry-After': String(emailLimit.retryAfterSec) } }
+      );
+    }
 
     const identityId = accountType === 'student' ? studentId : staffId?.toUpperCase();
     const existing = await User.findOne({
@@ -65,7 +83,7 @@ export async function POST(req) {
       targetType: 'User',
       targetId: newUser._id,
       targetName: `${firstName} ${lastName}`,
-      metadata: { email, role: newUser.role, applicationStatus: newUser.applicationStatus },
+      metadata: { accountType, role: newUser.role, applicationStatus: newUser.applicationStatus },
     });
 
     const token = generateToken(newUser);

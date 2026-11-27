@@ -4,9 +4,19 @@ import { generateToken } from '@/lib/auth';
 import { NextResponse } from 'next/server';
 import { loginSchema } from '@/lib/validators';
 import { logActivity } from '@/lib/logActivity';
+import { rateLimit, getClientIp } from '@/lib/rateLimit';
 
 export async function POST(req) {
   try {
+    const ip = getClientIp(req);
+    const ipLimit = rateLimit(`login:ip:${ip}`, { limit: 20, windowMs: 15 * 60 * 1000 });
+    if (!ipLimit.ok) {
+      return NextResponse.json(
+        { error: 'Too many login attempts. Please try again later.' },
+        { status: 429, headers: { 'Retry-After': String(ipLimit.retryAfterSec) } }
+      );
+    }
+
     await connectDB();
     const body = await req.json();
     const parsed = loginSchema.safeParse(body);
@@ -16,6 +26,13 @@ export async function POST(req) {
     }
 
     const { email, password } = parsed.data;
+    const emailLimit = rateLimit(`login:email:${email}`, { limit: 10, windowMs: 15 * 60 * 1000 });
+    if (!emailLimit.ok) {
+      return NextResponse.json(
+        { error: 'Too many login attempts for this account. Please try again later.' },
+        { status: 429, headers: { 'Retry-After': String(emailLimit.retryAfterSec) } }
+      );
+    }
 
     const user = await User.findOne({ email });
     if (!user) {

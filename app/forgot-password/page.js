@@ -95,7 +95,7 @@ export default function ForgotPasswordPage() {
         <p className="text-[10px] font-black uppercase tracking-[0.3em] text-red-500 dark:text-red-400">
           Account recovery
         </p>
-        <h1 className="mt-1.5 text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white">
+        <h1 className="font-display mt-1.5 text-3xl sm:text-4xl font-black uppercase tracking-tight text-slate-900 dark:text-white">
           Reset your password
         </h1>
         <p className="mt-1 text-xs sm:text-sm leading-relaxed text-slate-600 dark:text-slate-400">

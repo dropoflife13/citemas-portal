@@ -83,6 +83,11 @@ export default function Navbar() {
     setContainer(modalRoot);
   }, []);
 
+  // Auto-close mobile drawer on route change
+  useEffect(() => {
+    setIsDrawerOpen(false);
+  }, [pathname]);
+
   // Escape key handler for drawer
   useEffect(() => {
     if (!isDrawerOpen) return;
@@ -302,9 +307,10 @@ export default function Navbar() {
 
             <button
               onClick={() => setIsDrawerOpen(true)}
-              className="flex items-center justify-center rounded-xl border border-black/10 dark:border-white/10 p-2 text-slate-800 dark:text-white/80 hover:bg-black/[0.06] dark:hover:bg-white/[0.08] hover:text-slate-900 dark:hover:text-white transition-all active:scale-95"
+              className="flex h-11 w-11 items-center justify-center rounded-xl border border-black/10 dark:border-white/10 text-slate-800 dark:text-white/80 hover:bg-black/[0.06] dark:hover:bg-white/[0.08] hover:text-slate-900 dark:hover:text-white transition-all active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
               aria-label="Open navigation menu"
               aria-expanded={isDrawerOpen}
+              aria-controls="mobile-nav-drawer"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -336,6 +342,7 @@ export default function Navbar() {
             aria-modal="true"
           >
             <div
+              id="mobile-nav-drawer"
               onClick={(e) => e.stopPropagation()}
               className="fixed top-0 right-0 h-full w-[300px] max-w-[85vw] z-[85] bg-[var(--background)] dark:bg-[#110808] border-l border-black/10 dark:border-white/10 shadow-2xl flex flex-col p-6 text-slate-900 dark:text-white font-sans overflow-y-auto"
             >
@@ -411,33 +418,33 @@ export default function Navbar() {
 
                     {/* Notification Bell trigger (staff only) */}
                     {isStaff && (
-                      <div className="flex items-center justify-between py-2 px-3 rounded-xl hover:bg-white/[0.04] text-white/80 transition-colors">
+                      <div className="flex items-center justify-between py-2 px-3 rounded-xl hover:bg-black/[0.04] dark:hover:bg-white/[0.04] text-slate-800 dark:text-white/80 transition-colors">
                         <span className="text-sm font-bold uppercase tracking-wider">Notifications</span>
                         <AdminNotificationBell />
                       </div>
                     )}
 
                     {/* Theme Toggle in Mobile Drawer */}
-                    <div className="flex items-center justify-between py-2 px-3 rounded-xl hover:bg-white/[0.04] text-white/80 transition-colors">
+                    <div className="flex items-center justify-between py-2 px-3 rounded-xl hover:bg-black/[0.04] dark:hover:bg-white/[0.04] text-slate-800 dark:text-white/80 transition-colors">
                       <span className="text-sm font-bold uppercase tracking-wider">Theme</span>
                       <button
                         onClick={toggleTheme}
-                        className="flex items-center gap-2 rounded-full border border-white/10 px-3 py-1 text-xs font-mono"
+                        className="flex items-center gap-2 rounded-full border border-black/15 dark:border-white/15 px-3 py-1.5 text-xs font-mono text-slate-800 dark:text-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                       >
-                        {theme === 'dark' ? <Sun className="h-3.5 w-3.5 text-amber-300" /> : <Moon className="h-3.5 w-3.5 text-blue-300" />}
+                        {theme === 'dark' ? <Sun className="h-3.5 w-3.5 text-amber-300" /> : <Moon className="h-3.5 w-3.5 text-blue-600" />}
                         <span className="capitalize">{theme}</span>
                       </button>
                     </div>
                   </nav>
 
                   {/* Log Out button at bottom */}
-                  <div className="mt-auto pt-6 border-t border-white/10">
+                  <div className="mt-auto pt-6 border-t border-black/10 dark:border-white/10">
                     <button
                       onClick={() => {
                         closeDrawer();
                         handleLogout();
                       }}
-                      className="w-full flex items-center justify-center gap-2 py-3 px-4 text-xs font-bold uppercase tracking-wider rounded-xl border border-white/10 hover:border-red-500/50 hover:bg-red-600/20 text-red-400 hover:text-red-300 transition-all active:scale-95 text-center"
+                      className="w-full flex items-center justify-center gap-2 py-3 px-4 text-xs font-bold uppercase tracking-wider rounded-xl border border-black/10 dark:border-white/10 hover:border-red-500/50 hover:bg-red-600/15 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-all active:scale-95 text-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                     >
                       <LogOut className="h-4 w-4" />
                       <span>Log Out</span>
@@ -459,24 +466,23 @@ export default function Navbar() {
                     </Link>
 
                     {/* Theme Toggle in Mobile Drawer */}
-                    <div className="flex items-center justify-between py-2 px-3 rounded-xl hover:bg-white/[0.04] text-white/80 transition-colors">
+                    <div className="flex items-center justify-between py-2 px-3 rounded-xl hover:bg-black/[0.04] dark:hover:bg-white/[0.04] text-slate-800 dark:text-white/80 transition-colors">
                       <span className="text-sm font-bold uppercase tracking-wider">Theme</span>
                       <button
                         onClick={toggleTheme}
-                        className="flex items-center gap-2 rounded-full border border-white/10 px-3 py-1 text-xs font-mono"
+                        className="flex items-center gap-2 rounded-full border border-black/15 dark:border-white/15 px-3 py-1.5 text-xs font-mono text-slate-800 dark:text-white/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                       >
-                        {theme === 'dark' ? <Sun className="h-3.5 w-3.5 text-amber-300" /> : <Moon className="h-3.5 w-3.5 text-blue-300" />}
+                        {theme === 'dark' ? <Sun className="h-3.5 w-3.5 text-amber-300" /> : <Moon className="h-3.5 w-3.5 text-blue-600" />}
                         <span className="capitalize">{theme}</span>
                       </button>
                     </div>
                   </nav>
 
-                  <div className="mt-auto pt-6 border-t border-white/10 flex flex-col gap-3">
+                  <div className="mt-auto pt-6 border-t border-black/10 dark:border-white/10 flex flex-col gap-3">
                     <Link
                       href="/login"
                       onClick={closeDrawer}
-                      className="w-full py-2.5 text-center text-xs font-bold uppercase tracking-wider transition-all rounded-xl border border-white/10 hover:bg-white/[0.08]"
-                      style={{ color: CITEMAS_CREAM }}
+                      className="w-full py-2.5 text-center text-xs font-bold uppercase tracking-wider transition-all rounded-xl border border-black/15 dark:border-white/15 text-slate-900 dark:text-white hover:bg-black/[0.05] dark:hover:bg-white/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                     >
                       Log In
                     </Link>

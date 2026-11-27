@@ -18,16 +18,18 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
 
     const userId = searchParams.get('userId');
-    const limitParam = parseInt(searchParams.get('limit') || '0', 10);
+    const rawLimit = parseInt(searchParams.get('limit') || '0', 10);
+    const limitParam = Number.isFinite(rawLimit) && rawLimit > 0 ? Math.min(rawLimit, 50) : 0;
     const recent = searchParams.get('recent') === 'true';
 
+    const freshId = fresh ? String(fresh._id) : null;
     const isStaff = fresh && STAFF_ROLES.includes(fresh.role);
     const filter = {};
 
     if (userId) {
       filter.user = userId;
       // If querying specific user and not owner/staff, only show public
-      if (!fresh || (fresh.id !== userId && !isStaff)) {
+      if (!fresh || (freshId !== userId && !isStaff)) {
         filter.visibility = 'public';
       }
     } else {
@@ -36,7 +38,7 @@ export async function GET(req) {
         // staff can see all
       } else if (fresh) {
         // authenticated member sees public + own
-        filter.$or = [{ visibility: 'public' }, { user: fresh.id }];
+        filter.$or = [{ visibility: 'public' }, { user: fresh._id }];
       } else {
         // unauthenticated sees public only
         filter.visibility = 'public';
@@ -59,7 +61,7 @@ export async function GET(req) {
   } catch (err) {
     console.error('GET achievements error:', err);
     return NextResponse.json(
-      { error: 'Failed to fetch achievements: ' + err.message },
+      { error: 'Failed to fetch achievements' },
       { status: 500 }
     );
   }
@@ -109,19 +111,24 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Achievement date or year is required' }, { status: 400 });
     }
 
+    const trimmedCredUrl = typeof credentialUrl === 'string' ? credentialUrl.trim() : '';
+    if (trimmedCredUrl && !/^https:\/\//i.test(trimmedCredUrl)) {
+      return NextResponse.json({ error: 'Credential URL must use https://' }, { status: 400 });
+    }
+
     const validCategories = ['Award', 'Certificate', 'Recognition', 'Competition', 'Project', 'Other'];
     const safeCategory = validCategories.includes(category) ? category : 'Award';
     const safeVisibility = ['public', 'private'].includes(visibility) ? visibility : 'public';
 
     const achievement = new Achievement({
-      user: fresh.id,
+      user: fresh._id,
       portfolio: portfolio || null,
       title: title.trim(),
       description: description.trim(),
       date: date.trim(),
       category: safeCategory,
       issuer: issuer ? issuer.trim() : 'CITEMAS',
-      credentialUrl: credentialUrl ? credentialUrl.trim() : '',
+      credentialUrl: trimmedCredUrl,
       image: image || '',
       visibility: safeVisibility,
       displayOrder: Number(displayOrder) || 0,
@@ -147,7 +154,7 @@ export async function POST(req) {
   } catch (err) {
     console.error('POST achievement error:', err);
     return NextResponse.json(
-      { error: 'Failed to create achievement: ' + err.message },
+      { error: 'Failed to create achievement' },
       { status: 400 }
     );
   }

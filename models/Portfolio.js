@@ -13,10 +13,14 @@ const portfolioSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
+    trim: true,
+    maxlength: 150,
   },
   description: {
     type: String,
     required: true,
+    trim: true,
+    maxlength: 2000,
   },
   specialization: {
     type: String,
@@ -26,6 +30,8 @@ const portfolioSchema = new mongoose.Schema({
   mediaUrl: {
     type: String,
     required: true,
+    trim: true,
+    maxlength: 1000,
   },
   level: {
     type: String,
@@ -39,6 +45,8 @@ const portfolioSchema = new mongoose.Schema({
   },
   feedback: {
     type: String,
+    trim: true,
+    maxlength: 1000,
   },
 }, { timestamps: true });
 

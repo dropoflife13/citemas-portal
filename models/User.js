@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema({
   },
   staffApprovalStatus: {
     type: String,
-    enum: ['not_applicable', 'pending', 'approved'],
+    enum: ['not_applicable', 'pending', 'approved', 'rejected'],
     default: 'not_applicable',
   },
   yearLevel: { type: String, enum: ['1st', '2nd', '3rd', '4th', 'Graduate'] },
@@ -94,8 +94,13 @@ const userSchema = new mongoose.Schema({
   passwordResetExpiresAt: { type: Date, select: false },
   passwordResetAttempts: { type: Number, default: 0, select: false },
   passwordResetLastRequestedAt: { type: Date, select: false },
+  tokenVersion: { type: Number, default: 0 },
 
 }, { timestamps: true });
+
+// DB-07: Compound indexes for directory listing and officer roster queries
+userSchema.index({ role: 1, lastName: 1 });
+userSchema.index({ role: 1, officerPosition: 1, createdAt: 1 });
 
 // Enforce database-level uniqueness for single-holder executive officer positions.
 // Allows multiple members with null, and allows multi-seat positions (e.g. PRO, PIO, reps).

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
 import { getUserFromRequest } from '@/lib/auth';
@@ -31,8 +32,8 @@ export async function PATCH(req, { params }) {
   }
 
   const { id } = await params;
-  if (!id) {
-    return NextResponse.json({ message: 'Missing user id' }, { status: 400 });
+  if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+    return NextResponse.json({ message: 'Invalid user id' }, { status: 400 });
   }
 
   // Prevent self-role modification (SEC-05, SEC-02)
@@ -159,7 +160,7 @@ export async function PATCH(req, { params }) {
       );
     }
     return NextResponse.json(
-      { message: 'Failed to update user role: ' + err.message },
+      { message: 'Failed to update user role' },
       { status: 500 }
     );
   }
@@ -182,8 +183,8 @@ export async function DELETE(req, { params }) {
 
   const { id } = await params;
 
-  if (!id) {
-    return NextResponse.json({ message: 'Missing user id' }, { status: 400 });
+  if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+    return NextResponse.json({ message: 'Invalid user id' }, { status: 400 });
   }
 
   // Prevent self-delete
@@ -218,7 +219,6 @@ export async function DELETE(req, { params }) {
       targetId: id,
       targetName: `${target.firstName} ${target.lastName}`,
       metadata: {
-        deletedEmail: target.email,
         deletedRole: target.role,
         releasedOfficerPosition: target.officerPosition || null,
       },
@@ -235,7 +235,7 @@ export async function DELETE(req, { params }) {
   } catch (err) {
     console.error('Delete user error:', err);
     return NextResponse.json(
-      { message: 'Failed to delete user: ' + err.message },
+      { message: 'Failed to delete user' },
       { status: 500 }
     );
   }
