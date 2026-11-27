@@ -1,9 +1,9 @@
 import mongoose from 'mongoose';
 import connectDB from '@/lib/mongodb';
+import { runInTransaction } from '@/lib/transaction';
 import Application from '@/models/Application';
 import User from '@/models/User';
-import { getUserFromRequest } from '@/lib/auth';
-import { getFreshUser } from '@/lib/permissions';
+import { requireFreshUser } from '@/lib/permissions';
 import { NextResponse } from 'next/server';
 import { logActivity } from '@/lib/logActivity';
 
@@ -11,13 +11,9 @@ const REVIEW_ROLES = ['officer', 'teacher', 'adviser', 'super_admin'];
 
 // PATCH approve or reject an application — officers/teachers/admin only
 export async function PATCH(req, { params }) {
-  const currentUser = getUserFromRequest(req);
-  if (!currentUser) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-  }
-  const fresh = await getFreshUser(currentUser.id);
-  if (!fresh) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  const { user: fresh, decoded: currentUser, error, status } = await requireFreshUser(req);
+  if (error) {
+    return NextResponse.json({ error }, { status });
   }
   if (!REVIEW_ROLES.includes(fresh.role)) {
     return NextResponse.json({ error: 'You do not have permission to review applications' }, { status: 403 });
@@ -62,28 +58,31 @@ export async function PATCH(req, { params }) {
       );
     }
 
-    // Step b: Update Application document status
+    // Step b & c: Atomically update Application and User documents
     application.status = decision;
     application.reviewedBy = currentUser.id;
     application.reviewedAt = new Date();
-    await application.save();
 
-    // Step c: Update User document (role + applicationStatus)
     const newRole = decision === 'approved' ? 'member' : (previousRole === 'applicant' ? 'user' : previousRole);
     const newApplicationStatus = decision === 'approved' ? 'approved' : 'rejected';
 
-    if (applicantId) {
-      const updateDoc = {
-        $set: {
-          role: newRole,
-          applicationStatus: newApplicationStatus,
-        },
-      };
-      if (decision === 'approved' && Array.isArray(application.portfolioImages) && application.portfolioImages.length > 0) {
-        updateDoc.$addToSet = { portfolioImages: { $each: application.portfolioImages } };
+    await runInTransaction(async (session) => {
+      const opts = session ? { session } : {};
+      await application.save(opts);
+
+      if (applicantId) {
+        const updateDoc = {
+          $set: {
+            role: newRole,
+            applicationStatus: newApplicationStatus,
+          },
+        };
+        if (decision === 'approved' && Array.isArray(application.portfolioImages) && application.portfolioImages.length > 0) {
+          updateDoc.$addToSet = { portfolioImages: { $each: application.portfolioImages } };
+        }
+        await User.findByIdAndUpdate(applicantId, updateDoc, opts);
       }
-      await User.findByIdAndUpdate(applicantId, updateDoc);
-    }
+    });
 
     // Step d: Call logActivity AFTER User record is updated successfully
     await logActivity({
@@ -115,13 +114,9 @@ export async function PATCH(req, { params }) {
 
 // DELETE remove an application — officers/teachers/admin only
 export async function DELETE(req, { params }) {
-  const currentUser = getUserFromRequest(req);
-  if (!currentUser) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-  }
-  const fresh = await getFreshUser(currentUser.id);
-  if (!fresh) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  const { user: fresh, decoded: currentUser, error, status } = await requireFreshUser(req);
+  if (error) {
+    return NextResponse.json({ error }, { status });
   }
   if (!REVIEW_ROLES.includes(fresh.role)) {
     return NextResponse.json({ error: 'You do not have permission to delete applications' }, { status: 403 });

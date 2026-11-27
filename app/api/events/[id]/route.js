@@ -1,8 +1,7 @@
 import connectDB from '@/lib/mongodb';
 import Event from '@/models/Event';
 import '@/models/User';
-import { getUserFromRequest } from '@/lib/auth';
-import { getFreshUser } from '@/lib/permissions';
+import { requireFreshUser } from '@/lib/permissions';
 import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import { logActivity } from '@/lib/logActivity';
@@ -15,16 +14,12 @@ const CAN_MANAGE = ['officer', 'teacher', 'adviser', 'super_admin'];
 // =====================================================
 
 export async function GET(req, { params }) {
-  const currentUser = getUserFromRequest(req);
-
-  if (!currentUser) {
-    return NextResponse.json(
-      { error: 'Not authenticated' },
-      { status: 401 }
-    );
-  }
-
   try {
+    const { user: fresh, error, status } = await requireFreshUser(req);
+    if (error) {
+      return NextResponse.json({ error }, { status });
+    }
+
     const { id } = await params;
 
     // Validate MongoDB ObjectId
@@ -33,11 +28,6 @@ export async function GET(req, { params }) {
         { error: 'Invalid event ID' },
         { status: 400 }
       );
-    }
-
-    const fresh = await getFreshUser(currentUser.id);
-    if (!fresh) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
     await connectDB();
@@ -97,16 +87,12 @@ export async function GET(req, { params }) {
 // =====================================================
 
 export async function PATCH(req, { params }) {
-  const currentUser = getUserFromRequest(req);
-
-  if (!currentUser) {
-    return NextResponse.json(
-      { error: 'Not authenticated' },
-      { status: 401 }
-    );
-  }
-
   try {
+    const { user: fresh, decoded: currentUser, error, status } = await requireFreshUser(req);
+    if (error) {
+      return NextResponse.json({ error }, { status });
+    }
+
     const { id } = await params;
 
     // Validate MongoDB ObjectId
@@ -115,11 +101,6 @@ export async function PATCH(req, { params }) {
         { error: 'Invalid event ID' },
         { status: 400 }
       );
-    }
-
-    const fresh = await getFreshUser(currentUser.id);
-    if (!fresh) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
     await connectDB();
@@ -412,16 +393,12 @@ export async function PATCH(req, { params }) {
 // =====================================================
 
 export async function DELETE(req, { params }) {
-  const currentUser = getUserFromRequest(req);
-
-  if (!currentUser) {
-    return NextResponse.json(
-      { error: 'Not authenticated' },
-      { status: 401 }
-    );
-  }
-
   try {
+    const { user: fresh, decoded: currentUser, error, status } = await requireFreshUser(req);
+    if (error) {
+      return NextResponse.json({ error }, { status });
+    }
+
     const { id } = await params;
 
     // Validate MongoDB ObjectId
@@ -430,11 +407,6 @@ export async function DELETE(req, { params }) {
         { error: 'Invalid event ID' },
         { status: 400 }
       );
-    }
-
-    const fresh = await getFreshUser(currentUser.id);
-    if (!fresh) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
     await connectDB();

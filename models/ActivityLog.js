@@ -14,8 +14,14 @@ const ActivityLogSchema = new mongoose.Schema({
     required: true,
     index: true,
   },
-  targetType: { type: String },
-  targetId: { type: mongoose.Schema.Types.ObjectId },
+  targetType: {
+    type: String,
+    enum: ['User', 'Application', 'Event', 'Portfolio', 'Achievement'],
+  },
+  targetId: {
+    type: mongoose.Schema.Types.ObjectId,
+    refPath: 'targetType',
+  },
   targetName: { type: String },
   metadata: { type: mongoose.Schema.Types.Mixed },
   ip: { type: String },
@@ -37,6 +43,7 @@ ActivityLogSchema.pre(
 
 ActivityLogSchema.index({ action: 1, createdAt: -1 });
 ActivityLogSchema.index({ actor: 1, createdAt: -1 });
+ActivityLogSchema.index({ targetType: 1, targetId: 1 });
 
 export default mongoose.models.ActivityLog ||
   mongoose.model('ActivityLog', ActivityLogSchema);

@@ -1,21 +1,17 @@
 import connectDB from '@/lib/mongodb';
+import { runInTransaction } from '@/lib/transaction';
 import Application from '@/models/Application';
 import User from '@/models/User';
-import { getUserFromRequest } from '@/lib/auth';
-import { getFreshUser } from '@/lib/permissions';
+import { requireFreshUser } from '@/lib/permissions';
 import { NextResponse } from 'next/server';
 
 const REVIEW_ROLES = ['officer', 'teacher', 'adviser', 'super_admin'];
 
 // GET all applications — officers/teachers/admin only
 export async function GET(req) {
-  const currentUser = getUserFromRequest(req);
-  if (!currentUser) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-  }
-  const fresh = await getFreshUser(currentUser.id);
-  if (!fresh) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  const { user: fresh, error, status } = await requireFreshUser(req);
+  if (error) {
+    return NextResponse.json({ error }, { status });
   }
   if (!REVIEW_ROLES.includes(fresh.role)) {
     return NextResponse.json({ error: 'You do not have permission to view applications' }, { status: 403 });
@@ -31,18 +27,13 @@ export async function GET(req) {
 
 // POST submit an application — any logged-in "user"
 export async function POST(req) {
-  const currentUser = getUserFromRequest(req);
-  if (!currentUser) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  const { user: dbUser, decoded: currentUser, error, status } = await requireFreshUser(req);
+  if (error) {
+    return NextResponse.json({ error }, { status });
   }
 
   try {
     await connectDB();
-
-    const dbUser = await User.findById(currentUser.id).select('role');
-    if (!dbUser) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
 
     if (['member', 'officer', 'super_admin', 'teacher', 'adviser'].includes(dbUser.role)) {
       return NextResponse.json({ error: 'You are already an approved member of CITEMAS' }, { status: 400 });
@@ -75,8 +66,6 @@ export async function POST(req) {
       portfolioLink: portfolioLink?.trim() || '',
       portfolioImages: cleanedImages,
     });
-    await newApplication.save();
-
     const userUpdate = {
       $set: {
         role: 'applicant',
@@ -89,7 +78,11 @@ export async function POST(req) {
       userUpdate.$addToSet = { portfolioImages: { $each: cleanedImages } };
     }
 
-    await User.findByIdAndUpdate(currentUser.id, userUpdate);
+    await runInTransaction(async (session) => {
+      const opts = session ? { session } : {};
+      await newApplication.save(opts);
+      await User.findByIdAndUpdate(currentUser.id, userUpdate, opts);
+    });
 
     return NextResponse.json(newApplication, { status: 201 });
   } catch (err) {

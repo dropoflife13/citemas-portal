@@ -42,14 +42,21 @@ export async function POST(req) {
     const matched = !expired && user && passwordResetCodeMatches(email, code, user.passwordResetCodeHash);
 
     if (!matched) {
-      if (user && !expired) {
-        user.passwordResetAttempts = (user.passwordResetAttempts || 0) + 1;
-        if (user.passwordResetAttempts >= PASSWORD_RESET_MAX_ATTEMPTS) {
+      if (user) {
+        if (expired && (user.passwordResetCodeHash || user.passwordResetExpiresAt)) {
           user.passwordResetCodeHash = undefined;
           user.passwordResetExpiresAt = undefined;
           user.passwordResetAttempts = 0;
+          await user.save();
+        } else if (!expired) {
+          user.passwordResetAttempts = (user.passwordResetAttempts || 0) + 1;
+          if (user.passwordResetAttempts >= PASSWORD_RESET_MAX_ATTEMPTS) {
+            user.passwordResetCodeHash = undefined;
+            user.passwordResetExpiresAt = undefined;
+            user.passwordResetAttempts = 0;
+          }
+          await user.save();
         }
-        await user.save();
       }
       return NextResponse.json({ error: INVALID_CODE_MESSAGE }, { status: 400 });
     }

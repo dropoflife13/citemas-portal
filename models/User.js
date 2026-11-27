@@ -64,7 +64,6 @@ const userSchema = new mongoose.Schema({
       'creative_director',
       'year_level_representative'
     ],
-    default: null,
   },
 
   specialization: {
@@ -72,7 +71,6 @@ const userSchema = new mongoose.Schema({
     enum: ['traditional_arts', 'digital_arts', 'animation', 'voice_acting', 'videography', 'photography']
   },
   
-  isAlumni: { type: Boolean, default: false },
   graduationYear: { type: Number },
 
   phone: { type: String },
@@ -87,8 +85,6 @@ const userSchema = new mongoose.Schema({
     default: 'not_applied'
   },
   applicationDate: { type: Date },
-
-  portfolioCount: { type: Number, default: 0 },
 
   passwordResetCodeHash: { type: String, select: false },
   passwordResetExpiresAt: { type: Date, select: false },
@@ -131,10 +127,16 @@ userSchema.methods.comparePassword = function (candidatePassword) {
 
 // Remove password when converting to JSON
 userSchema.set('toJSON', {
+  virtuals: true,
   transform: function (doc, ret) {
     delete ret.password;
     return ret;
   }
+});
+
+// Virtual field to check if user is an alumni (derived from role)
+userSchema.virtual('isAlumni').get(function () {
+  return this.role === 'alumni';
 });
 
 // Virtual field to get full name
@@ -144,7 +146,7 @@ userSchema.virtual('fullName').get(function() {
 
 // Virtual field to check if user is an officer
 userSchema.virtual('isOfficer').get(function() {
-  return this.role === 'officer' && this.officerPosition !== null;
+  return this.role === 'officer' && Boolean(this.officerPosition);
 });
 
 // Virtual field to get formatted officer position

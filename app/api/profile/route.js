@@ -1,53 +1,33 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/lib/mongodb';
 import User from '@/models/User';
-import Application from '@/models/Application';
-import Portfolio from '@/models/Portfolio';
-import { verifyAuth } from '@/lib/auth';
+import { requireFreshUser } from '@/lib/permissions';
 import { profilePatchSchema } from '@/lib/validators';
 import { logActivity } from '@/lib/logActivity';
 
 export async function GET(req) {
   try {
-    const authResult = await verifyAuth(req);
-
-    if (!authResult || !authResult.success) {
-      return NextResponse.json(
-        { message: authResult?.message || 'Authentication failed' },
-        { status: 401 }
-      );
+    const { decoded, error, status } = await requireFreshUser(req);
+    if (error) {
+      return NextResponse.json({ message: error }, { status });
     }
 
     await dbConnect();
 
-    const userId = authResult.user.id || authResult.user._id;
+    const userId = decoded.id || decoded._id;
     const user = await User.findById(userId).select('-password').lean();
 
     if (!user) {
       return NextResponse.json({ message: 'User not found in database' }, { status: 404 });
     }
 
-    // Merge any portfolio images submitted via Applications or Portfolio entries
-    const [applications, portfolios] = await Promise.all([
-      Application.find({ applicant: userId }).select('portfolioImages').sort({ createdAt: -1 }).lean(),
-      Portfolio.find({ owner: userId }).select('mediaUrl').sort({ createdAt: -1 }).lean(),
-    ]);
-
-    const appImages = applications.flatMap((app) =>
-      Array.isArray(app.portfolioImages) ? app.portfolioImages : []
-    );
-    const portfolioMedia = portfolios
-      .map((item) => item.mediaUrl)
-      .filter((url) => typeof url === 'string' && url.trim().length > 0);
-
     const existingImages = Array.isArray(user.portfolioImages) ? user.portfolioImages : [];
-    const mergedImages = Array.from(new Set([...existingImages, ...appImages, ...portfolioMedia])).filter(Boolean);
 
     return NextResponse.json(
       {
         user: {
           ...user,
-          portfolioImages: mergedImages,
+          portfolioImages: existingImages,
         },
       },
       { status: 200 }
@@ -63,15 +43,12 @@ export async function GET(req) {
 
 export async function PATCH(req) {
   try {
-    const authResult = await verifyAuth(req);
-
-    if (!authResult || !authResult.success) {
-      return NextResponse.json(
-        { message: authResult?.message || 'Authentication failed' },
-        { status: 401 }
-      );
+    const { decoded, error, status } = await requireFreshUser(req);
+    if (error) {
+      return NextResponse.json({ message: error }, { status });
     }
 
+    const authResult = { user: decoded };
     await dbConnect();
 
     const body = await req.json();

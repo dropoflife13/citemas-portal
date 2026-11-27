@@ -1,8 +1,7 @@
 import connectDB from '@/lib/mongodb';
 import Event from '@/models/Event';
 import '@/models/User';
-import { getUserFromRequest } from '@/lib/auth';
-import { getFreshUser } from '@/lib/permissions';
+import { requireFreshUser } from '@/lib/permissions';
 import { logActivity } from '@/lib/logActivity';
 import { NextResponse } from 'next/server';
 const CAN_MANAGE = ['officer', 'teacher', 'adviser', 'super_admin'];
@@ -10,19 +9,10 @@ const CAN_MANAGE = ['officer', 'teacher', 'adviser', 'super_admin'];
 // GET — get all events
 // Any authenticated user can view events
 export async function GET(req) {
-  const currentUser = getUserFromRequest(req);
-
-  if (!currentUser) {
-    return NextResponse.json(
-      { error: 'Not authenticated' },
-      { status: 401 }
-    );
-  }
-
   try {
-    const fresh = await getFreshUser(currentUser.id);
-    if (!fresh) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    const { user: fresh, decoded: currentUser, error, status } = await requireFreshUser(req);
+    if (error) {
+      return NextResponse.json({ error }, { status });
     }
 
     await connectDB();
@@ -66,18 +56,9 @@ export async function GET(req) {
 // POST — create an event
 // Only officer, teacher, and super_admin
 export async function POST(req) {
-  const currentUser = getUserFromRequest(req);
-
-  if (!currentUser) {
-    return NextResponse.json(
-      { error: 'Not authenticated' },
-      { status: 401 }
-    );
-  }
-
-  const fresh = await getFreshUser(currentUser.id);
-  if (!fresh) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  const { user: fresh, decoded: currentUser, error, status } = await requireFreshUser(req);
+  if (error) {
+    return NextResponse.json({ error }, { status });
   }
 
   if (!CAN_MANAGE.includes(fresh.role)) {

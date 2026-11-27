@@ -1,20 +1,14 @@
 import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import ActivityLog from '@/models/ActivityLog';
-import { getUserFromRequest } from '@/lib/auth';
-import { getFreshUser } from '@/lib/permissions';
+import { requireFreshUser } from '@/lib/permissions';
 
 const ADMIN_ROLES = ['super_admin', 'teacher', 'adviser', 'officer'];
 
 export async function GET(req) {
-  const currentUser = getUserFromRequest(req);
-  if (!currentUser) {
-    return NextResponse.json({ message: 'Not authenticated' }, { status: 401 });
-  }
-
-  const fresh = await getFreshUser(currentUser.id);
-  if (!fresh) {
-    return NextResponse.json({ message: 'Not authenticated' }, { status: 401 });
+  const { user: fresh, error, status } = await requireFreshUser(req);
+  if (error) {
+    return NextResponse.json({ message: error }, { status });
   }
 
   if (!ADMIN_ROLES.includes(fresh.role)) {

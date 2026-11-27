@@ -2,13 +2,13 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Application from '@/models/Application';
 import User from '@/models/User';
-import { getUserFromRequest } from '@/lib/auth';
+import { requireFreshUser } from '@/lib/permissions';
 
 export async function GET(req) {
-  const currentUser = getUserFromRequest(req);
+  const { decoded: currentUser, error, status: authStatus } = await requireFreshUser(req);
 
-  if (!currentUser) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  if (error) {
+    return NextResponse.json({ error }, { status: authStatus });
   }
 
   try {

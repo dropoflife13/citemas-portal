@@ -204,8 +204,8 @@ citemas/
 ├── models/
 │   ├── User.js                    # User schema (roles, officerPosition, specialization, studentId, status)
 │   ├── Application.js             # Membership application schema (motivation, portfolioLink, portfolioImages)
-│   ├── Portfolio.js               # Creative work schema (mediaUrl, specialization, featured flags)
-│   ├── Event.js                   # Event schema (date, location, attendees RSVP list, coverImage)
+│   ├── Portfolio.js               # Creative work schema (mediaUrl, specialization, level, status)
+│   ├── Event.js                   # Event schema (date, location, attendees RSVP list, image/images)
 │   ├── Achievement.js             # Member awards & recognition schema
 │   └── ActivityLog.js             # System-wide administrative audit log schema
 └── public/

@@ -2,8 +2,7 @@ import mongoose from 'mongoose';
 import connectDB from '@/lib/mongodb';
 import Portfolio from '@/models/Portfolio';
 import User from '@/models/User';
-import { getUserFromRequest } from '@/lib/auth';
-import { getFreshUser } from '@/lib/permissions';
+import { requireFreshUser } from '@/lib/permissions';
 import { NextResponse } from 'next/server';
 import { logActivity } from '@/lib/logActivity';
 
@@ -15,13 +14,9 @@ const MAX_ENTRIES_PER_MEMBER = 5;
 // Staff: All pieces (pending, approved, rejected)
 // Members/Alumni: All approved works across the guild + their own submissions
 export async function GET(req) {
-  const currentUser = getUserFromRequest(req);
-  if (!currentUser) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-  }
-  const fresh = await getFreshUser(currentUser.id);
-  if (!fresh) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  const { user: fresh, decoded: currentUser, error, status } = await requireFreshUser(req);
+  if (error) {
+    return NextResponse.json({ error }, { status });
   }
 
   try {
@@ -55,13 +50,9 @@ export async function GET(req) {
 
 // POST — Create a new portfolio entry
 export async function POST(req) {
-  const currentUser = getUserFromRequest(req);
-  if (!currentUser) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-  }
-  const fresh = await getFreshUser(currentUser.id);
-  if (!fresh) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  const { user: fresh, decoded: currentUser, error, status } = await requireFreshUser(req);
+  if (error) {
+    return NextResponse.json({ error }, { status });
   }
   if (!CAN_CREATE.includes(fresh.role)) {
     return NextResponse.json({ error: 'You do not have permission to submit a portfolio' }, { status: 403 });
@@ -117,10 +108,6 @@ export async function POST(req) {
     });
     await newEntry.save();
 
-    // Increment user portfolio count
-    const totalCount = await Portfolio.countDocuments({ owner: currentUser.id });
-    await User.findByIdAndUpdate(currentUser.id, { portfolioCount: totalCount });
-
     await logActivity({
       req,
       actor: currentUser,
@@ -142,12 +129,11 @@ export async function POST(req) {
 
 // PATCH — Moderate portfolio piece (Approve / Reject / Feedback)
 export async function PATCH(req) {
-  const currentUser = getUserFromRequest(req);
-  if (!currentUser) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  const { user: fresh, decoded: currentUser, error, status: authStatus } = await requireFreshUser(req);
+  if (error) {
+    return NextResponse.json({ error }, { status: authStatus });
   }
-  const fresh = await getFreshUser(currentUser.id);
-  if (!fresh || !STAFF_ROLES.includes(fresh.role)) {
+  if (!STAFF_ROLES.includes(fresh.role)) {
     return NextResponse.json({ error: 'Only staff can moderate portfolio submissions' }, { status: 403 });
   }
 
@@ -187,13 +173,9 @@ export async function PATCH(req) {
 
 // DELETE — Remove a portfolio piece (Staff OR original owner)
 export async function DELETE(req) {
-  const currentUser = getUserFromRequest(req);
-  if (!currentUser) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-  }
-  const fresh = await getFreshUser(currentUser.id);
-  if (!fresh) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  const { user: fresh, decoded: currentUser, error, status } = await requireFreshUser(req);
+  if (error) {
+    return NextResponse.json({ error }, { status });
   }
 
   try {
@@ -217,12 +199,6 @@ export async function DELETE(req) {
     }
 
     await Portfolio.findByIdAndDelete(id);
-
-    // Update remaining portfolio count on owner
-    if (entry.owner) {
-      const remainingCount = await Portfolio.countDocuments({ owner: entry.owner });
-      await User.findByIdAndUpdate(entry.owner, { portfolioCount: remainingCount });
-    }
 
     await logActivity({
       req,

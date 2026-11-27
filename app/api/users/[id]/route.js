@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import connectDB from '@/lib/mongodb';
 import User from '@/models/User';
-import { getUserFromRequest } from '@/lib/auth';
 import { logActivity } from '@/lib/logActivity';
 import {
   VALID_ROLES,
@@ -12,19 +11,16 @@ import {
   isUniqueOfficerPosition,
   canManageMembers,
   canDeleteMembers,
-  getFreshUser,
+  requireFreshUser,
 } from '@/lib/permissions';
 
 export async function PATCH(req, { params }) {
-  const currentUser = getUserFromRequest(req);
-
-  if (!currentUser) {
-    return NextResponse.json({ message: 'Not authenticated' }, { status: 401 });
+  const { user: dbUser, decoded: currentUser, error, status } = await requireFreshUser(req);
+  if (error) {
+    return NextResponse.json({ message: error }, { status });
   }
 
-  // Verify fresh permissions from DB to prevent demoted officers from performing updates
-  const dbUser = await getFreshUser(currentUser.id);
-  if (!dbUser || !canManageMembers(dbUser)) {
+  if (!canManageMembers(dbUser)) {
     return NextResponse.json(
       { message: 'You do not have permission to update user roles' },
       { status: 403 }
@@ -71,9 +67,16 @@ export async function PATCH(req, { params }) {
 
     await connectDB();
 
-    const targetUser = await User.findById(id).select('firstName lastName role officerPosition');
+    const targetUser = await User.findById(id).select('firstName lastName role officerPosition accountType');
     if (!targetUser) {
       return NextResponse.json({ message: 'User not found' }, { status: 404 });
+    }
+
+    if ((decision === 'approved' || decision === 'rejected') && targetUser.accountType !== 'adviser') {
+      return NextResponse.json(
+        { message: 'Staff approval decisions only apply to adviser accounts' },
+        { status: 400 }
+      );
     }
 
     // Privilege Escalation Prevention (SEC-05, SEC-02)
@@ -120,19 +123,32 @@ export async function PATCH(req, { params }) {
       }
     }
 
-    const updates = {
-      role,
-      officerPosition: role === 'officer' ? officerPosition || null : null,
-    };
+    const nextOfficerPosition = role === 'officer' && officerPosition ? officerPosition : undefined;
+    const updates = { role };
+    if (nextOfficerPosition) {
+      updates.officerPosition = nextOfficerPosition;
+    }
 
-    // Staff roles get approved automatically
-    if (role === 'teacher' || role === 'adviser' || decision === 'approved') {
+    // Staff approval status only applies to adviser/staff accounts
+    if ((decision === 'approved' && targetUser.accountType === 'adviser') || role === 'teacher' || role === 'adviser') {
       updates.staffApprovalStatus = 'approved';
-    } else if (decision === 'rejected') {
+    } else if (decision === 'rejected' && targetUser.accountType === 'adviser') {
       updates.staffApprovalStatus = 'rejected';
     }
 
-    const updated = await User.findByIdAndUpdate(id, { $set: updates }, { new: true, runValidators: true })
+    const roleOrPositionChanged =
+      targetUser.role !== updates.role ||
+      (targetUser.officerPosition || null) !== (nextOfficerPosition || null);
+
+    const updateOp = { $set: updates };
+    if (!nextOfficerPosition) {
+      updateOp.$unset = { officerPosition: '' };
+    }
+    if (roleOrPositionChanged) {
+      updateOp.$inc = { tokenVersion: 1 };
+    }
+
+    const updated = await User.findByIdAndUpdate(id, updateOp, { new: true, runValidators: true })
       .select('firstName lastName email role officerPosition staffApprovalStatus')
       .lean();
 
@@ -167,14 +183,12 @@ export async function PATCH(req, { params }) {
 }
 
 export async function DELETE(req, { params }) {
-  const currentUser = getUserFromRequest(req);
-
-  if (!currentUser) {
-    return NextResponse.json({ message: 'Not authenticated' }, { status: 401 });
+  const { user: dbUser, decoded: currentUser, error, status } = await requireFreshUser(req);
+  if (error) {
+    return NextResponse.json({ message: error }, { status });
   }
 
-  const dbUser = await getFreshUser(currentUser.id);
-  if (!dbUser || !canDeleteMembers(dbUser)) {
+  if (!canDeleteMembers(dbUser)) {
     return NextResponse.json(
       { message: 'Only super admins can delete users' },
       { status: 403 }

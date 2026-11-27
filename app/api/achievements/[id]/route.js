@@ -3,8 +3,7 @@ import mongoose from 'mongoose';
 import connectDB from '@/lib/mongodb';
 import Achievement from '@/models/Achievement';
 import '@/models/User';
-import { getUserFromRequest } from '@/lib/auth';
-import { getFreshUser } from '@/lib/permissions';
+import { requireFreshUser } from '@/lib/permissions';
 import { logActivity } from '@/lib/logActivity';
 
 const STAFF_ROLES = ['super_admin', 'teacher', 'adviser', 'officer'];
@@ -26,8 +25,7 @@ export async function GET(req, { params }) {
       return NextResponse.json({ error: 'Achievement not found' }, { status: 404 });
     }
 
-    const currentUser = getUserFromRequest(req);
-    const fresh = currentUser ? await getFreshUser(currentUser.id) : null;
+    const { user: fresh = null } = await requireFreshUser(req);
     const isOwner = fresh && String(achievement.user?._id || achievement.user) === String(fresh._id);
     const isStaff = fresh && STAFF_ROLES.includes(fresh.role);
 
@@ -46,20 +44,15 @@ export async function GET(req, { params }) {
 }
 
 export async function PATCH(req, { params }) {
-  const currentUser = getUserFromRequest(req);
-  if (!currentUser) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-  }
-
   try {
+    const { user: fresh, decoded: currentUser, error, status } = await requireFreshUser(req);
+    if (error) {
+      return NextResponse.json({ error }, { status });
+    }
+
     const { id } = await params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ error: 'Invalid achievement ID' }, { status: 400 });
-    }
-
-    const fresh = await getFreshUser(currentUser.id);
-    if (!fresh) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
     await connectDB();
@@ -123,20 +116,15 @@ export async function PATCH(req, { params }) {
 }
 
 export async function DELETE(req, { params }) {
-  const currentUser = getUserFromRequest(req);
-  if (!currentUser) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-  }
-
   try {
+    const { user: fresh, decoded: currentUser, error, status } = await requireFreshUser(req);
+    if (error) {
+      return NextResponse.json({ error }, { status });
+    }
+
     const { id } = await params;
     if (!mongoose.Types.ObjectId.isValid(id)) {
       return NextResponse.json({ error: 'Invalid achievement ID' }, { status: 400 });
-    }
-
-    const fresh = await getFreshUser(currentUser.id);
-    if (!fresh) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
     }
 
     await connectDB();

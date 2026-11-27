@@ -2,8 +2,7 @@ import { NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Achievement from '@/models/Achievement';
 import '@/models/User';
-import { getUserFromRequest } from '@/lib/auth';
-import { getFreshUser } from '@/lib/permissions';
+import { requireFreshUser } from '@/lib/permissions';
 import { logActivity } from '@/lib/logActivity';
 
 const ALLOWED_CREATORS = ['super_admin', 'teacher', 'adviser', 'officer', 'member', 'alumni'];
@@ -13,8 +12,7 @@ export async function GET(req) {
   try {
     await connectDB();
 
-    const currentUser = getUserFromRequest(req);
-    const fresh = currentUser ? await getFreshUser(currentUser.id) : null;
+    const { user: fresh = null } = await requireFreshUser(req);
     const { searchParams } = new URL(req.url);
 
     const userId = searchParams.get('userId');
@@ -68,14 +66,9 @@ export async function GET(req) {
 }
 
 export async function POST(req) {
-  const currentUser = getUserFromRequest(req);
-
-  if (!currentUser) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-  }
-  const fresh = await getFreshUser(currentUser.id);
-  if (!fresh) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  const { user: fresh, decoded: currentUser, error, status } = await requireFreshUser(req);
+  if (error) {
+    return NextResponse.json({ error }, { status });
   }
 
   if (!ALLOWED_CREATORS.includes(fresh.role)) {
